@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Tabla de Notas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            line-height: 1.6;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            font-size: 2.2em;
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+        }
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #generateTable {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #generateTable:hover {
+            background: linear-gradient(to right, #27ae60, #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .output-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .output-buttons button {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px;
+        }
+        #exportPDFPortrait {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        #exportPDFPortrait:hover {
+            background: linear-gradient(to right, #c0392b, #a23526);
+            transform: translateY(-2px);
+        }
+        #exportPDFLandscape {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+        }
+        #exportPDFLandscape:hover {
+            background: linear-gradient(to right, #8e44ad, #7d3c98);
+            transform: translateY(-2px);
+        }
+        #exportExcel {
+            background: linear-gradient(to right, #f39c12, #d35400);
+            color: white;
+        }
+        #exportExcel:hover {
+            background: linear-gradient(to right, #d35400, #bf4c00);
+            transform: translateY(-2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            border: 2px solid #2c3e50;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 14px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        th {
+            background: linear-gradient(to bottom, #3498db, #2980b9);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            font-size: 1.05em;
+        }
+        td {
+            background-color: white;
+            transition: background-color 0.2s;
+        }
+        td:focus {
+            background-color: #ecf0f1;
+            outline: 2px solid #3498db;
+        }
+        /* Primera columna - 10% */
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 10%;
+            background: linear-gradient(to right, #e6f2ff, #d9e6ff);
+            font-weight: bold;
+        }
+        /* Columnas centrales - se ajustan automáticamente */
+        th:not(:first-child):not(:last-child),
+        td:not(:first-child):not(:last-child) {
+            width: auto;
+        }
+        /* Última columna - 30% */
+        th:last-child,
+        td:last-child {
+            width: 30%;
+            background: linear-gradient(to right, #e6f2ff, #d9e6ff);
+        }
+        .hidden {
+            display: none;
+        }
+        #tablePreview {
+            margin-top: 40px;
+            overflow-x: auto;
+        }
+        .instrument-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .instrument-input {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            flex: 1;
+            min-width: 200px;
+        }
+        .instrument-input input {
+            margin: 0;
+            flex: 1;
+        }
+        .remove-instrument {
+            margin-left: 12px;
+            color: #e74c3c;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 0 5px;
+        }
+        .remove-instrument:hover {
+            color: #c0392b;
+            transform: scale(1.2);
+        }
+        #addInstrument {
+            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        #addInstrument:hover {
+            background: linear-gradient(to right, #7f8c8d, #6c7b7d);
+            transform: translateY(-2px);
+        }
+        caption {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            caption-side: top;
+            color: #2c3e50;
+            padding: 15px;
+            background: linear-gradient(to right, #ecf0f1, #dfe6e9);
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .output-buttons {
+                flex-direction: column;
+            }
+            .output-buttons button {
+                width: 100%;
+                margin-bottom: 12px;
+            }
+            .instrument-input {
+                min-width: 100%;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+        .instructions {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .instructions ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Creador de Tabla de Notas</h1>
+        
+        <div class="instructions">
+            <h3>Instrucciones:</h3>
+            <ul>
+                <li>Completa los datos solicitados</li>
+                <li>Añade los instrumentos de evaluación que necesites</li>
+                <li>Haz clic en "Generar Tabla"</li>
+                <li>Puedes editar directamente las celdas de notas</li>
+                <li>Exporta a PDF o Excel cuando termines</li>
+            </ul>
+        </div>
+        
+        <div class="form-group">
+            <label for="subjectName">Nombre de la Asignatura:</label>
+            <input type="text" id="subjectName" placeholder="Ej: Matemáticas">
+        </div>
+        
+        <div class="form-group">
+            <label for="studentName">Nombre del Alumno:</label>
+            <input type="text" id="studentName" placeholder="Tu nombre">
+        </div>
+        
+        <div class="form-group">
+            <label for="topicCount">Número de Temas:</label>
+            <input type="number" id="topicCount" min="1" value="5">
+        </div>
+        
+        <div class="form-group">
+            <label>Instrumentos de Evaluación:</label>
+            <div class="instrument-inputs" id="instrumentContainer">
+                <div class="instrument-input">
+                    <input type="text" class="instrument" placeholder="Ej: Examen" value="Examen">
+                    <span class="remove-instrument">×</span>
+                </div>
+                <div class="instrument-input">
+                    <input type="text" class="instrument" placeholder="Ej: Trabajo" value="Trabajo">
+                    <span class="remove-instrument">×</span>
+                </div>
+            </div>
+            <button id="addInstrument">Añadir Instrumento</button>
+        </div>
+        
+        <button id="generateTable">Generar Tabla</button>
+        
+        <div id="tablePreview" class="hidden">
+            <h2>Vista Previa de la Tabla</h2>
+            <div id="tableContainer"></div>
+            
+            <div class="output-buttons">
+                <button id="exportPDFPortrait">Exportar a PDF (Vertical)</button>
+                <button id="exportPDFLandscape">Exportar a PDF (Horizontal)</button>
+                <button id="exportExcel">Exportar a Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const { jsPDF } = window.jspdf;
+            
+            // Añadir instrumento
+            document.getElementById('addInstrument').addEventListener('click', function() {
+                const container = document.getElementById('instrumentContainer');
+                const newInstrument = document.createElement('div');
+                newInstrument.className = 'instrument-input';
+                newInstrument.innerHTML = `
+                    <input type="text" class="instrument" placeholder="Ej: Libreta">
+                    <span class="remove-instrument">×</span>
+                `;
+                container.appendChild(newInstrument);
+                
+                // Añadir evento para eliminar
+                newInstrument.querySelector('.remove-instrument').addEventListener('click', function() {
+                    container.removeChild(newInstrument);
+                });
+            });
+            
+            // Eliminar instrumentos existentes
+            document.querySelectorAll('.remove-instrument').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // Generar tabla
+            document.getElementById('generateTable').addEventListener('click', function() {
+                const topicCount = parseInt(document.getElementById('topicCount').value);
+                const subjectName = document.getElementById('subjectName').value;
+                const studentName = document.getElementById('studentName').value;
+                const instruments = Array.from(document.querySelectorAll('.instrument')).map(input => input.value);
+                
+                if (topicCount <= 0) {
+                    alert('El número de temas debe ser mayor que 0');
+                    return;
+                }
+                
+                if (instruments.some(inst => !inst.trim())) {
+                    alert('Todos los instrumentos deben tener un nombre');
+                    return;
+                }
+                
+                if (!subjectName.trim()) {
+                    alert('Por favor, ingresa el nombre de la asignatura');
+                    return;
+                }
+                
+                if (!studentName.trim()) {
+                    alert('Por favor, ingresa el nombre del alumno');
+                    return;
+                }
+                
+                generateTable(topicCount, instruments, subjectName, studentName);
+                document.getElementById('tablePreview').classList.remove('hidden');
+                
+                // Desplazarse suavemente a la tabla generada
+                document.getElementById('tablePreview').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Exportar a PDF vertical
+            document.getElementById('exportPDFPortrait').addEventListener('click', function() {
+                exportToPDF('portrait');
+            });
+            
+            // Exportar a PDF horizontal
+            document.getElementById('exportPDFLandscape').addEventListener('click', function() {
+                exportToPDF('landscape');
+            });
+            
+            // Exportar a Excel
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            
+            function generateTable(topicCount, instruments, subjectName, studentName) {
+                const tableContainer = document.getElementById('tableContainer');
+                tableContainer.innerHTML = '';
+                
+                const table = document.createElement('table');
+                
+                // Crear título
+                const caption = document.createElement('caption');
+                caption.textContent = `${subjectName} - ${studentName}`;
+                table.appendChild(caption);
+                
+                // Crear cabecera
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                const thTopic = document.createElement('th');
+                thTopic.textContent = 'Tema';
+                headerRow.appendChild(thTopic);
+                
+                instruments.forEach(instrument => {
+                    const th = document.createElement('th');
+                    th.textContent = instrument;
+                    headerRow.appendChild(th);
+                });
+                
+                const thSignature = document.createElement('th');
+                thSignature.textContent = 'Firma';
+                headerRow.appendChild(thSignature);
+                
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Crear cuerpo
+                const tbody = document.createElement('tbody');
+                
+                for (let i = 1; i <= topicCount; i++) {
+                    const row = document.createElement('tr');
+                    
+                    const tdTopic = document.createElement('td');
+                    tdTopic.textContent = `Tema ${i}`;
+                    row.appendChild(tdTopic);
+                    
+                    instruments.forEach(() => {
+                        const td = document.createElement('td');
+                        td.contentEditable = 'true';
+                        row.appendChild(td);
+                    });
+                    
+                    const tdSignature = document.createElement('td');
+                    row.appendChild(tdSignature);
+                    
+                    tbody.appendChild(row);
+                }
+                
+                table.appendChild(tbody);
+                tableContainer.appendChild(table);
+            }
+            
+            function exportToPDF(orientation) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm'
+                });
+                
+                const subjectName = document.getElementById('subjectName').value || 'Asignatura';
+                const studentName = document.getElementById('studentName').value || 'Alumno';
+                const title = `${subjectName} - ${studentName}`;
+                
+                // Obtener datos de la tabla
+                const table = document.querySelector('#tableContainer table');
+                const headers = [];
+                const data = [];
+                
+                // Obtener encabezados
+                table.querySelectorAll('thead th').forEach(th => {
+                    headers.push(th.textContent);
+                });
+                
+                // Obtener datos
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const row = [];
+                    tr.querySelectorAll('td').forEach(td => {
+                        row.push(td.textContent);
+                    });
+                    data.push(row);
+                });
+                
+                // Calcular anchos de columna según porcentajes
+                const pageWidth = orientation === 'portrait' ? 180 : 270;
+                const columnCount = headers.length;
+                
+                // Asignar anchos según porcentajes (10% primera, 30% última)
+                const columnWidths = [];
+                columnWidths[0] = pageWidth * 0.10; // Primera columna - 10%
+                
+                // Columnas centrales - se distribuyen el 60% restante
+                const instrumentCount = columnCount - 2;
+                const centralWidth = (pageWidth * 0.60) / instrumentCount;
+                
+                for (let i = 1; i <= instrumentCount; i++) {
+                    columnWidths[i] = centralWidth;
+                }
+                
+                columnWidths[columnCount - 1] = pageWidth * 0.30; // Última columna - 30%
+                
+                // Añadir título
+                doc.setFontSize(16);
+                doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+                
+                // Crear la tabla con autoTable
+                doc.autoTable({
+                    head: [headers],
+                    body: data,
+                    startY: 25,
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 3,
+                        overflow: 'linebreak',
+                        halign: 'center',
+                        valign: 'middle',
+                        lineColor: [0, 0, 0],
+                        lineWidth: 0.2
+                    },
+                    headStyles: {
+                        fillColor: [74, 111, 165],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        lineWidth: 0.2
+                    },
+                    alternateRowStyles: {
+                        fillColor: [255, 255, 255]
+                    },
+                    columnStyles: {
+                        0: {
+                            cellWidth: columnWidths[0],
+                            fillColor: [230, 242, 255],
+                            fontStyle: 'bold'
+                        },
+                        // Aplicar estilos a las columnas de instrumentos
+                        ...(() => {
+                            const styles = {};
+                            for (let i = 1; i <= instrumentCount; i++) {
+                                styles[i] = { 
+                                    cellWidth: columnWidths[i],
+                                    fillColor: [255, 255, 255]
+                                };
+                            }
+                            return styles;
+                        })(),
+                        [columnCount - 1]: {
+                            cellWidth: columnWidths[columnCount - 1],
+                            fillColor: [230, 242, 255]
+                        }
+                    },
+                    margin: { top: 25 },
+                    tableWidth: 'wrap'
+                });
+                
+                // Guardar PDF
+                doc.save(`${title.replace(/ /g, '_')}_${orientation}.pdf`);
+            }
+            
+            function exportToExcel() {
+                const subjectName = document.getElementById('subjectName').value || 'Asignatura';
+                const studentName = document.getElementById('studentName').value || 'Alumno';
+                const title = `${subjectName} - ${studentName}`;
+                
+                // Obtener datos de la tabla
+                const table = document.querySelector('#tableContainer table');
+                const headers = [];
+                const data = [];
+                
+                // Obtener encabezados
+                table.querySelectorAll('thead th').forEach(th => {
+                    headers.push(th.textContent);
+                });
+                
+                // Obtener datos
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const row = [];
+                    tr.querySelectorAll('td').forEach(td => {
+                        row.push(td.textContent);
+                    });
+                    data.push(row);
+                });
+                
+                // Crear libro de Excel
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+                
+                // Aplicar estilos (limitado en SheetJS)
+                if (ws['!cols'] === undefined) ws['!cols'] = [];
+                
+                // Ajustar anchos de columna (aproximando los porcentajes)
+                const totalWidth = 100; // Ancho total relativo
+                ws['!cols'][0] = { width: totalWidth * 0.10 }; // Primera columna - 10%
+                
+                // Columnas centrales
+                for (let i = 1; i < headers.length - 1; i++) {
+                    ws['!cols'][i] = { width: (totalWidth * 0.60) / (headers.length - 2) };
+                }
+                
+                ws['!cols'][headers.length - 1] = { width: totalWidth * 0.30 }; // Última columna - 30%
+                
+                // Añadir hoja al libro
+                XLSX.utils.book_append_sheet(wb, ws, "Notas");
+                
+                // Exportar
+                XLSX.writeFile(wb, `${title.replace(/ /g, '_')}.xlsx`);
+            }
+        });
+    </script>
+</body>
+</html>
