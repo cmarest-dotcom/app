@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Creador de ZIP (hasta 3 niveles)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#FDF2F8;
+      --bg2:#EEF2FF;
+      --card:#FFFFFFCC;
+      --text:#1F2937;
+      --muted:#6B7280;
+
+      --primary:#7C3AED;
+      --primary2:#EC4899;
+      --primarySoft:#F5F3FF;
+
+      --ok:#10B981;
+      --warn:#F59E0B;
+      --bad:#EF4444;
+
+      --shadow: 0 20px 60px rgba(17, 24, 39, 0.12);
+      --shadow2: 0 10px 30px rgba(17, 24, 39, 0.10);
+      --radius: 22px;
+      --radiusBtn: 999px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, var(--bg2), transparent 55%),
+        radial-gradient(900px 520px at 90% 20%, var(--bg1), transparent 55%),
+        linear-gradient(180deg, #ffffff, #fafafa);
+      overflow-x:hidden;
+    }
+
+    .wrap{ max-width: 1120px; margin: 0 auto; padding: 28px 18px 48px; }
+
+    .header{
+      display:flex; gap:18px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap; margin-bottom: 18px;
+    }
+
+    .title{ display:flex; flex-direction:column; gap:8px; }
+    h1{ margin:0; font-size: clamp(22px, 3.2vw, 34px); line-height:1.1; letter-spacing:-0.02em; }
+    .subtitle{ margin:0; color: var(--muted); max-width: 78ch; font-size: 14px; line-height: 1.55; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:10px; padding:10px 14px;
+      background: linear-gradient(135deg, #fff, #fff7fb);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 999px;
+      box-shadow: var(--shadow2);
+      color: var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .badge strong{ color: var(--text); font-weight: 800; }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .card-inner{
+      padding: 18px;
+      display:grid;
+      grid-template-columns: 1.45fr 0.55fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px){ .card-inner{ grid-template-columns: 1fr; } }
+
+    .stack{ display:flex; flex-direction:column; gap: 16px; }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px){ .grid2{ grid-template-columns: 1fr; } }
+
+    .panel{
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 12px 26px rgba(17,24,39,0.06);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 260px;
+    }
+
+    .panel-header{
+      padding: 12px 14px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom: 1px solid rgba(17,24,39,0.06);
+      background: linear-gradient(180deg, #ffffff, #fff);
+    }
+
+    .panel-title{ display:flex; flex-direction:column; gap:4px; }
+    .panel-title .kicker{ font-size: 12px; color: var(--muted); }
+    .panel-title .main{ font-weight: 800; letter-spacing:-0.01em; }
+
+    .pill{
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--primarySoft);
+      border: 1px solid rgba(124,58,237,0.18);
+      color: #4C1D95;
+      font-size: 12px;
+      font-weight: 700;
+      white-space:nowrap;
+    }
+
+    textarea{
+      width:100%;
+      flex:1;
+      padding: 14px 14px 16px;
+      border: 0;
+      outline: none;
+      resize: vertical;
+      background: transparent;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      min-height: 170px;
+    }
+    textarea::placeholder{ color: #9CA3AF; }
+
+    .controls{ padding: 14px; display:flex; flex-direction:column; gap: 12px; }
+
+    label{
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display:block;
+    }
+
+    .input, select{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,0.10);
+      background: rgba(255,255,255,0.85);
+      outline: none;
+      font-size: 14px;
+      box-shadow: 0 8px 18px rgba(17,24,39,0.06);
+    }
+    .input:focus, select:focus{
+      border-color: rgba(124,58,237,0.35);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.12), 0 10px 22px rgba(17,24,39,0.08);
+    }
+
+    .btnrow{ display:flex; gap: 10px; flex-wrap:wrap; align-items:center; }
+
+    .btn{
+      appearance:none;
+      border: 0;
+      cursor:pointer;
+      padding: 12px 16px;
+      border-radius: var(--radiusBtn);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: transform .08s ease, box-shadow .18s ease, filter .18s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(1px) scale(0.99); }
+
+    .btn-primary{
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      box-shadow: 0 18px 38px rgba(124,58,237,0.20), 0 10px 20px rgba(236,72,153,0.12);
+    }
+    .btn-primary:hover{ filter: brightness(1.02); box-shadow: 0 20px 46px rgba(124,58,237,0.24), 0 12px 22px rgba(236,72,153,0.14); }
+
+    .btn-ghost{
+      color: var(--text);
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(17,24,39,0.10);
+      box-shadow: 0 12px 22px rgba(17,24,39,0.06);
+    }
+    .btn-ghost:hover{ box-shadow: 0 16px 28px rgba(17,24,39,0.08); }
+
+    .mini{ font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .log{
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(17,24,39,0.08);
+      box-shadow: 0 12px 22px rgba(17,24,39,0.06);
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .status{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,0.08);
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 12px 22px rgba(17,24,39,0.06);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: #D1D5DB;
+      box-shadow: 0 0 0 4px rgba(209,213,219,0.18);
+      flex: 0 0 auto;
+    }
+    .dot.ok{ background: var(--ok); box-shadow: 0 0 0 4px rgba(16,185,129,0.16); }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,0.16); }
+    .dot.bad{ background: var(--bad); box-shadow: 0 0 0 4px rgba(239,68,68,0.14); }
+
+    .kbd{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 5px 8px; border-radius: 10px;
+      background: #fff; border: 1px solid rgba(17,24,39,0.10);
+      color: var(--text); font-size: 12px; font-weight: 700;
+    }
+
+    .footer{
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      text-align:center;
+    }
+
+    .icon{ width: 18px; height: 18px; display:inline-block; }
+    .icon svg{ width:100%; height:100%; display:block; }
+
+    .hidden{ display:none !important; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <div class="title">
+        <h1>ZIP de carpetas (hasta 3 niveles)</h1>
+        <p class="subtitle">
+          Define carpetas principales y elige cuántos niveles de subcarpetas comunes quieres (<strong>1–3</strong>).
+          Cada nivel tiene su propio cuadro de texto (1 por línea). Se generará el ZIP con todas las combinaciones.
+        </p>
+      </div>
+
+      <div class="badge">
+        <span>Principales:</span> <strong id="countMain">0</strong>
+        <span>•</span>
+        <span>N1:</span> <strong id="count1">0</strong>
+        <span>•</span>
+        <span>N2:</span> <strong id="count2">0</strong>
+        <span>•</span>
+        <span>N3:</span> <strong id="count3">0</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-inner">
+
+        <!-- Izquierda: entradas -->
+        <div class="stack">
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <div class="kicker">Base</div>
+                <div class="main">Carpetas principales (1 por línea)</div>
+              </div>
+              <div class="pill" id="pillMain">Sin entradas</div>
+            </div>
+            <textarea id="mainNames" placeholder="Ejemplo:
+Cliente A
+Cliente B
+Proyecto X
+2026/01"></textarea>
+          </div>
+
+          <div class="grid2">
+            <div class="panel" id="panel1">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <div class="kicker">Nivel 1</div>
+                  <div class="main">Subcarpetas N1 (comunes)</div>
+                </div>
+                <div class="pill" id="pill1">Opcional</div>
+              </div>
+              <textarea id="sub1" placeholder="Ejemplo:
+Docs
+Facturas
+Contrato"></textarea>
+            </div>
+
+            <div class="panel" id="panel2">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <div class="kicker">Nivel 2</div>
+                  <div class="main">Subcarpetas N2 (comunes)</div>
+                </div>
+                <div class="pill" id="pill2">Opcional</div>
+              </div>
+              <textarea id="sub2" placeholder="Ejemplo:
+2026
+2025"></textarea>
+            </div>
+
+            <div class="panel" id="panel3">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <div class="kicker">Nivel 3</div>
+                  <div class="main">Subcarpetas N3 (comunes)</div>
+                </div>
+                <div class="pill" id="pill3">Opcional</div>
+              </div>
+              <textarea id="sub3" placeholder="Ejemplo:
+Borradores
+Final"></textarea>
+            </div>
+
+            <div class="panel" style="min-height:260px">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <div class="kicker">Ayuda</div>
+                  <div class="main">Cómo se combinan</div>
+                </div>
+                <div class="pill">Info</div>
+              </div>
+              <div style="padding:14px; color:var(--muted); font-size:13px; line-height:1.55">
+                <p style="margin:0 0 10px 0">
+                  Se crean carpetas como:
+                </p>
+                <div class="kbd" style="display:block; width:100%; margin-bottom:10px">
+                  Principal / N1 / N2 / N3
+                </div>
+                <p style="margin:0">
+                  Si eliges <strong>1 nivel</strong>, sólo se usa N1.
+                  Si eliges <strong>2 niveles</strong>, se usa N1 y N2.
+                  Si eliges <strong>3 niveles</strong>, N1+N2+N3.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Derecha: controles -->
+        <div class="controls">
+          <div>
+            <label for="levels">Niveles de subcarpetas</label>
+            <select id="levels">
+              <option value="1">1 nivel (N1)</option>
+              <option value="2">2 niveles (N1 → N2)</option>
+              <option value="3">3 niveles (N1 → N2 → N3)</option>
+            </select>
+            <div class="mini" style="margin-top:8px">
+              Consejo: deja un nivel vacío si no lo quieres usar (aunque esté visible).
+            </div>
+          </div>
+
+          <div>
+            <label for="zipName">Nombre del ZIP</label>
+            <input id="zipName" class="input" type="text" value="carpetas.zip" />
+          </div>
+
+          <div class="btnrow">
+            <button id="createBtn" class="btn btn-primary">
+              <span class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3v10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M8 9l4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              CREAR
+            </button>
+
+            <button id="demoBtn" class="btn btn-ghost" type="button">Ejemplo</button>
+            <button id="clearBtn" class="btn btn-ghost" type="button">Limpiar</button>
+          </div>
+
+          <div class="status">
+            <span id="dot" class="dot ok"></span>
+            <span id="statusText">Listo para crear el ZIP.</span>
+          </div>
+
+          <div id="log" class="log" aria-live="polite"></div>
+
+          <div class="footer">
+            Sanitiza nombres inválidos (<span class="kbd">\ : * ? " &lt; &gt; |</span>) y elimina duplicados.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function sanitizePath(input) {
+      let s = input.trim().replace(/\\/g, "/");
+      s = s.replace(/[. ]+$/g, "");
+      s = s.replace(/\/{2,}/g, "/").replace(/^\/+|\/+$/g, "");
+      s = s.replace(/[<>:"|?*\u0000-\u001F]/g, "");
+      s = s.split("/").filter(seg => seg && seg !== "." && seg !== "..").join("/");
+      s = s.split("/").map(seg => seg.slice(0, 120)).join("/");
+      return s;
+    }
+
+    function parseLines(text) {
+      const raw = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const cleaned = raw.map(sanitizePath).filter(Boolean);
+
+      const seen = new Set();
+      const unique = [];
+      for (const p of cleaned) {
+        const key = p.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(p);
+        }
+      }
+      return { rawCount: raw.length, cleanedCount: cleaned.length, unique };
+    }
+
+    function setLog(msg) { $("log").textContent = msg; }
+    function setStatus(kind, text) {
+      const dot = $("dot");
+      dot.classList.remove("ok","warn","bad");
+      dot.classList.add(kind);
+      $("statusText").textContent = text;
+    }
+
+    function joinPaths(a, b) {
+      if (!a) return b || "";
+      if (!b) return a || "";
+      return `${a.replace(/\/+$/,"")}/${b.replace(/^\/+/,"")}`;
+    }
+
+    function cartesianJoin(basePaths, nextLevel) {
+      // Si nextLevel está vacío, devolvemos basePaths tal cual (no añadimos nada)
+      if (!nextLevel || nextLevel.length === 0) return basePaths.slice();
+      const out = [];
+      for (const base of basePaths) {
+        for (const add of nextLevel) out.push(joinPaths(base, add));
+      }
+      return out;
+    }
+
+    function updatePanelsVisibility() {
+      const lvl = Number($("levels").value);
+      $("panel2").classList.toggle("hidden", lvl < 2);
+      $("panel3").classList.toggle("hidden", lvl < 3);
+    }
+
+    function updateUI() {
+      updatePanelsVisibility();
+
+      const main = parseLines($("mainNames").value);
+      const n1 = parseLines($("sub1").value);
+      const n2 = parseLines($("sub2").value);
+      const n3 = parseLines($("sub3").value);
+
+      $("countMain").textContent = main.unique.length;
+      $("count1").textContent = n1.unique.length;
+      $("count2").textContent = n2.unique.length;
+      $("count3").textContent = n3.unique.length;
+
+      $("pillMain").textContent = main.unique.length === 0 ? "Sin entradas" : `${main.unique.length} únicas`;
+      $("pill1").textContent = n1.unique.length === 0 ? "Opcional" : `${n1.unique.length} únicas`;
+      $("pill2").textContent = n2.unique.length === 0 ? "Opcional" : `${n2.unique.length} únicas`;
+      $("pill3").textContent = n3.unique.length === 0 ? "Opcional" : `${n3.unique.length} únicas`;
+
+      if (main.rawCount === 0 && n1.rawCount === 0 && n2.rawCount === 0 && n3.rawCount === 0) {
+        setStatus("ok", "Listo para crear el ZIP.");
+        return;
+      }
+
+      if (main.unique.length === 0) {
+        setStatus("bad", "Faltan carpetas principales válidas.");
+        return;
+      }
+
+      // Aviso si se limpió algo
+      const cleanedLess =
+        main.cleanedCount < main.rawCount ||
+        n1.cleanedCount < n1.rawCount ||
+        n2.cleanedCount < n2.rawCount ||
+        n3.cleanedCount < n3.rawCount;
+
+      if (cleanedLess) setStatus("warn", "Algunas líneas se han descartado/limpiado.");
+      else setStatus("ok", "Todo listo. Puedes crear el ZIP.");
+    }
+
+    async function createZip() {
+      const zip = new JSZip();
+
+      const lvl = Number($("levels").value);
+      const main = parseLines($("mainNames").value);
+      const n1 = parseLines($("sub1").value);
+      const n2 = parseLines($("sub2").value);
+      const n3 = parseLines($("sub3").value);
+
+      if (main.unique.length === 0) {
+        setStatus("bad", "No se puede crear: faltan carpetas principales.");
+        setLog("❌ No hay carpetas principales válidas.\nEscribe al menos una carpeta (1 por línea).");
+        return;
+      }
+
+      // Construcción por niveles (cartesiano)
+      let leafPaths = main.unique.slice(); // rutas “hoja” resultantes
+
+      // N1 siempre aplica si hay entradas; si no, se queda como principales
+      leafPaths = cartesianJoin(leafPaths, n1.unique);
+
+      if (lvl >= 2) leafPaths = cartesianJoin(leafPaths, n2.unique);
+      if (lvl >= 3) leafPaths = cartesianJoin(leafPaths, n3.unique);
+
+      // Además, queremos incluir también todas las carpetas intermedias para que se vean vacías en el zip
+      // Reunimos:
+      // - principales
+      // - principales/N1
+      // - principales/N1/N2
+      // - principales/N1/N2/N3 (hojas)
+      const allPaths = new Set();
+
+      // Siempre incluir principales
+      for (const m of main.unique) allPaths.add(m);
+
+      // Si hay N1, incluir intermedias; si no hay N1, no se crean esas capas
+      if (n1.unique.length > 0) {
+        for (const m of main.unique) {
+          for (const a of n1.unique) allPaths.add(joinPaths(m, a));
+        }
+      }
+
+      if (lvl >= 2 && n1.unique.length > 0 && n2.unique.length > 0) {
+        for (const m of main.unique) {
+          for (const a of n1.unique) {
+            const p1 = joinPaths(m, a);
+            for (const b of n2.unique) allPaths.add(joinPaths(p1, b));
+          }
+        }
+      }
+
+      if (lvl >= 3 && n1.unique.length > 0 && n2.unique.length > 0 && n3.unique.length > 0) {
+        for (const m of main.unique) {
+          for (const a of n1.unique) {
+            const p1 = joinPaths(m, a);
+            for (const b of n2.unique) {
+              const p2 = joinPaths(p1, b);
+              for (const c of n3.unique) allPaths.add(joinPaths(p2, c));
+            }
+          }
+        }
+      }
+
+      // También añadir leafPaths (por si algún nivel está vacío: garantiza al menos las “hojas” existentes)
+      for (const p of leafPaths) allPaths.add(p);
+
+      const finalPaths = Array.from(allPaths).sort((x,y)=>x.localeCompare(y, "es", {sensitivity:"base"}));
+
+      // Crea entradas de carpeta vacía
+      finalPaths.forEach(path => {
+        zip.folder(path);
+        zip.file(path.replace(/\/?$/, "/"), "");
+      });
+
+      let outName = $("zipName").value.trim() || "carpetas.zip";
+      if (!outName.toLowerCase().endsWith(".zip")) outName += ".zip";
+
+      setStatus("warn", "Generando ZIP…");
+
+      const nLeaves = leafPaths.length;
+      setLog(
+        `📌 Resumen\n` +
+        `• Principales: ${main.unique.length}\n` +
+        `• N1: ${n1.unique.length}\n` +
+        `• N2: ${lvl>=2 ? n2.unique.length : 0}\n` +
+        `• N3: ${lvl>=3 ? n3.unique.length : 0}\n` +
+        `• Carpetas finales (hojas): ${nLeaves}\n` +
+        `• Total carpetas en ZIP (incl. intermedias): ${finalPaths.length}\n\n` +
+        `⏳ Generando: ${outName}…`
+      );
+
+      const blob = await zip.generateAsync({ type: "blob" });
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = outName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+
+      setStatus("ok", "ZIP creado y descargado ✅");
+
+      const previewLimit = 200;
+      const preview = finalPaths.slice(0, previewLimit);
+      const more = finalPaths.length > previewLimit ? `\n… y ${finalPaths.length - previewLimit} más` : "";
+
+      setLog(
+        `✅ ZIP creado: ${outName}\n\n` +
+        `📁 Carpetas incluidas (${finalPaths.length}):\n- ` + preview.join("\n- ") + more
+      );
+    }
+
+    // Eventos
+    ["mainNames","sub1","sub2","sub3","zipName"].forEach(id => $(id).addEventListener("input", updateUI));
+    $("levels").addEventListener("change", updateUI);
+
+    $("createBtn").addEventListener("click", () => {
+      createZip().catch(err => {
+        console.error(err);
+        setStatus("bad", "Error creando el ZIP.");
+        setLog("Error creando el ZIP: " + (err?.message || String(err)));
+      });
+    });
+
+    $("demoBtn").addEventListener("click", () => {
+      $("levels").value = "3";
+      $("mainNames").value =
+`Cliente A
+Cliente B
+Proyecto X`;
+      $("sub1").value =
+`Docs
+Facturas
+Contrato`;
+      $("sub2").value =
+`2026
+2025`;
+      $("sub3").value =
+`Borradores
+Final`;
+
+      setLog("Ejemplo cargado (3 niveles). Pulsa CREAR para descargar el ZIP.");
+      updateUI();
+    });
+
+    $("clearBtn").addEventListener("click", () => {
+      $("mainNames").value = "";
+      $("sub1").value = "";
+      $("sub2").value = "";
+      $("sub3").value = "";
+      setLog("Lista limpia. Escribe carpetas y pulsa CREAR.");
+      updateUI();
+    });
+
+    // Inicial
+    setLog("✨ Define carpetas principales y niveles de subcarpetas comunes (1–3). Luego pulsa CREAR.");
+    updateUI();
+  </script>
+</body>
+</html>
