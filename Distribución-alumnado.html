@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificador de Asientos con Selección de Género</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #3b5998;
+            --secondary: #6d8cbb;
+            --accent: #e74c3c;
+            --light: #f5f7fa;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --random: #9b59b6;
+            --alphabetic: #16a085;
+            --save: #8e44ad;
+            --load: #2ecc71;
+            --desk-color: #ecf0f1;
+            --desk-border: #bdc3c7;
+            --student-list: #e8f4fc;
+            --aisle-color: #f8f9fa;
+            --male-color: #d6eaf8;
+            --female-color: #fadbd8;
+            --unknown-gender: #d5f5e3;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f3f5; color: #333; line-height: 1.6; padding: 20px; width: 100vw; overflow-x: hidden; }
+
+        .container { max-width: 100%; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 0 25px rgba(0, 0, 0, 0.1); padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid var(--light); }
+        h1 { color: var(--primary); margin-bottom: 15px; font-size: 2.2rem; }
+        .description { color: var(--dark); font-size: 1.1rem; max-width: 900px; margin: 0 auto; }
+        .main-content { display: flex; flex-wrap: wrap; gap: 25px; width: 100%; }
+        .config-panel { flex: 1; min-width: 320px; background: var(--light); padding: 25px; border-radius: 10px; display: flex; flex-direction: column; gap: 20px; }
+        .classroom-container { flex: 2; min-width: 60%; display: flex; flex-direction: column; gap: 20px; width: 100%; overflow: hidden; }
+        .classroom-view { background: white; border: 2px solid var(--light); border-radius: 10px; padding: 15px; min-height: 400px; display: flex; flex-direction: column; width: 100%; overflow: auto; }
+        .students-drag-area { background: var(--student-list); border: 2px solid var(--light); border-radius: 10px; padding: 20px; min-height: 150px; width: 100%; }
+
+        .panel-title { font-size: 1.3rem; color: var(--primary); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--secondary); }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark); }
+        select, input, button, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        button { background-color: var(--primary); color: white; border: none; cursor: pointer; transition: all 0.3s; font-weight: 600; margin-top: 5px; }
+        button:hover { background-color: #2d4373; transform: translateY(-2px); }
+        .btn-generate { background-color: var(--success); }
+        .btn-generate:hover { background-color: #219653; }
+        .btn-landscape { background-color: var(--secondary); }
+        .btn-landscape:hover { background-color: #5a7cab; }
+        .btn-warning { background-color: var(--warning); }
+        .btn-warning:hover { background-color: #e67e22; }
+        .btn-random { background-color: var(--random); }
+        .btn-random:hover { background-color: #8e44ad; }
+        .btn-alphabetic { background-color: var(--alphabetic); }
+        .btn-alphabetic:hover { background-color: #1abc9c; }
+        .btn-save { background-color: var(--save); }
+        .btn-save:hover { background-color: #7d3c98; }
+        .btn-load { background-color: var(--load); }
+        .btn-load:hover { background-color: #27ae60; }
+        .btn-export { background-color: #e67e22; }
+        .btn-export:hover { background-color: #d35400; }
+        .btn-import { background-color: #3498db; }
+        .btn-import:hover { background-color: #2980b9; }
+        .students-input { min-height: 200px; resize: vertical; font-family: monospace; padding: 15px; }
+        .file-import { display: flex; flex-direction: column; gap: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px dashed var(--secondary); }
+
+        .classroom-layout { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            padding: 10px; 
+            flex-grow: 1; 
+            width: 100%; 
+            justify-content: center; 
+        }
+        
+        .classroom-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            align-items: center;
+        }
+        
+        .classroom-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .desk-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .desk {
+            border: 2px solid var(--desk-border);
+            border-radius: 8px;
+            padding: 10px;
+            width: 120px;
+            height: 90px;
+            background: var(--desk-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            word-break: break-word;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .desk:hover { background: #dfe6e9; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .desk.empty { background: var(--desk-color); color: #7f8c8d; }
+        .desk.occupied { border-color: #2ecc71; }
+        .desk.male { background: var(--male-color); border-color: #3498db; }
+        .desk.female { background: var(--female-color); border-color: #e74c3c; }
+        .desk.unknown { background: var(--unknown-gender); border-color: #2ecc71; }
+        .desk.removed { 
+            background: repeating-linear-gradient(
+                45deg,
+                #f8f9fa,
+                #f8f9fa 5px,
+                #e9ecef 5px,
+                #e9ecef 10px
+            );
+            border: 2px dashed #adb5bd;
+            opacity: 0.7;
+        }
+        .desk-number { font-size: 0.7rem; color: #7f8c8d; position: absolute; top: 3px; left: 5px; }
+        .student-name { 
+            font-weight: 500; 
+            text-align: center; 
+            max-width: 100%; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            font-size: 0.9rem; 
+            line-height: 1.2; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+        }
+        .gender-badge {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        
+        .teacher-area { 
+            background: #d6eaf8; 
+            border-color: #3498db; 
+            text-align: center; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            width: 100%; 
+            max-width: 1000px;
+            margin: 0 auto 20px auto;
+        }
+
+        .teacher-area.bottom {
+            order: 1;
+        }
+
+        .classroom-grid.bottom-teacher {
+            flex-direction: column-reverse;
+        }
+
+        .aisle {
+            background-color: var(--aisle-color);
+            width: 30px;
+            min-width: 30px;
+            margin: 0 10px;
+        }
+
+        .actions { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+        .actions button { width: auto; padding: 15px 30px; min-width: 220px; }
+        .dimensions-config { display: flex; gap: 15px; }
+        .dimensions-config .form-group { flex: 1; }
+        .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 15px; }
+        .student-card { 
+            background: var(--light); 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border: 1px solid #ddd; 
+            word-break: break-word; 
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .student-card:hover { transform: translateY(-3px); }
+        .student-card.assigned { display: none; }
+        .student-card.male { background-color: var(--male-color); border-left: 4px solid #3498db; }
+        .student-card.female { background-color: var(--female-color); border-left: 4px solid #e74c3c; }
+        .student-card.unknown { background-color: var(--unknown-gender); border-left: 4px solid #2ecc71; }
+        .student-card .gender-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gender-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .gender-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .gender-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        .male-color { background-color: var(--male-color); }
+        .female-color { background-color: var(--female-color); }
+        .unknown-color { background-color: var(--unknown-gender); }
+
+        @media (max-width: 1200px) {
+            .main-content { flex-direction: column; }
+            .config-panel, .classroom-container { min-width: 100%; }
+            .dimensions-config { flex-direction: column; gap: 10px; }
+        }
+        
+        @media (max-width: 768px) {
+            .actions { flex-direction: column; align-items: center; }
+            .actions button { width: 100%; max-width: 300px; }
+            .classroom-grid { gap: 15px; }
+            .aisle { width: 15px; margin: 0 5px; }
+            .classroom-row { gap: 15px; }
+            .desk { width: 100px; height: 80px; }
+        }
+
+        .instructions {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .class-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .class-info .form-group {
+            flex: 1;
+        }
+        
+        /* Menú contextual para eliminar pupitres */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .context-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .context-menu li {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .context-menu li:hover {
+            background: #f0f0f0;
+        }
+        
+        .assignment-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .assignment-buttons button {
+            flex: 1;
+        }
+        
+        .save-load-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid var(--secondary);
+        }
+        
+        .saved-classes {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .saved-class-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .saved-class-item:hover {
+            background: #e9ecef;
+        }
+        
+        .delete-class {
+            color: #e74c3c;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Modal para guardar configuración */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+
+        .teacher-position {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .teacher-position label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .teacher-position input[type="radio"] {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Planificador de Asientos con Selección de Género</h1>
+            <p class="description">Haz clic en los estudiantes para cambiar su género antes de arrastrarlos. Cada clic cambia entre masculino, femenino y no especificado.</p>
+        </header>
+        <div class="main-content">
+            <div class="config-panel">
+                <h2 class="panel-title">Configuración del Aula</h2>
+                <div class="class-info">
+                    <div class="form-group">
+                        <label for="classGroup">Grupo:</label>
+                        <input type="text" id="classGroup" placeholder="Ej: 1ºA">
+                    </div>
+                    <div class="form-group">
+                        <label for="teacherName">Profesor:</label>
+                        <input type="text" id="teacherName" placeholder="Nombre del profesor">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="teacherPosition">Posición del profesor:</label>
+                    <div class="teacher-position">
+                        <label>
+                            <input type="radio" name="teacherPosition" value="top" checked> Arriba
+                        </label>
+                        <label>
+                            <input type="radio" name="teacherPosition" value="bottom"> Abajo
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="layoutType">Modelo de Agrupamiento:</label>
+                    <select id="layoutType">
+                        <option value="pairs">Parejas (2 asientos juntos)</option>
+                        <option value="individual">Individual (todos separados)</option>
+                        <option value="trios">Tríos (3 asientos juntos)</option>
+                        <option value="mixed">Mixto (personalizado)</option>
+                    </select>
+                </div>
+                <div class="dimensions-config">
+                    <div class="form-group"><label for="rowsNumber">Filas (horizontal):</label><input type="number" id="rowsNumber" min="1" max="10" value="4"></div>
+                    <div class="form-group"><label for="columnsNumber">Columnas (vertical):</label><input type="number" id="columnsNumber" min="1" max="10" value="3"></div>
+                </div>
+                <div class="form-group" id="mixedConfig" style="display: none;">
+                    <label for="mixedPattern">Agrupamiento por columnas (ej: 2,3,2):</label>
+                    <input type="text" id="mixedPattern" placeholder="Escribe el patrón separado por comas">
+                </div>
+                <button id="applyLayout">Aplicar Configuración</button>
+                <h2 class="panel-title">Gestión de Estudiantes</h2>
+                <div class="form-group">
+                    <label for="studentsInput">Nombres de Estudiantes (uno por línea):</label>
+                    <textarea id="studentsInput" class="students-input" placeholder="Escribe un nombre por línea. Ej:&#10;María González&#10;Carlos Rodríguez&#10;Ana Martínez"></textarea>
+                </div>
+                <button id="loadStudents">Cargar Estudiantes</button>
+                <div class="file-import">
+                    <label>Importar desde Excel:</label>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls">
+                    <button id="importExcel">Importar Nombres</button>
+                </div>
+                <div class="assignment-buttons">
+                    <button class="btn-random" id="assignRandom">Asignar Aleatoriamente</button>
+                    <button class="btn-alphabetic" id="assignAlphabetic">Asignar Alfabéticamente</button>
+                </div>
+                
+                <div class="save-load-section">
+                    <h2 class="panel-title">Guardar y Cargar Clases</h2>
+                    <div class="assignment-buttons">
+                        <button class="btn-save" id="saveClass">Guardar Clase Actual</button>
+                        <button class="btn-load" id="showSavedClasses">Mostrar Clases Guardadas</button>
+                    </div>
+                    <div class="assignment-buttons">
+                        <button class="btn-export" id="exportClass">Exportar Clase a Archivo</button>
+                        <button class="btn-import" id="importClass">Importar Clase desde Archivo</button>
+                    </div>
+                    <div id="savedClassesList" class="saved-classes" style="display: none;">
+                        <!-- Las clases guardadas se mostrarán aquí -->
+                    </div>
+                </div>
+            </div>
+            <div class="classroom-container">
+                <div class="classroom-view">
+                    <h2 class="panel-title">Distribución del Aula</h2>
+                    <div class="instructions">
+                        <strong>Instrucciones adicionales:</strong> 
+                        <div>• Clic derecho sobre un pupitre para eliminarlo/restaurarlo</div>
+                    </div>
+                    <div class="classroom-layout" id="classroomLayout"></div>
+                </div>
+                <div class="students-drag-area">
+                    <h2 class="panel-title">Estudiantes para asignar</h2>
+                    <p>Haz clic para cambiar el género, luego arrastra a los asientos.</p>
+                    <div class="instructions">
+                        <strong>Instrucciones:</strong> 
+                        <div>• Clic para cambiar género: Masculino → Femenino → No especificado</div>
+                        <div>• Arrastrar al pupitre para asignar</div>
+                        <div>• Clic en pupitre para eliminar asignación</div>
+                    </div>
+                    <div class="students-grid" id="studentsGrid"></div>
+                    <div class="gender-stats" id="genderStats">
+                        <div class="gender-stat">
+                            <div class="gender-color male-color"></div>
+                            <span id="maleCount">0 masculinos</span>
+                        </div>
+                        <div class="gender-stat">
+                            <div class="gender-color female-color"></div>
+                            <span id="femaleCount">0 femeninos</span>
+                        </div>
+                        <div class="gender-stat">
+                            <div class="gender-color unknown-color"></div>
+                            <span id="unknownCount">0 sin especificar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn-generate" id="generatePDF">Generar PDF (Vertical)</button>
+            <button class="btn-landscape" id="generateLandscapePDF">Generar PDF (Horizontal)</button>
+            <button class="btn-warning" id="resetAll">Reiniciar Todo</button>
+        </div>
+    </div>
+
+    <!-- Menú contextual para eliminar pupitres -->
+    <div id="contextMenu" class="context-menu">
+        <ul>
+            <li id="removeDesk">Eliminar pupitre</li>
+            <li id="restoreDesk">Restaurar pupitre</li>
+        </ul>
+    </div>
+
+    <!-- Modal para guardar clase -->
+    <div id="saveModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Guardar Clase</h2>
+            <div class="form-group">
+                <label for="saveClassName">Nombre de la clase:</label>
+                <input type="text" id="saveClassName" placeholder="Ej: 1ºA - Matemáticas">
+            </div>
+            <button id="confirmSave">Guardar</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const layoutType = document.getElementById('layoutType');
+        const rowsNumber = document.getElementById('rowsNumber');
+        const columnsNumber = document.getElementById('columnsNumber');
+        const studentsInput = document.getElementById('studentsInput');
+        const loadStudentsBtn = document.getElementById('loadStudents');
+        const excelFile = document.getElementById('excelFile');
+        const importExcelBtn = document.getElementById('importExcel');
+        const applyLayoutBtn = document.getElementById('applyLayout');
+        const classroomLayout = document.getElementById('classroomLayout');
+        const generatePDFBtn = document.getElementById('generatePDF');
+        const generateLandscapePDFBtn = document.getElementById('generateLandscapePDF');
+        const resetAllBtn = document.getElementById('resetAll');
+        const mixedConfig = document.getElementById('mixedConfig');
+        const mixedPattern = document.getElementById('mixedPattern');
+        const studentsGrid = document.getElementById('studentsGrid');
+        const maleCount = document.getElementById('maleCount');
+        const femaleCount = document.getElementById('femaleCount');
+        const unknownCount = document.getElementById('unknownCount');
+        const classGroup = document.getElementById('classGroup');
+        const teacherName = document.getElementById('teacherName');
+        const contextMenu = document.getElementById('contextMenu');
+        const removeDeskBtn = document.getElementById('removeDesk');
+        const restoreDeskBtn = document.getElementById('restoreDesk');
+        const assignRandomBtn = document.getElementById('assignRandom');
+        const assignAlphabeticBtn = document.getElementById('assignAlphabetic');
+        const saveClassBtn = document.getElementById('saveClass');
+        const showSavedClassesBtn = document.getElementById('showSavedClasses');
+        const savedClassesList = document.getElementById('savedClassesList');
+        const saveModal = document.getElementById('saveModal');
+        const saveClassName = document.getElementById('saveClassName');
+        const confirmSave = document.getElementById('confirmSave');
+        const closeModal = document.querySelector('.close');
+        const teacherPositionRadios = document.querySelectorAll('input[name="teacherPosition"]');
+        const exportClassBtn = document.getElementById('exportClass');
+        const importClassBtn = document.getElementById('importClass');
+
+        let students = [];
+        let deskAssignments = {};
+        let currentLayout = 'pairs';
+        let removedDesks = []; // Almacena los pupitres eliminados
+        let currentDeskContext = null; // Almacena el pupitre actual para el menú contextual
+        let deskCounter = 0; // Contador global de pupitres
+        let teacherPosition = 'top'; // Posición por defecto del profesor
+
+        // Event listeners para la posición del profesor
+        teacherPositionRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                teacherPosition = this.value;
+                renderClassroomLayout();
+            });
+        });
+
+        // Event listeners para el menú contextual
+        document.addEventListener('click', function() {
+            contextMenu.style.display = 'none';
+        });
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        removeDeskBtn.addEventListener('click', function() {
+            if (currentDeskContext) {
+                const deskId = parseInt(currentDeskContext.getAttribute('data-desk-id'));
+                if (!removedDesks.includes(deskId)) {
+                    removedDesks.push(deskId);
+                    
+                    // Si el pupitre tenía un estudiante asignado, liberarlo
+                    if (deskAssignments[deskId] !== undefined) {
+                        delete deskAssignments[deskId];
+                    }
+                    
+                    renderClassroomLayout();
+                    renderStudentsGrid();
+                }
+            }
+            contextMenu.style.display = 'none';
+        });
+
+        restoreDeskBtn.addEventListener('click', function() {
+            if (currentDeskContext) {
+                const deskId = parseInt(currentDeskContext.getAttribute('data-desk-id'));
+                const index = removedDesks.indexOf(deskId);
+                if (index > -1) {
+                    removedDesks.splice(index, 1);
+                    renderClassroomLayout();
+                }
+            }
+            contextMenu.style.display = 'none';
+        });
+
+        layoutType.addEventListener('change', function() {
+            mixedConfig.style.display = this.value === 'mixed' ? 'block' : 'none';
+            currentLayout = this.value;
+        });
+
+        loadStudentsBtn.addEventListener('click', function() {
+            const namesText = studentsInput.value.trim();
+            if (namesText) {
+                students = parseStudentInput(namesText);
+                updateGenderStats();
+                renderClassroomLayout(); 
+                renderStudentsGrid();
+            } else {
+                alert('Por favor, introduce al menos un nombre de estudiante');
+            }
+        });
+
+        importExcelBtn.addEventListener('click', function() {
+            if (!excelFile.files.length) { alert('Selecciona un archivo'); return; }
+            const file = excelFile.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    students = [];
+                    jsonData.forEach(row => { 
+                        if (row[0] && typeof row[0] === 'string' && row[0].trim().length > 0) {
+                            students.push({
+                                name: row[0].trim(),
+                                gender: 'U' // Por defecto no especificado
+                            });
+                        }
+                    });
+                    studentsInput.value = students.map(s => s.name).join('\n');
+                    updateGenderStats();
+                    renderClassroomLayout(); 
+                    renderStudentsGrid();
+                } catch (error) {
+                    console.error('Error al importar Excel:', error);
+                    alert('Error al importar el archivo Excel. Asegúrate de que es un formato válido.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function parseStudentInput(text) {
+            return text.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .map(line => {
+                    return { 
+                        name: line,
+                        gender: 'U' // Por defecto no especificado
+                    };
+                });
+        }
+
+        function updateGenderStats() {
+            const male = students.filter(s => s.gender === 'M').length;
+            const female = students.filter(s => s.gender === 'F').length;
+            const unknown = students.filter(s => s.gender === 'U').length;
+            
+            maleCount.textContent = `${male} masculinos`;
+            femaleCount.textContent = `${female} femeninos`;
+            unknownCount.textContent = `${unknown} sin especificar`;
+        }
+
+        function renderStudentsGrid() {
+            studentsGrid.innerHTML = '';
+            students.forEach((student, index) => {
+                if (Object.values(deskAssignments).includes(index)) return;
+                
+                const card = document.createElement('div');
+                card.className = `student-card ${getGenderClass(student.gender)}`;
+                card.setAttribute('data-id', index);
+                card.draggable = true;
+                
+                // Añadir nombre
+                const nameElement = document.createElement('div');
+                nameElement.className = 'student-name';
+                nameElement.textContent = student.name;
+                card.appendChild(nameElement);
+                
+                // Añadir badge de género
+                const genderBadge = document.createElement('div');
+                genderBadge.className = 'gender-badge';
+                genderBadge.textContent = getGenderBadge(student.gender);
+                card.appendChild(genderBadge);
+                
+                // Cambiar género al hacer clic
+                card.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    cycleStudentGender(index);
+                    renderStudentsGrid();
+                    updateGenderStats();
+                });
+                
+                card.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', card.getAttribute('data-id'));
+                });
+                
+                studentsGrid.appendChild(card);
+            });
+        }
+
+        function getGenderClass(gender) {
+            if (gender === 'M') return 'male';
+            if (gender === 'F') return 'female';
+            return 'unknown';
+        }
+
+        function getGenderBadge(gender) {
+            if (gender === 'M') return 'M';
+            if (gender === 'F') return 'F';
+            return '?';
+        }
+
+        function cycleStudentGender(studentIndex) {
+            const currentGender = students[studentIndex].gender;
+            if (currentGender === 'U') {
+                students[studentIndex].gender = 'M';
+            } else if (currentGender === 'M') {
+                students[studentIndex].gender = 'F';
+            } else {
+                students[studentIndex].gender = 'U';
+            }
+        }
+
+        applyLayoutBtn.addEventListener('click', function() {
+            // Reiniciar pupitres eliminados al aplicar nueva configuración
+            removedDesks = [];
+            renderClassroomLayout();
+        });
+
+        function renderClassroomLayout() {
+            const config = getLayoutConfig();
+            classroomLayout.innerHTML = '';
+            
+            const teacherArea = document.createElement('div');
+            teacherArea.className = `teacher-area ${teacherPosition === 'bottom' ? 'bottom' : ''}`;
+            
+            // Añadir información del grupo y profesor al área del profesor
+            const groupText = classGroup.value ? `Grupo: ${classGroup.value}` : '';
+            const teacherText = teacherName.value ? `Profesor: ${teacherName.value}` : '';
+            teacherArea.textContent = `Área del Profesor ${groupText ? ' - ' + groupText : ''} ${teacherText ? ' - ' + teacherText : ''}`;
+            
+            const classroomGrid = document.createElement('div');
+            classroomGrid.className = `classroom-grid ${teacherPosition === 'bottom' ? 'bottom-teacher' : ''}`;
+            
+            // Si el profesor está arriba, añadirlo primero
+            if (teacherPosition === 'top') {
+                classroomLayout.appendChild(teacherArea);
+            }
+            
+            deskCounter = 1;
+            
+            for (let row = 0; row < config.rows; row++) {
+                const rowElement = document.createElement('div');
+                rowElement.className = 'classroom-row';
+                
+                for (let col = 0; col < config.columns; col++) {
+                    const groupSize = config.groups[col % config.groups.length];
+                    const deskGroup = document.createElement('div');
+                    deskGroup.className = 'desk-group';
+                    
+                    for (let i = 0; i < groupSize; i++) {
+                        // Solo agregar pupitres que no estén eliminados
+                        if (!removedDesks.includes(deskCounter)) {
+                            deskGroup.appendChild(createDesk(deskCounter));
+                        } else {
+                            // Mostrar espacio vacío para pupitre eliminado
+                            const emptySpace = document.createElement('div');
+                            emptySpace.className = 'desk removed';
+                            emptySpace.setAttribute('data-desk-id', deskCounter);
+                            emptySpace.innerHTML = `<div class="desk-number">#${deskCounter}</div><div class="student-name">Eliminado</div>`;
+                            
+                            // Agregar evento de clic derecho
+                            emptySpace.addEventListener('contextmenu', function(e) {
+                                e.preventDefault();
+                                currentDeskContext = this;
+                                contextMenu.style.display = 'block';
+                                contextMenu.style.top = `${e.pageY}px`;
+                                contextMenu.style.left = `${e.pageX}px`;
+                                
+                                // Mostrar opción de restaurar en lugar de eliminar
+                                removeDeskBtn.style.display = 'none';
+                                restoreDeskBtn.style.display = 'block';
+                            });
+                            
+                            deskGroup.appendChild(emptySpace);
+                        }
+                        deskCounter++;
+                    }
+                    
+                    rowElement.appendChild(deskGroup);
+                    
+                    // Añadir pasillo entre grupos excepto después del último
+                    if (col < config.columns - 1) {
+                        const aisle = document.createElement('div');
+                        aisle.className = 'aisle';
+                        rowElement.appendChild(aisle);
+                    }
+                }
+                
+                classroomGrid.appendChild(rowElement);
+            }
+            
+            classroomLayout.appendChild(classroomGrid);
+            
+            // Si el profesor está abajo, añadirlo después del grid
+            if (teacherPosition === 'bottom') {
+                classroomLayout.appendChild(teacherArea);
+            }
+            
+            initDragAndDrop();
+        }
+
+        function getLayoutConfig() {
+            const rows = parseInt(rowsNumber.value) || 4;
+            const columns = parseInt(columnsNumber.value) || 3;
+            switch(currentLayout) {
+                case 'pairs': return { rows, columns, groups: [2] };
+                case 'individual': return { rows, columns, groups: [1] };
+                case 'trios': return { rows, columns, groups: [3] };
+                case 'mixed':
+                    const pattern = mixedPattern.value.split(',').map(n => parseInt(n.trim())).filter(n => n > 0);
+                    return { rows, columns, groups: pattern.length > 0 ? pattern : [2,3,2] };
+                default: return { rows: 4, columns: 3, groups: [2] };
+            }
+        }
+
+        function createDesk(id) {
+            const desk = document.createElement('div');
+            desk.className = 'desk empty';
+            desk.setAttribute('data-desk-id', id);
+            
+            const num = document.createElement('div');
+            num.className = 'desk-number';
+            num.textContent = `#${id}`;
+            
+            const name = document.createElement('div');
+            name.className = 'student-name';
+            name.textContent = ' ';
+            
+            if (deskAssignments[id] !== undefined) {
+                const student = students[deskAssignments[id]];
+                desk.classList.remove('empty'); 
+                if (student.gender === 'M') {
+                desk.classList.add('occupied', 'male');
+            } else if (student.gender === 'F') {
+                desk.classList.add('occupied', 'female');
+            } else {
+                desk.classList.add('occupied', 'unknown');
+            }
+                name.textContent = student.name;
+                
+                // Añadir badge de género
+                const genderBadge = document.createElement('div');
+                genderBadge.className = 'gender-badge';
+                genderBadge.textContent = student.gender === 'M' ? 'M' : (student.gender === 'F' ? 'F' : '?');
+                desk.appendChild(genderBadge);
+            }
+            
+            desk.appendChild(num); 
+            desk.appendChild(name);
+            
+            // Agregar evento de clic derecho para eliminar pupitre
+            desk.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                currentDeskContext = this;
+                contextMenu.style.display = 'block';
+                contextMenu.style.top = `${e.pageY}px`;
+                contextMenu.style.left = `${e.pageX}px`;
+                
+                // Mostrar opción de eliminar en lugar de restaurar
+                removeDeskBtn.style.display = 'block';
+                restoreDeskBtn.style.display = 'none';
+            });
+            
+            return desk;
+        }
+
+        function initDragAndDrop() {
+            document.querySelectorAll('.desk:not(.removed)').forEach(desk => {
+                desk.addEventListener('dragover', e => e.preventDefault());
+                desk.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    const studentId = e.dataTransfer.getData('text/plain');
+                    if (studentId) assignStudentToDesk(parseInt(studentId), this.getAttribute('data-desk-id'));
+                });
+                desk.addEventListener('click', function() {
+                    const deskId = this.getAttribute('data-desk-id');
+                    if (deskAssignments[deskId] !== undefined) {
+                        delete deskAssignments[deskId]; 
+                        renderClassroomLayout(); 
+                        renderStudentsGrid();
+                    }
+                });
+            });
+        }
+
+        function assignStudentToDesk(studentId, deskId) {
+            for (const d in deskAssignments) { 
+                if (deskAssignments[d] === studentId) delete deskAssignments[d]; 
+            }
+            deskAssignments[deskId] = studentId;
+            renderClassroomLayout(); 
+            renderStudentsGrid();
+        }
+
+        // Función para asignar estudiantes aleatoriamente
+        assignRandomBtn.addEventListener('click', function() {
+            if (students.length === 0) {
+                alert('Primero carga los estudiantes');
+                return;
+            }
+            
+            // Limpiar asignaciones anteriores
+            deskAssignments = {};
+            
+            // Obtener todos los IDs de pupitres disponibles (no eliminados)
+            const availableDesks = [];
+            for (let i = 1; i < deskCounter; i++) {
+                if (!removedDesks.includes(i)) {
+                    availableDesks.push(i);
+                }
+            }
+            
+            // Mezclar aleatoriamente los pupitres
+            shuffleArray(availableDesks);
+            
+            // Asignar estudiantes a pupitres
+            for (let i = 0; i < Math.min(students.length, availableDesks.length); i++) {
+                deskAssignments[availableDesks[i]] = i;
+            }
+            
+            renderClassroomLayout();
+            renderStudentsGrid();
+        });
+        
+        // Función para asignar estudiantes alfabéticamente
+        assignAlphabeticBtn.addEventListener('click', function() {
+            if (students.length === 0) {
+                alert('Primero carga los estudiantes');
+                return;
+            }
+            
+            // Limpiar asignaciones anteriores
+            deskAssignments = {};
+            
+            // Obtener todos los IDs de pupitres disponibles (no eliminados)
+            const availableDesks = [];
+            for (let i = 1; i < deskCounter; i++) {
+                if (!removedDesks.includes(i)) {
+                    availableDesks.push(i);
+                }
+            }
+            
+            // Ordenar estudiantes alfabéticamente
+            const sortedStudents = [...students];
+            sortedStudents.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Actualizar el array original de estudiantes con el orden alfabético
+            students = sortedStudents;
+            
+            // Asignar estudiantes a pupitres en orden
+            for (let i = 0; i < Math.min(students.length, availableDesks.length); i++) {
+                deskAssignments[availableDesks[i]] = i;
+            }
+            
+            renderClassroomLayout();
+            renderStudentsGrid();
+        });
+        
+        // Función para mezclar un array (algoritmo Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Funcionalidad para guardar y cargar clases
+        saveClassBtn.addEventListener('click', function() {
+            saveModal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', function() {
+            saveModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == saveModal) {
+                saveModal.style.display = 'none';
+            }
+        });
+
+        confirmSave.addEventListener('click', function() {
+            const className = saveClassName.value.trim();
+            if (!className) {
+                alert('Por favor, introduce un nombre para la clase');
+                return;
+            }
+
+            const classData = {
+                students: students,
+                deskAssignments: deskAssignments,
+                currentLayout: currentLayout,
+                rows: parseInt(rowsNumber.value) || 4,
+                columns: parseInt(columnsNumber.value) || 3,
+                mixedPattern: mixedPattern.value,
+                classGroup: classGroup.value,
+                teacherName: teacherName.value,
+                teacherPosition: teacherPosition,
+                removedDesks: removedDesks,
+                studentsInput: studentsInput.value,
+                saveTime: new Date().toLocaleString()
+            };
+
+            // Guardar en localStorage
+            localStorage.setItem('classConfig_' + className, JSON.stringify(classData));
+            
+            // Cerrar el modal y limpiar el campo
+            saveModal.style.display = 'none';
+            saveClassName.value = '';
+            
+            alert(`Clase "${className}" guardada correctamente`);
+        });
+
+        showSavedClassesBtn.addEventListener('click', function() {
+            // Mostrar u ocultar la lista de clases guardadas
+            if (savedClassesList.style.display === 'block') {
+                savedClassesList.style.display = 'none';
+                return;
+            }
+            
+            // Obtener todas las clases guardadas
+            savedClassesList.innerHTML = '';
+            let hasSavedClasses = false;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('classConfig_')) {
+                    hasSavedClasses = true;
+                    const className = key.replace('classConfig_', '');
+                    const classData = JSON.parse(localStorage.getItem(key));
+                    
+                    const classItem = document.createElement('div');
+                    classItem.className = 'saved-class-item';
+                    classItem.innerHTML = `
+                        <div>${className} (${classData.saveTime})</div>
+                        <div class="delete-class" data-key="${key}">×</div>
+                    `;
+                    
+                    classItem.addEventListener('click', function(e) {
+                        if (!e.target.classList.contains('delete-class')) {
+                            loadClass(key);
+                            savedClassesList.style.display = 'none';
+                        }
+                    });
+                    
+                    const deleteBtn = classItem.querySelector('.delete-class');
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (confirm(`¿Estás seguro de que quieres eliminar la clase "${className}"?`)) {
+                            localStorage.removeItem(key);
+                            showSavedClassesBtn.click(); // Refrescar la lista
+                        }
+                    });
+                    
+                    savedClassesList.appendChild(classItem);
+                }
+            }
+            
+            if (!hasSavedClasses) {
+                savedClassesList.innerHTML = '<div>No hay clases guardadas</div>';
+            }
+            
+            savedClassesList.style.display = 'block';
+        });
+
+        function loadClass(key) {
+            const classData = JSON.parse(localStorage.getItem(key));
+            
+            // Cargar todos los datos
+            students = classData.students;
+            deskAssignments = classData.deskAssignments;
+            currentLayout = classData.currentLayout;
+            rowsNumber.value = classData.rows;
+            columnsNumber.value = classData.columns;
+            mixedPattern.value = classData.mixedPattern;
+            classGroup.value = classData.classGroup;
+            teacherName.value = classData.teacherName;
+            teacherPosition = classData.teacherPosition || 'top';
+            removedDesks = classData.removedDesks;
+            studentsInput.value = classData.studentsInput;
+            
+            // Actualizar la interfaz
+            layoutType.value = currentLayout;
+            mixedConfig.style.display = currentLayout === 'mixed' ? 'block' : 'none';
+            
+            // Actualizar los radio buttons de posición del profesor
+            document.querySelector(`input[name="teacherPosition"][value="${teacherPosition}"]`).checked = true;
+            
+            updateGenderStats();
+            renderClassroomLayout();
+            renderStudentsGrid();
+            
+            alert('Clase cargada correctamente');
+        }
+
+        // Funcionalidad de Exportar/Importar archivos
+        exportClassBtn.addEventListener('click', function() {
+            if (students.length === 0) {
+                alert('No hay datos de clase para exportar');
+                return;
+            }
+
+            const classData = {
+                students: students,
+                deskAssignments: deskAssignments,
+                currentLayout: currentLayout,
+                rows: parseInt(rowsNumber.value) || 4,
+                columns: parseInt(columnsNumber.value) || 3,
+                mixedPattern: mixedPattern.value,
+                classGroup: classGroup.value,
+                teacherName: teacherName.value,
+                teacherPosition: teacherPosition,
+                removedDesks: removedDesks,
+                studentsInput: studentsInput.value,
+                exportTime: new Date().toLocaleString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(classData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            const fileName = `clase_${classGroup.value || 'sin_grupo'}_${new Date().getTime()}.json`;
+            link.download = fileName;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`Clase exportada como ${fileName}`);
+        });
+
+        importClassBtn.addEventListener('click', function() {
+            // Crear input file temporal
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const classData = JSON.parse(e.target.result);
+                        
+                        // Validar que sea un archivo de clase válido
+                        if (!classData.students || !classData.deskAssignments) {
+                            alert('El archivo no es una clase válida');
+                            return;
+                        }
+                        
+                        // Cargar los datos
+                        students = classData.students;
+                        deskAssignments = classData.deskAssignments;
+                        currentLayout = classData.currentLayout;
+                        rowsNumber.value = classData.rows;
+                        columnsNumber.value = classData.columns;
+                        mixedPattern.value = classData.mixedPattern || '';
+                        classGroup.value = classData.classGroup || '';
+                        teacherName.value = classData.teacherName || '';
+                        teacherPosition = classData.teacherPosition || 'top';
+                        removedDesks = classData.removedDesks || [];
+                        studentsInput.value = classData.studentsInput || '';
+                        
+                        // Actualizar la interfaz
+                        layoutType.value = currentLayout;
+                        mixedConfig.style.display = currentLayout === 'mixed' ? 'block' : 'none';
+                        
+                        // Actualizar los radio buttons de posición del profesor
+                        document.querySelector(`input[name="teacherPosition"][value="${teacherPosition}"]`).checked = true;
+                        
+                        updateGenderStats();
+                        renderClassroomLayout();
+                        renderStudentsGrid();
+                        
+                        alert('Clase importada correctamente desde archivo');
+                    } catch (error) {
+                        console.error('Error al importar archivo:', error);
+                        alert('Error al importar el archivo. Asegúrate de que es un archivo de clase válido.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+            fileInput.click();
+        });
+
+        generatePDFBtn.addEventListener('click', () => generatePDF('portrait'));
+        generateLandscapePDFBtn.addEventListener('click', () => generatePDF('landscape'));
+
+       function generatePDF(orientation) {
+    // Crear un contenedor temporal para el PDF
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.width = orientation === 'portrait' ? '210mm' : '297mm';
+    pdfContainer.style.padding = '10mm';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+    pdfContainer.style.background = 'white';
+    pdfContainer.style.boxSizing = 'border-box';
+    
+    // Título
+    const title = document.createElement('h1');
+    title.textContent = 'Planificación de Aula';
+    title.style.textAlign = 'center'; 
+    title.style.marginBottom = '10px'; 
+    title.style.fontSize = '18px'; 
+    title.style.color = '#3b5998';
+    pdfContainer.appendChild(title);
+    
+    // Información de configuración - en dos columnas
+    const configInfo = document.createElement('div');
+    configInfo.style.display = 'flex';
+    configInfo.style.justifyContent = 'space-between';
+    configInfo.style.marginBottom = '15px';
+    configInfo.style.fontSize = '11px';
+    configInfo.style.flexWrap = 'wrap';
+    configInfo.style.padding = '8px';
+    configInfo.style.backgroundColor = '#f5f7fa';
+    configInfo.style.borderRadius = '4px';
+    
+    const layoutName = getLayoutName(currentLayout);
+    const date = new Date().toLocaleDateString();
+    const groupText = classGroup.value ? `Grupo: ${classGroup.value}` : '';
+    const teacherText = teacherName.value ? `Profesor: ${teacherName.value}` : '';
+    
+    const leftColumn = document.createElement('div');
+    leftColumn.innerHTML = `
+        <div><strong>Configuración:</strong> ${layoutName}</div>
+        <div><strong>Filas:</strong> ${rowsNumber.value} | <strong>Columnas:</strong> ${columnsNumber.value}</div>
+    `;
+    
+    const rightColumn = document.createElement('div');
+    rightColumn.innerHTML = `
+        <div><strong>${groupText}</strong></div>
+        <div><strong>${teacherText}</strong></div>
+        <div><strong>Fecha:</strong> ${date}</div>
+    `;
+    
+    configInfo.appendChild(leftColumn);
+    configInfo.appendChild(rightColumn);
+    pdfContainer.appendChild(configInfo);
+    
+    // Crear una réplica exacta del layout pero ocultando los pupitres eliminados
+    const classroomClone = document.createElement('div');
+    classroomClone.className = 'classroom-layout';
+    classroomClone.style.width = '100%';
+    classroomClone.style.boxSizing = 'border-box';
+    
+    // Clonar el área del profesor (según la posición seleccionada)
+    const teacherArea = document.createElement('div');
+    teacherArea.className = 'teacher-area';
+    teacherArea.style.marginBottom = '10px';
+    teacherArea.style.padding = '8px';
+    teacherArea.style.fontSize = '12px';
+    teacherArea.style.textAlign = 'center';
+    teacherArea.textContent = `Área del Profesor ${groupText ? ' - ' + groupText : ''} ${teacherText ? ' - ' + teacherText : ''}`;
+    
+    // Posicionar el área del profesor según la configuración
+    if (teacherPosition === 'top') {
+        classroomClone.appendChild(teacherArea);
+    }
+    
+    const classroomGrid = document.createElement('div');
+    classroomGrid.className = 'classroom-grid';
+    classroomGrid.style.width = '100%';
+    classroomGrid.style.boxSizing = 'border-box';
+    
+    // Obtener configuración actual
+    const config = getLayoutConfig();
+    const totalRows = config.rows;
+    const totalColumns = config.columns;
+    
+    // Calcular el tamaño máximo de grupo para determinar el ancho máximo
+    const maxGroupSize = Math.max(...config.groups);
+    
+    // Calcular dimensiones dinámicas basadas en el número de filas y columnas
+    const pageWidth = orientation === 'portrait' ? 190 : 277; // mm menos márgenes
+    
+    // FACTOR DE ESCALA AUTOMÁTICO - se ajusta según la complejidad del layout
+    let baseDeskWidth;
+    
+    // Determinar baseDeskWidth según la complejidad del layout
+    const totalDesks = totalRows * totalColumns * (maxGroupSize || 1);
+    
+    if (totalDesks <= 12) {
+        // Layout pequeño: pupitres más grandes
+        baseDeskWidth = orientation === 'portrait' ? 35 : 45;
+    } else if (totalDesks <= 24) {
+        // Layout mediano: tamaño intermedio
+        baseDeskWidth = orientation === 'portrait' ? 28 : 35;
+    } else if (totalDesks <= 36) {
+        // Layout grande: tamaño más pequeño
+        baseDeskWidth = orientation === 'portrait' ? 22 : 28;
+    } else {
+        // Layout muy grande: tamaño mínimo
+        baseDeskWidth = orientation === 'portrait' ? 18 : 22;
+    }
+    
+    // Ajuste adicional basado en número de columnas
+    const columnAdjustment = Math.max(1, totalColumns / 3);
+    const deskWidth = Math.min(baseDeskWidth, pageWidth / (totalColumns * columnAdjustment));
+    const deskHeight = deskWidth * 0.7;
+    
+    // Calcular tamaño de fuente basado en el tamaño del pupitre
+    let fontSize;
+    if (deskWidth >= 30) {
+        fontSize = 12; // Tamaño grande para layouts pequeños
+    } else if (deskWidth >= 22) {
+        fontSize = 10; // Tamaño medio
+    } else if (deskWidth >= 18) {
+        fontSize = 9;  // Tamaño pequeño
+    } else {
+        fontSize = 8;  // Tamaño mínimo
+    }
+    
+    let deskCounter = 1;
+    
+    for (let row = 0; row < totalRows; row++) {
+        const rowElement = document.createElement('div');
+        rowElement.className = 'classroom-row';
+        rowElement.style.display = 'flex';
+        rowElement.style.justifyContent = 'center';
+        rowElement.style.marginBottom = '5px';
+        rowElement.style.width = '100%';
+        
+        for (let col = 0; col < totalColumns; col++) {
+            const groupSize = config.groups[col % config.groups.length];
+            const deskGroup = document.createElement('div');
+            deskGroup.className = 'desk-group';
+            deskGroup.style.display = 'flex';
+            deskGroup.style.gap = '2px';
+            
+            for (let i = 0; i < groupSize; i++) {
+                const deskId = deskCounter;
+                
+                if (removedDesks.includes(deskId)) {
+                    // Para pupitres eliminados: crear un espacio vacío invisible
+                    const emptySpace = document.createElement('div');
+                    emptySpace.className = 'desk removed';
+                    emptySpace.style.visibility = 'hidden';
+                    emptySpace.style.border = 'none';
+                    emptySpace.style.background = 'transparent';
+                    emptySpace.style.width = deskWidth + 'mm';
+                    emptySpace.style.height = deskHeight + 'mm';
+                    emptySpace.style.minWidth = deskWidth + 'mm';
+                    deskGroup.appendChild(emptySpace);
+                } else {
+                    // Para pupitres normales: crear una versión para PDF
+                    const desk = document.createElement('div');
+                    desk.className = 'desk';
+                    
+                    // Aplicar clases según el estado
+                    if (deskAssignments[deskId] !== undefined) {
+                        const student = students[deskAssignments[deskId]];
+                        desk.classList.add('occupied');
+                        if (student.gender === 'M') {
+                            desk.classList.add('male');
+                            desk.style.background = '#d6eaf8';
+                            desk.style.border = '2px solid #3498db';
+                        } else if (student.gender === 'F') {
+                            desk.classList.add('female');
+                            desk.style.background = '#fadbd8';
+                            desk.style.border = '2px solid #e74c3c';
+                        } else {
+                            desk.classList.add('unknown');
+                            desk.style.background = '#d5f5e3';
+                            desk.style.border = '2px solid #2ecc71';
+                        }
+                    } else {
+                        desk.classList.add('empty');
+                        desk.style.background = '#ecf0f1';
+                        desk.style.border = '2px solid #bdc3c7';
+                    }
+                    
+                    // Estilos para PDF con tamaño dinámico
+                    desk.style.width = deskWidth + 'mm';
+                    desk.style.height = deskHeight + 'mm';
+                    desk.style.minWidth = deskWidth + 'mm';
+                    desk.style.padding = '2px';
+                    desk.style.borderRadius = '4px';
+                    desk.style.display = 'flex';
+                    desk.style.flexDirection = 'column';
+                    desk.style.justifyContent = 'center';
+                    desk.style.alignItems = 'center';
+                    desk.style.position = 'relative';
+                    desk.style.wordBreak = 'break-word';
+                    desk.style.textAlign = 'center';
+                    desk.style.fontSize = fontSize + 'pt';
+                    desk.style.boxSizing = 'border-box';
+                    desk.style.flexShrink = '0';
+                    
+                    // Número del pupitre
+                    const num = document.createElement('div');
+                    num.className = 'desk-number';
+                    num.textContent = `#${deskId}`;
+                    num.style.fontSize = (fontSize - 2) + 'pt';
+                    num.style.color = '#7f8c8d';
+                    num.style.position = 'absolute';
+                    num.style.top = '1px';
+                    num.style.left = '2px';
+                    desk.appendChild(num);
+                    
+                    // Nombre del estudiante o espacio vacío
+                    const name = document.createElement('div');
+                    name.className = 'student-name';
+                    name.style.fontWeight = '500';
+                    name.style.textAlign = 'center';
+                    name.style.maxWidth = '100%';
+                    name.style.overflow = 'hidden';
+                    name.style.fontSize = fontSize + 'pt';
+                    name.style.lineHeight = '1.1';
+                    name.style.padding = '2px';
+                    name.style.boxSizing = 'border-box';
+                    
+                    if (deskAssignments[deskId] !== undefined) {
+                        const student = students[deskAssignments[deskId]];
+                        name.textContent = student.name;
+                        
+                        // Badge de género
+                        const genderBadge = document.createElement('div');
+                        genderBadge.className = 'gender-badge';
+                        genderBadge.textContent = student.gender === 'M' ? 'M' : (student.gender === 'F' ? 'F' : '?');
+                        genderBadge.style.fontSize = (fontSize - 2) + 'pt';
+                        genderBadge.style.fontWeight = 'bold';
+                        genderBadge.style.color = '#7f8c8d';
+                        genderBadge.style.position = 'absolute';
+                        genderBadge.style.top = '1px';
+                        genderBadge.style.right = '2px';
+                        desk.appendChild(genderBadge);
+                    } else {
+                        name.textContent = ' ';
+                    }
+                    
+                    desk.appendChild(name);
+                    deskGroup.appendChild(desk);
+                }
+                
+                deskCounter++;
+            }
+            
+            rowElement.appendChild(deskGroup);
+            
+            // Añadir pasillo entre grupos excepto después del último
+            if (col < totalColumns - 1) {
+                const aisle = document.createElement('div');
+                aisle.className = 'aisle';
+                aisle.style.width = '5mm';
+                aisle.style.minWidth = '5mm';
+                rowElement.appendChild(aisle);
+            }
+        }
+        
+        classroomGrid.appendChild(rowElement);
+    }
+    
+    classroomClone.appendChild(classroomGrid);
+    
+    // Si el profesor está abajo, añadir el área después del grid
+    if (teacherPosition === 'bottom') {
+        classroomClone.appendChild(teacherArea);
+    }
+    
+    pdfContainer.appendChild(classroomClone);
+    
+    // Añadir a documento temporal
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute'; 
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.width = orientation === 'portrait' ? '210mm' : '297mm';
+    tempContainer.appendChild(pdfContainer); 
+    document.body.appendChild(tempContainer);
+    
+    // Generar PDF con escalado automático
+    html2canvas(tempContainer, { 
+        scale: 2, 
+        backgroundColor: '#fff',
+        useCORS: true,
+        logging: false,
+        width: tempContainer.offsetWidth,
+        height: tempContainer.offsetHeight
+    }).then(canvas => {
+        document.body.removeChild(tempContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ 
+            orientation: orientation, 
+            unit: 'mm', 
+            format: 'a4' 
+        });
+        
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 5;
+        
+        // Calcular dimensiones para que quepa en la página
+        const contentWidth = pageWidth - (2 * margin);
+        const contentHeight = pageHeight - (2 * margin);
+        
+        // Calcular relación de aspecto
+        const imgRatio = canvas.width / canvas.height;
+        const pageRatio = contentWidth / contentHeight;
+        
+        let finalWidth, finalHeight;
+        
+        if (imgRatio > pageRatio) {
+            // La imagen es más ancha que la página
+            finalWidth = contentWidth;
+            finalHeight = contentWidth / imgRatio;
+        } else {
+            // La imagen es más alta que la página
+            finalHeight = contentHeight;
+            finalWidth = contentHeight * imgRatio;
+        }
+        
+        // Centrar en la página
+        const x = margin + (contentWidth - finalWidth) / 2;
+        const y = margin + (contentHeight - finalHeight) / 2;
+        
+        doc.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+        doc.save(`planificacion-aula-${new Date().getTime()}.pdf`);
+    });
+}
+        
+        function getLayoutName(layoutType) {
+            const names = {
+                'pairs': 'Parejas',
+                'individual': 'Individual',
+                'trios': 'Tríos',
+                'mixed': 'Mixto'
+            };
+            return names[layoutType] || 'Personalizado';
+        }
+
+        resetAllBtn.addEventListener('click', () => { 
+            if (confirm('¿Estás seguro de que quieres reiniciar todo? Se perderán todos los datos.')) {
+                students = []; 
+                deskAssignments = {}; 
+                removedDesks = [];
+                studentsInput.value = ''; 
+                excelFile.value = ''; 
+                rowsNumber.value = 4; 
+                columnsNumber.value = 3; 
+                classGroup.value = '';
+                teacherName.value = '';
+                teacherPosition = 'top';
+                document.querySelector('input[name="teacherPosition"][value="top"]').checked = true;
+                updateGenderStats();
+                renderClassroomLayout(); 
+                renderStudentsGrid(); 
+            }
+        });
+
+        // Inicializar
+        renderClassroomLayout();
+    });
+    </script>
+</body>
+</html>
