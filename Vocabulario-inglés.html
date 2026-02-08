@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repaso de Vocabulario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/mammoth@1.4.8/mammoth.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2575fc;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background-color: transparent;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+        
+        .tab-button.active {
+            background-color: #2575fc;
+            color: white;
+        }
+        
+        .tab-button:hover:not(.active) {
+            background-color: rgba(37, 117, 252, 0.1);
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .config-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .config-title {
+            font-size: 1.3rem;
+            color: #2575fc;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .config-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .config-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        
+        .word-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .word-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .word-input input {
+            flex: 1;
+        }
+        
+        .file-upload {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px dashed #2575fc;
+            border-radius: 10px;
+            text-align: center;
+            background-color: rgba(37, 117, 252, 0.05);
+        }
+        
+        .file-upload input {
+            display: none;
+        }
+        
+        .file-upload label {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #2575fc;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload label:hover {
+            background-color: #1a65e0;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            background-color: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #1a65e0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+            color: #333;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .practice-section {
+            text-align: center;
+        }
+        
+        .question {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #333;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .answer-input {
+            margin: 25px auto;
+            max-width: 400px;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .correct {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .incorrect {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .score-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px auto;
+            max-width: 300px;
+        }
+        
+        .score-small {
+            font-size: 1.2rem;
+            padding: 10px 15px;
+        }
+        
+        .passed {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        .failed {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        
+        .match-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-top: 30px;
+            min-height: 400px;
+        }
+        
+        .word-column {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        
+        .word-item {
+            padding: 15px;
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .word-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .word-item.selected {
+            border-color: #2575fc;
+            background-color: rgba(37, 117, 252, 0.1);
+        }
+        
+        .word-item.matched {
+            opacity: 0.7;
+            cursor: pointer;
+            border-color: #28a745;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .matched-pair {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            margin-bottom: 10px;
+            animation: fadeIn 0.5s ease;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .matched-pair:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .matched-pair .spanish-word {
+            font-weight: bold;
+            color: #2575fc;
+        }
+        
+        .matched-pair .english-word {
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .matched-pair .separator {
+            font-size: 1.5rem;
+            color: #666;
+        }
+        
+        .match-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .word-counter {
+            display: inline-block;
+            background-color: #2575fc;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-left: 10px;
+        }
+        
+        .score-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            min-width: 150px;
+            text-align: center;
+        }
+        
+        .score-display h3 {
+            margin-bottom: 10px;
+            color: #2575fc;
+            font-size: 1.2rem;
+        }
+        
+        .matched-pairs-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .matched-pairs-container h3 {
+            color: #2575fc;
+            margin-bottom: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2575fc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Estilos para la nueva funcionalidad */
+        .practice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .pending-questions {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+            display: none;
+        }
+        
+        .pending-questions ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .pending-questions li {
+            margin: 5px 0;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .pending-questions li:hover {
+            background-color: #ffeaa7;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .finish-confirmation {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            border: 2px solid #2575fc;
+            display: none;
+        }
+        
+        .finish-confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .question-navigation {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 8px 15px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        .nav-btn.active {
+            background-color: #2575fc;
+        }
+        
+        /* Nuevos estilos para navegación */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .timer-display {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #2575fc;
+            display: none;
+        }
+        
+        .timer-warning {
+            background-color: #ffc107;
+            color: #333;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .match-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .config-group {
+                flex-direction: column;
+            }
+            
+            .config-item {
+                min-width: 100%;
+            }
+            
+            .score-display, .timer-display {
+                position: static;
+                margin: 20px auto;
+                width: 90%;
+            }
+            
+            .practice-buttons, .nav-buttons, .navigation-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> Repaso de Vocabulario</h1>
+            <p class="subtitle">Practica vocabulario en español e inglés con ejercicios interactivos</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="config">Configuración</button>
+            <button class="tab-button" data-tab="practice">Práctica</button>
+            <button class="tab-button" data-tab="match">Relacionar</button>
+        </div>
+        
+        <!-- Configuración -->
+        <div id="config" class="tab-content active">
+            <div class="config-section">
+                <h2 class="config-title"><i class="fas fa-cog"></i> Configuración del ejercicio</h2>
+                <div class="config-group">
+                    <div class="config-item">
+                        <label for="numWords">Nº de palabras:</label>
+                        <select id="numWords">
+                            <option value="5">5 palabras</option>
+                            <option value="10" selected>10 palabras</option>
+                            <option value="15">15 palabras</option>
+                            <option value="20">20 palabras</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label for="direction">Dirección de traducción:</label>
+                        <select id="direction">
+                            <option value="both">Ambas direcciones (aleatorio)</option>
+                            <option value="es-en">Español → Inglés</option>
+                            <option value="en-es">Inglés → Español</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label for="scoreDisplay">Mostrar puntuación:</label>
+                        <select id="scoreDisplay">
+                            <option value="end">Al final del ejercicio</option>
+                            <option value="during">Durante el ejercicio</option>
+                            <option value="always">Siempre visible</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label for="accentOption">Valoración de tildes:</label>
+                        <select id="accentOption">
+                            <option value="ignore">Ignorar tildes</option>
+                            <option value="strict">Requerir tildes correctas</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label for="timerOption">Temporizador:</label>
+                        <select id="timerOption">
+                            <option value="0" selected>Sin tiempo límite</option>
+                            <option value="60">1 minuto</option>
+                            <option value="120">2 minutos</option>
+                            <option value="180">3 minutos</option>
+                            <option value="240">4 minutos</option>
+                            <option value="300">5 minutos</option>
+                            <option value="420">7 minutos</option>
+                            <option value="600">10 minutos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h2 class="config-title"><i class="fas fa-file-upload"></i> Cargar palabras desde archivo</h2>
+                <div class="file-upload">
+                    <input type="file" id="fileInput" accept=".txt,.doc,.docx">
+                    <label for="fileInput">
+                        <i class="fas fa-upload"></i> Seleccionar archivo (.doc, .docx o .txt)
+                    </label>
+                    <div class="file-info">
+                        <p>Formato: cada línea debe contener "inglés: español" (separados por dos puntos y un espacio)</p>
+                        <p>Ejemplo: house: casa, dog: perro, cat: gato</p>
+                    </div>
+                </div>
+                <div id="fileStatus"></div>
+            </div>
+            
+            <div class="config-section">
+                <h2 class="config-title"><i class="fas fa-list-ul"></i> Vocabulario a practicar</h2>
+                <p>Agrega o edita las palabras que quieres practicar (formato: inglés: español):</p>
+                
+                <div class="word-list" id="wordList">
+                    <!-- Las entradas de palabras se agregarán aquí -->
+                </div>
+                
+                <div class="controls">
+                    <button id="addWordBtn" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i> Agregar palabra
+                    </button>
+                    <button id="loadSampleBtn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Cargar ejemplo
+                    </button>
+                    <button id="clearWordsBtn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Limpiar todo
+                    </button>
+                </div>
+                
+                <div class="controls" style="margin-top: 30px;">
+                    <button id="startPracticeBtn" class="btn btn-success">
+                        <i class="fas fa-play"></i> Iniciar práctica
+                    </button>
+                    <button id="startMatchBtn" class="btn btn-success">
+                        <i class="fas fa-project-diagram"></i> Iniciar ejercicio de relación
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Práctica -->
+        <div id="practice" class="tab-content">
+            <div class="timer-display" id="timerDisplay">
+                <i class="fas fa-clock"></i> <span id="timerValue">00:00</span>
+            </div>
+            
+            <div class="score-display" id="scoreDisplayContainer" style="display: none;">
+                <h3>Puntuación</h3>
+                <div id="currentScore">0/0</div>
+                <div id="scorePercentage">0%</div>
+            </div>
+            
+            <div class="practice-section">
+                <h2 class="config-title"><i class="fas fa-pencil-alt"></i> Práctica de vocabulario</h2>
+                
+                <div id="practiceInfo">
+                    <p>Traduce la palabra mostrada:</p>
+                </div>
+                
+                <div class="question" id="question"></div>
+                
+                <div class="answer-input">
+                    <input type="text" id="answerInput" placeholder="Escribe la traducción aquí..." autocomplete="off">
+                </div>
+                
+                <!-- Botones de navegación y acción -->
+                <div class="navigation-buttons" id="navigationButtons" style="display: none;">
+                    <button id="prevBtn" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </button>
+                    <button id="validateBtn" class="btn btn-success">
+                        <i class="fas fa-check"></i> Validar
+                    </button>
+                    <button id="nextBtn" class="btn">
+                        <i class="fas fa-arrow-right"></i> Siguiente
+                    </button>
+                    <button id="finishPracticeBtn" class="btn btn-warning">
+                        <i class="fas fa-flag-checkered"></i> Terminar
+                    </button>
+                </div>
+                
+                <!-- Confirmación para terminar ejercicio -->
+                <div class="finish-confirmation" id="finishConfirmation">
+                    <h4><i class="fas fa-exclamation-triangle"></i> ¿Terminar ejercicio?</h4>
+                    <p>Tienes <span id="unansweredCount">0</span> pregunta(s) sin responder.</p>
+                    <p>Si terminas ahora, esas preguntas se marcarán como incorrectas.</p>
+                    <div class="finish-confirmation-buttons">
+                        <button id="confirmFinishBtn" class="btn btn-danger">
+                            <i class="fas fa-check"></i> Sí, terminar
+                        </button>
+                        <button id="cancelFinishBtn" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="feedback" class="feedback"></div>
+                
+                <div class="progress" style="margin-top: 30px;">
+                    <p>Progreso: <span id="currentWord">0</span> de <span id="totalWords">0</span></p>
+                </div>
+                
+                <div id="result" class="result-container hidden">
+                    <!-- El resultado se generará dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Relacionar -->
+        <div id="match" class="tab-content">
+            <div class="practice-section">
+                <h2 class="config-title"><i class="fas fa-project-diagram"></i> Relacionar palabras</h2>
+                <p>Selecciona una palabra en español y una en inglés para relacionarlas (puedes emparejar cualquier combinación)</p>
+                <p><strong>Nota:</strong> Las palabras emparejadas desaparecerán de la lista y aparecerán abajo. Haz clic en un par emparejado para devolverlas a la lista.</p>
+                
+                <div class="match-container">
+                    <div class="word-column" id="spanishColumn">
+                        <h3>Español</h3>
+                        <!-- Las palabras en español se agregarán aquí -->
+                    </div>
+                    
+                    <div class="word-column" id="englishColumn">
+                        <h3>Inglés</h3>
+                        <!-- Las palabras en inglés se agregarán aquí -->
+                    </div>
+                </div>
+                
+                <div class="matched-pairs-container" id="matchedPairsContainer">
+                    <h3>Pares emparejados</h3>
+                    <div id="matchedPairsList">
+                        <!-- Los pares emparejados se mostrarán aquí -->
+                    </div>
+                </div>
+                
+                <div class="match-controls">
+                    <button id="checkMatchesBtn" class="btn">
+                        <i class="fas fa-check-circle"></i> Comprobar relaciones
+                    </button>
+                    <button id="resetMatchesBtn" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Reiniciar
+                    </button>
+                </div>
+                
+                <div id="matchResult" class="result-container hidden">
+                    <!-- El resultado del emparejamiento se generará dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Aplicación de repaso de vocabulario para estudiantes de idiomas</p>
+        </footer>
+    </div>
+
+    <script>
+        // Variables globales
+        let vocabulary = [];
+        let currentPracticeWords = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedSpanishWord = null;
+        let selectedEnglishWord = null;
+        let matches = [];
+        let matchAttempts = [];
+        let currentMatchWords = [];
+        let matchedPairsMap = new Map();
+        let timerInterval = null;
+        let timeLeft = 0;
+        let timerEnabled = false;
+        
+        // Función para agregar una nueva entrada de palabra
+        function addWordInput(spanish = '', english = '') {
+            const wordInput = document.createElement('div');
+            wordInput.className = 'word-input';
+            wordInput.innerHTML = `
+                <input type="text" class="english-input" placeholder="Inglés" value="${english}" style="flex: 1;">
+                <span style="display:flex; align-items:center;">:</span>
+                <input type="text" class="spanish-input" placeholder="Español" value="${spanish}" style="flex: 1;">
+                <button class="btn btn-danger btn-small remove-word-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            const wordListContainer = document.getElementById('wordList');
+            wordListContainer.appendChild(wordInput);
+            
+            // Agregar evento al botón de eliminar
+            const removeBtn = wordInput.querySelector('.remove-word-btn');
+            removeBtn.addEventListener('click', () => {
+                wordListContainer.removeChild(wordInput);
+            });
+        }
+        
+        // Función para cargar palabras de ejemplo
+        function loadSampleWords() {
+            const sampleWords = [
+                {english: "house", spanish: "casa"},
+                {english: "dog", spanish: "perro"},
+                {english: "cat", spanish: "gato"},
+                {english: "book", spanish: "libro"},
+                {english: "table", spanish: "mesa"},
+                {english: "chair", spanish: "silla"},
+                {english: "window", spanish: "ventana"},
+                {english: "door", spanish: "puerta"},
+                {english: "apple", spanish: "manzana"},
+                {english: "orange", spanish: "naranja"},
+                {english: "water", spanish: "agua"},
+                {english: "bread", spanish: "pan"},
+                {english: "milk", spanish: "leche"},
+                {english: "school", spanish: "escuela"},
+                {english: "teacher", spanish: "profesor"},
+                {english: "student", spanish: "estudiante"},
+                {english: "computer", spanish: "computadora"},
+                {english: "phone", spanish: "teléfono"},
+                {english: "car", spanish: "coche"},
+                {english: "city", spanish: "ciudad"}
+            ];
+            
+            // Limpiar lista actual
+            const wordListContainer = document.getElementById('wordList');
+            wordListContainer.innerHTML = '';
+            
+            // Agregar palabras de ejemplo
+            sampleWords.forEach(word => {
+                addWordInput(word.spanish, word.english);
+            });
+            
+            showMessage('Palabras de ejemplo cargadas correctamente', 'success');
+        }
+        
+        // Función para mostrar mensajes
+        function showMessage(message, type = 'info') {
+            const fileStatus = document.getElementById('fileStatus');
+            fileStatus.innerHTML = `<div style="padding:10px; border-radius:5px; background-color:${
+                type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#fff3cd'
+            }; color:${
+                type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#856404'
+            };">${message}</div>`;
+        }
+        
+        // Función para procesar el contenido de un archivo
+        function processFileContent(content, filename) {
+            const lines = content.split(/\r?\n/);
+            const newWords = [];
+            let lineCount = 0;
+            
+            // Limpiar lista actual
+            const wordListContainer = document.getElementById('wordList');
+            wordListContainer.innerHTML = '';
+            
+            // Procesar cada línea
+            lines.forEach(line => {
+                lineCount++;
+                const trimmedLine = line.trim();
+                
+                // Saltar líneas vacías
+                if (!trimmedLine) return;
+                
+                // Buscar el patrón "palabra inglés: palabra español"
+                const colonIndex = trimmedLine.indexOf(':');
+                
+                if (colonIndex === -1) {
+                    console.warn(`Línea ${lineCount}: No se encontraron dos puntos en "${trimmedLine}"`);
+                    return;
+                }
+                
+                const english = trimmedLine.substring(0, colonIndex).trim();
+                const spanish = trimmedLine.substring(colonIndex + 1).trim();
+                
+                if (english && spanish) {
+                    newWords.push({english, spanish});
+                    addWordInput(spanish, english);
+                } else {
+                    console.warn(`Línea ${lineCount}: Formato incorrecto en "${trimmedLine}"`);
+                }
+            });
+            
+            if (newWords.length === 0) {
+                showMessage(`No se encontraron palabras en el formato correcto (inglés: español) en ${filename}`, 'error');
+                addWordInput(); // Agregar una entrada vacía
+            } else {
+                showMessage(`Se cargaron ${newWords.length} palabras desde ${filename}`, 'success');
+            }
+            
+            // Hacer scroll hacia la lista de palabras
+            wordListContainer.scrollTop = wordListContainer.scrollHeight;
+        }
+        
+        // Función para manejar la carga de archivos
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const filename = file.name;
+            const fileExtension = filename.split('.').pop().toLowerCase();
+            
+            // Mostrar mensaje de carga
+            showMessage(`<div><span class="loading"></span> Procesando archivo ${filename}...</div>`, 'info');
+            
+            try {
+                let content = '';
+                
+                if (fileExtension === 'txt') {
+                    // Procesar archivo de texto
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        content = e.target.result;
+                        processFileContent(content, filename);
+                    };
+                    
+                    reader.onerror = function() {
+                        showMessage('Error al leer el archivo de texto', 'error');
+                    };
+                    
+                    reader.readAsText(file);
+                    
+                } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+                    // Procesar archivo DOCX usando mammoth
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        
+                        mammoth.extractRawText({arrayBuffer: arrayBuffer})
+                            .then(function(result) {
+                                content = result.value;
+                                const messages = result.messages;
+                                
+                                if (messages.length > 0) {
+                                    console.warn("Mensajes de mammoth:", messages);
+                                }
+                                
+                                processFileContent(content, filename);
+                            })
+                            .catch(function(error) {
+                                console.error("Error con mammoth:", error);
+                                showMessage('Error al procesar el archivo DOC/DOCX: ' + error.message, 'error');
+                                
+                                // Intentar como archivo de texto como respaldo
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    try {
+                                        processFileContent(e.target.result, filename);
+                                    } catch (fallbackError) {
+                                        showMessage('No se pudo procesar el archivo. Asegúrate de que sea un archivo DOCX válido o usa formato TXT.', 'error');
+                                    }
+                                };
+                                reader.readAsText(file);
+                            });
+                    } catch (error) {
+                        console.error("Error al procesar DOCX:", error);
+                        showMessage('Error al procesar el archivo. Intenta convertirlo a formato TXT.', 'error');
+                    }
+                } else {
+                    showMessage('Formato de archivo no soportado. Usa .txt, .doc o .docx', 'error');
+                }
+                
+            } catch (error) {
+                console.error("Error general:", error);
+                showMessage('Error inesperado: ' + error.message, 'error');
+            }
+        }
+        
+        // Función para obtener el vocabulario desde los inputs
+        function getVocabularyFromInputs() {
+            const vocabulary = [];
+            const wordInputs = document.querySelectorAll('.word-input');
+            
+            wordInputs.forEach(input => {
+                const spanish = input.querySelector('.spanish-input').value.trim();
+                const english = input.querySelector('.english-input').value.trim();
+                
+                if (spanish && english) {
+                    vocabulary.push({spanish, english});
+                }
+            });
+            
+            return vocabulary;
+        }
+        
+        // Función para eliminar tildes de una cadena
+        function removeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+        
+        // Función para comparar respuestas considerando la opción de tildes
+        function compareAnswers(userAnswer, correctAnswer) {
+            const accentOption = document.getElementById('accentOption').value;
+            
+            if (accentOption === 'ignore') {
+                // Eliminar tildes para comparación
+                const normalizedUser = removeAccents(userAnswer.toLowerCase());
+                const normalizedCorrect = removeAccents(correctAnswer.toLowerCase());
+                return normalizedUser === normalizedCorrect;
+            } else {
+                // Comparación estricta con tildes
+                return userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            }
+        }
+        
+        // Función para actualizar la visualización de puntuación
+        function updateScoreDisplay(showFeedback = true) {
+            const total = currentPracticeWords.length;
+            const answeredQuestions = currentPracticeWords.filter(w => w.answered).length;
+            const correctAnswers = currentPracticeWords.filter(w => w.answered && w.isCorrect).length;
+            
+            const percentage = answeredQuestions > 0 ? Math.round((correctAnswers / answeredQuestions) * 100) : 0;
+            const isPassed = percentage >= 70;
+            
+            const currentScoreElement = document.getElementById('currentScore');
+            const scorePercentageElement = document.getElementById('scorePercentage');
+            const scoreDisplayContainer = document.getElementById('scoreDisplayContainer');
+            const scoreDisplaySelect = document.getElementById('scoreDisplay');
+            
+            currentScoreElement.textContent = `${correctAnswers}/${answeredQuestions}`;
+            scorePercentageElement.textContent = answeredQuestions > 0 ? `${percentage}%` : '0%';
+            
+            // Controlar cuándo mostrar colores según la configuración
+            const displayMode = scoreDisplaySelect.value;
+            
+            if (displayMode === 'always') {
+                scoreDisplayContainer.style.display = 'block';
+                scorePercentageElement.style.color = answeredQuestions > 0 ? (isPassed ? '#28a745' : '#dc3545') : '#666';
+            } else if (displayMode === 'during' && currentQuestionIndex > 0 && showFeedback) {
+                scoreDisplayContainer.style.display = 'block';
+                if (showFeedback) {
+                    scorePercentageElement.style.color = answeredQuestions > 0 ? (isPassed ? '#28a745' : '#dc3545') : '#666';
+                } else {
+                    scorePercentageElement.style.color = '#666';
+                }
+            } else if (displayMode === 'end' && currentQuestionIndex >= total) {
+                scoreDisplayContainer.style.display = 'block';
+                scorePercentageElement.style.color = answeredQuestions > 0 ? (isPassed ? '#28a745' : '#dc3545') : '#666';
+            } else {
+                scoreDisplayContainer.style.display = 'none';
+            }
+            
+            if (displayMode === 'end' && currentQuestionIndex < total) {
+                scorePercentageElement.style.color = '#666';
+            }
+        }
+        
+        // Función para iniciar el temporizador
+        function startTimer(durationInSeconds) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timeLeft = durationInSeconds;
+            timerEnabled = durationInSeconds > 0;
+            
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerValue = document.getElementById('timerValue');
+            
+            if (timerEnabled) {
+                timerDisplay.style.display = 'block';
+                updateTimerDisplay();
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerDisplay.classList.add('timer-warning');
+                        timeUp();
+                    } else if (timeLeft <= 30) {
+                        timerDisplay.classList.add('timer-warning');
+                    }
+                }, 1000);
+            } else {
+                timerDisplay.style.display = 'none';
+            }
+        }
+        
+        // Función para actualizar la visualización del temporizador
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerValue = document.getElementById('timerValue');
+            timerValue.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Función para cuando se acaba el tiempo
+        function timeUp() {
+            alert('¡Se acabó el tiempo!');
+            finishExercise();
+        }
+        
+        // Función para detener el temporizador
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.style.display = 'none';
+            timerDisplay.classList.remove('timer-warning');
+        }
+        
+        // Función para iniciar la práctica
+        function startPractice() {
+            vocabulary = getVocabularyFromInputs();
+            
+            if (vocabulary.length === 0) {
+                alert('Por favor, agrega al menos una palabra para practicar.');
+                return;
+            }
+            
+            const numWords = parseInt(document.getElementById('numWords').value);
+            const direction = document.getElementById('direction').value;
+            
+            // Seleccionar palabras aleatorias
+            currentPracticeWords = getRandomWords(vocabulary, Math.min(numWords, vocabulary.length));
+            
+            // Configurar dirección de traducción
+            currentPracticeWords.forEach(word => {
+                if (direction === 'both') {
+                    word.direction = Math.random() > 0.5 ? 'es-en' : 'en-es';
+                } else {
+                    word.direction = direction;
+                }
+                // Inicializar propiedades de seguimiento
+                word.answered = false;
+                word.isCorrect = false;
+                word.userAnswer = '';
+                word.validated = false;
+            });
+            
+            // Reiniciar variables
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // Configurar temporizador
+            const timerSeconds = parseInt(document.getElementById('timerOption').value);
+            startTimer(timerSeconds);
+            
+            // Cambiar a pestaña de práctica
+            document.querySelector('.tab-button[data-tab="practice"]').click();
+            
+            // Mostrar la primera pregunta
+            showQuestion();
+            
+            // Actualizar contador
+            document.getElementById('currentWord').textContent = '1';
+            document.getElementById('totalWords').textContent = currentPracticeWords.length;
+            
+            // Ocultar resultado si está visible
+            const resultContainer = document.getElementById('result');
+            const feedbackElement = document.getElementById('feedback');
+            resultContainer.classList.add('hidden');
+            resultContainer.innerHTML = '';
+            feedbackElement.classList.remove('correct', 'incorrect');
+            feedbackElement.style.display = 'none';
+            feedbackElement.textContent = '';
+            
+            // Ocultar confirmación de finalización
+            document.getElementById('finishConfirmation').style.display = 'none';
+            
+            // Actualizar información de práctica
+            document.getElementById('practiceInfo').innerHTML = `<p>Traduce la palabra mostrada (${currentPracticeWords.length} palabras):</p>`;
+            
+            // Mostrar botones de navegación
+            document.getElementById('navigationButtons').style.display = 'flex';
+            
+            // Actualizar puntuación
+            updateScoreDisplay(false);
+            
+            // Enfocar el campo de respuesta
+            document.getElementById('answerInput').focus();
+        }
+        
+        // Función para obtener palabras aleatorias
+        function getRandomWords(words, count) {
+            if (count >= words.length) {
+                return [...words];
+            }
+            const shuffled = [...words].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+        
+        // Función para mostrar la pregunta actual
+        function showQuestion() {
+            if (currentQuestionIndex >= currentPracticeWords.length) {
+                showResult();
+                return;
+            }
+            
+            const currentWord = currentPracticeWords[currentQuestionIndex];
+            const questionElement = document.getElementById('question');
+            const answerInput = document.getElementById('answerInput');
+            const feedbackElement = document.getElementById('feedback');
+            const currentWordElement = document.getElementById('currentWord');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (currentWord.direction === 'es-en') {
+                questionElement.textContent = `"${currentWord.spanish}" → Inglés`;
+            } else {
+                questionElement.textContent = `"${currentWord.english}" → Español`;
+            }
+            
+            // Configurar campo de respuesta según si ya está validada
+            if (currentWord.validated) {
+                answerInput.value = currentWord.userAnswer;
+                answerInput.disabled = true;
+                answerInput.style.backgroundColor = '#f8f9fa';
+            } else {
+                answerInput.value = currentWord.userAnswer || '';
+                answerInput.disabled = false;
+                answerInput.style.backgroundColor = 'white';
+            }
+            
+            // Limpiar feedback
+            feedbackElement.classList.remove('correct', 'incorrect');
+            feedbackElement.style.display = 'none';
+            feedbackElement.textContent = '';
+            
+            // Actualizar contador
+            currentWordElement.textContent = currentQuestionIndex + 1;
+            
+            // Ocultar confirmación de finalización
+            document.getElementById('finishConfirmation').style.display = 'none';
+            
+            // Actualizar estado de botones de navegación
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === currentPracticeWords.length - 1;
+            
+            // Mostrar feedback si la pregunta ya fue validada
+            if (currentWord.validated) {
+                if (currentWord.isCorrect) {
+                    feedbackElement.textContent = `Respuesta validada: "${currentWord.userAnswer}" (Correcta)`;
+                    feedbackElement.className = 'feedback correct';
+                } else {
+                    feedbackElement.textContent = `Respuesta validada: "${currentWord.userAnswer}" (Incorrecta)`;
+                    feedbackElement.className = 'feedback incorrect';
+                }
+                feedbackElement.style.display = 'block';
+            }
+            
+            updateScoreDisplay(false);
+            
+            if (!currentWord.validated) {
+                answerInput.focus();
+            }
+        }
+        
+        // Función para validar la respuesta
+        function validateAnswer() {
+            const answerInput = document.getElementById('answerInput');
+            const answer = answerInput.value.trim();
+            const currentWord = currentPracticeWords[currentQuestionIndex];
+            const feedbackElement = document.getElementById('feedback');
+            
+            let correctAnswer = '';
+            let isCorrect = false;
+            
+            if (currentWord.direction === 'es-en') {
+                correctAnswer = currentWord.english;
+                isCorrect = answer ? compareAnswers(answer, correctAnswer) : false;
+            } else {
+                correctAnswer = currentWord.spanish;
+                isCorrect = answer ? compareAnswers(answer, correctAnswer) : false;
+            }
+            
+            const isSkipped = answer === '';
+            
+            // Marcar como respondida y validada
+            currentWord.answered = !isSkipped;
+            currentWord.isCorrect = isCorrect;
+            currentWord.userAnswer = answer;
+            currentWord.validated = true;
+            
+            // Mostrar retroalimentación
+            if (isSkipped) {
+                feedbackElement.textContent = "Has dejado esta pregunta sin responder.";
+                feedbackElement.className = 'feedback';
+            } else if (isCorrect) {
+                feedbackElement.textContent = `¡Correcto! La respuesta es "${currentWord.direction === 'es-en' ? currentWord.english : currentWord.spanish}"`;
+                feedbackElement.className = 'feedback correct';
+                score++;
+            } else {
+                feedbackElement.textContent = `Incorrecto. La respuesta correcta es "${currentWord.direction === 'es-en' ? currentWord.english : currentWord.spanish}"`;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            feedbackElement.style.display = 'block';
+            
+            // Deshabilitar campo de respuesta
+            answerInput.disabled = true;
+            answerInput.style.backgroundColor = '#f8f9fa';
+            
+            // Actualizar puntuación
+            updateScoreDisplay(true);
+            
+            // Actualizar botones de navegación
+            document.getElementById('nextBtn').focus();
+        }
+        
+        // Función para ir a la siguiente pregunta
+        function goToNextQuestion() {
+            if (currentQuestionIndex < currentPracticeWords.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            }
+        }
+        
+        // Función para ir a la pregunta anterior
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+        
+        // Función para mostrar confirmación de finalización
+        function showFinishConfirmation() {
+            const unansweredCount = currentPracticeWords.filter(w => !w.validated).length;
+            const unansweredCountElement = document.getElementById('unansweredCount');
+            const finishConfirmation = document.getElementById('finishConfirmation');
+            
+            unansweredCountElement.textContent = unansweredCount;
+            finishConfirmation.style.display = 'block';
+            
+            finishConfirmation.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // Función para finalizar el ejercicio
+        function finishExercise() {
+            // Marcar todas las preguntas no validadas como incorrectas
+            currentPracticeWords.forEach(word => {
+                if (!word.validated) {
+                    word.answered = true;
+                    word.isCorrect = false;
+                    word.userAnswer = word.userAnswer || "(No respondida)";
+                    word.validated = true;
+                }
+            });
+            
+            // Detener temporizador
+            stopTimer();
+            
+            // Mostrar resultado final
+            showResult();
+        }
+        
+        // Función para mostrar el resultado final
+        function showResult() {
+            const total = currentPracticeWords.length;
+            const answeredQuestions = currentPracticeWords.filter(w => w.answered).length;
+            const correctAnswers = currentPracticeWords.filter(w => w.answered && w.isCorrect).length;
+            const skippedQuestions = total - answeredQuestions;
+            
+            const percentage = answeredQuestions > 0 ? Math.round((correctAnswers / answeredQuestions) * 100) : 0;
+            const isPassed = percentage >= 70;
+            
+            let resultHTML = `<h3>Resultado del ejercicio</h3>`;
+            resultHTML += `<div class="score ${isPassed ? 'passed' : 'failed'}">Puntuación: ${correctAnswers}/${answeredQuestions} (${percentage}%)</div>`;
+            resultHTML += `<div style="margin-top: 15px;">`;
+            resultHTML += `<p><strong>Total de palabras:</strong> ${total}</p>`;
+            resultHTML += `<p><strong>Respondidas:</strong> ${answeredQuestions}</p>`;
+            resultHTML += `<p><strong>No respondidas:</strong> ${skippedQuestions}</p>`;
+            resultHTML += `<p><strong>Correctas:</strong> ${correctAnswers}</p>`;
+            resultHTML += `<p><strong>Incorrectas:</strong> ${answeredQuestions - correctAnswers}</p>`;
+            resultHTML += `</div>`;
+            
+            resultHTML += `<div style="margin-top: 20px; max-height: 200px; overflow-y: auto;">`;
+            resultHTML += `<h4>Detalle por palabra:</h4>`;
+            
+            currentPracticeWords.forEach((word, index) => {
+                const wordText = word.direction === 'es-en' ? word.spanish : word.english;
+                const correctAnswer = word.direction === 'es-en' ? word.english : word.spanish;
+                
+                if (word.answered) {
+                    const status = word.isCorrect ? '✅ Correcta' : '❌ Incorrecta';
+                    const answerText = word.userAnswer === "(No respondida)" ? "No respondida" : `"${word.userAnswer}"`;
+                    
+                    if (word.isCorrect) {
+                        resultHTML += `<p>${index + 1}. "${wordText}" → ${answerText} (${status})</p>`;
+                    } else {
+                        resultHTML += `<p>${index + 1}. "${wordText}" → ${answerText} (${status}) - <strong>Respuesta correcta: "${correctAnswer}"</strong></p>`;
+                    }
+                } else {
+                    resultHTML += `<p>${index + 1}. "${wordText}" → No respondida - <strong>Respuesta correcta: "${correctAnswer}"</strong></p>`;
+                }
+            });
+            
+            resultHTML += `</div>`;
+            
+            resultHTML += `<div class="controls" style="margin-top: 20px;">`;
+            resultHTML += `<button id="retryBtn" class="btn"><i class="fas fa-redo"></i> Repetir ejercicio</button>`;
+            resultHTML += `<button id="backToConfigBtn" class="btn btn-secondary"><i class="fas fa-cog"></i> Cambiar configuración</button>`;
+            resultHTML += `</div>`;
+            
+            const resultContent = document.createElement('div');
+            resultContent.innerHTML = resultHTML;
+            
+            const resultContainer = document.getElementById('result');
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(resultContent);
+            resultContainer.classList.remove('hidden');
+            
+            resultContainer.querySelector('#retryBtn').addEventListener('click', startPractice);
+            resultContainer.querySelector('#backToConfigBtn').addEventListener('click', () => {
+                document.querySelector('.tab-button[data-tab="config"]').click();
+            });
+            
+            updateScoreDisplay(true);
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            document.getElementById('navigationButtons').style.display = 'none';
+            document.getElementById('finishConfirmation').style.display = 'none';
+        }
+        
+        // Función para iniciar el ejercicio de relación
+        function startMatchExercise() {
+            vocabulary = getVocabularyFromInputs();
+            
+            if (vocabulary.length < 3) {
+                alert('Por favor, agrega al menos 3 palabras para el ejercicio de relación.');
+                return;
+            }
+            
+            const numWords = parseInt(document.getElementById('numWords').value);
+            const wordsToUse = getRandomWords(vocabulary, Math.min(numWords, vocabulary.length));
+            
+            currentMatchWords = [...wordsToUse];
+            matches = [];
+            matchAttempts = [];
+            selectedSpanishWord = null;
+            selectedEnglishWord = null;
+            matchedPairsMap.clear();
+            
+            const spanishColumn = document.getElementById('spanishColumn');
+            const englishColumn = document.getElementById('englishColumn');
+            const matchedPairsList = document.getElementById('matchedPairsList');
+            
+            spanishColumn.innerHTML = '<h3>Español</h3>';
+            englishColumn.innerHTML = '<h3>Inglés</h3>';
+            matchedPairsList.innerHTML = '';
+            
+            const spanishWords = [...wordsToUse].map(w => w.spanish);
+            const englishWords = [...wordsToUse].map(w => w.english);
+            
+            shuffleArray(spanishWords);
+            shuffleArray(englishWords);
+            
+            spanishWords.forEach(word => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item';
+                wordElement.textContent = word;
+                wordElement.dataset.word = word;
+                wordElement.dataset.language = 'spanish';
+                wordElement.addEventListener('click', () => selectWord(word, 'spanish', wordElement));
+                spanishColumn.appendChild(wordElement);
+            });
+            
+            englishWords.forEach(word => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item';
+                wordElement.textContent = word;
+                wordElement.dataset.word = word;
+                wordElement.dataset.language = 'english';
+                wordElement.addEventListener('click', () => selectWord(word, 'english', wordElement));
+                englishColumn.appendChild(wordElement);
+            });
+            
+            document.getElementById('matchedPairsContainer').style.display = 'block';
+            document.getElementById('matchResult').classList.add('hidden');
+            document.getElementById('matchResult').innerHTML = '';
+            
+            document.querySelector('.tab-button[data-tab="match"]').click();
+        }
+        
+        // Función para seleccionar una palabra en el ejercicio de relación
+        function selectWord(word, language, element) {
+            if (element.classList.contains('matched')) return;
+            
+            if (language === 'spanish') {
+                if (selectedSpanishWord) {
+                    selectedSpanishWord.element.classList.remove('selected');
+                }
+                selectedSpanishWord = {word, element};
+                element.classList.add('selected');
+            } else {
+                if (selectedEnglishWord) {
+                    selectedEnglishWord.element.classList.remove('selected');
+                }
+                selectedEnglishWord = {word, element};
+                element.classList.add('selected');
+            }
+            
+            if (selectedSpanishWord && selectedEnglishWord) {
+                createMatch();
+            }
+        }
+        
+        // Función para crear una relación entre palabras seleccionadas
+        function createMatch() {
+            const existingAttempt = matchAttempts.find(a => 
+                a.spanish === selectedSpanishWord.word && a.english === selectedEnglishWord.word
+            );
+            
+            if (!existingAttempt) {
+                const attempt = {
+                    spanish: selectedSpanishWord.word,
+                    english: selectedEnglishWord.word,
+                    spanishElement: selectedSpanishWord.element,
+                    englishElement: selectedEnglishWord.element,
+                    pairId: Date.now() + Math.random()
+                };
+                
+                matchAttempts.push(attempt);
+                
+                const isValidMatch = currentMatchWords.some(word => 
+                    word.spanish === selectedSpanishWord.word && word.english === selectedEnglishWord.word
+                );
+                
+                selectedSpanishWord.element.classList.add('matched');
+                selectedEnglishWord.element.classList.add('matched');
+                selectedSpanishWord.element.style.display = 'none';
+                selectedEnglishWord.element.style.display = 'none';
+                
+                const pairElement = addMatchedPair(selectedSpanishWord.word, selectedEnglishWord.word, attempt.pairId, isValidMatch);
+                
+                matchedPairsMap.set(attempt.pairId, {
+                    spanishWord: selectedSpanishWord.word,
+                    englishWord: selectedEnglishWord.word,
+                    spanishElement: selectedSpanishWord.element,
+                    englishElement: selectedEnglishWord.element,
+                    pairElement: pairElement,
+                    isValid: isValidMatch
+                });
+                
+                if (isValidMatch) {
+                    matches.push({
+                        spanish: selectedSpanishWord.word,
+                        english: selectedEnglishWord.word
+                    });
+                }
+                
+                selectedSpanishWord.element.classList.remove('selected');
+                selectedEnglishWord.element.classList.remove('selected');
+                selectedSpanishWord = null;
+                selectedEnglishWord = null;
+            }
+        }
+        
+        // Función para agregar un par emparejado a la lista visual
+        function addMatchedPair(spanish, english, pairId, isCorrect = true) {
+            const pairElement = document.createElement('div');
+            pairElement.className = 'matched-pair';
+            pairElement.dataset.pairId = pairId;
+            
+            pairElement.style.borderColor = '#2575fc';
+            pairElement.style.backgroundColor = 'rgba(37, 117, 252, 0.1)';
+            
+            pairElement.innerHTML = `
+                <span class="spanish-word">${spanish}</span>
+                <span class="separator">↔</span>
+                <span class="english-word">${english}</span>
+                <span style="margin-left: 10px; color: #666; font-size: 0.9rem;">(haz clic para deshacer)</span>
+            `;
+            
+            pairElement.addEventListener('click', () => removeMatchedPair(pairId));
+            
+            const matchedPairsList = document.getElementById('matchedPairsList');
+            matchedPairsList.appendChild(pairElement);
+            matchedPairsList.scrollTop = matchedPairsList.scrollHeight;
+            
+            return pairElement;
+        }
+        
+        // Función para eliminar un par emparejado
+        function removeMatchedPair(pairId) {
+            const pairData = matchedPairsMap.get(pairId);
+            
+            if (pairData) {
+                pairData.spanishElement.classList.remove('matched');
+                pairData.englishElement.classList.remove('matched');
+                pairData.spanishElement.style.display = 'block';
+                pairData.englishElement.style.display = 'block';
+                
+                pairData.pairElement.remove();
+                matchedPairsMap.delete(pairId);
+                
+                const attemptIndex = matchAttempts.findIndex(a => a.pairId === pairId);
+                if (attemptIndex !== -1) {
+                    matchAttempts.splice(attemptIndex, 1);
+                }
+                
+                if (pairData.isValid) {
+                    const matchIndex = matches.findIndex(m => 
+                        m.spanish === pairData.spanishWord && m.english === pairData.englishWord
+                    );
+                    if (matchIndex !== -1) {
+                        matches.splice(matchIndex, 1);
+                    }
+                }
+            }
+        }
+        
+        // Función para comprobar las relaciones
+        function checkMatches() {
+            const totalWords = currentMatchWords.length;
+            const correctMatches = matches.length;
+            const incorrectMatches = matchAttempts.length - correctMatches;
+            
+            const maxPossibleMatches = totalWords;
+            const percentage = maxPossibleMatches > 0 ? Math.round((correctMatches / maxPossibleMatches) * 100) : 0;
+            const isPassed = percentage >= 70;
+            
+            let resultHTML = `<h3>Resultado del ejercicio de relación</h3>`;
+            resultHTML += `<div class="score ${isPassed ? 'passed' : 'failed'}">`;
+            resultHTML += `Correctas: ${correctMatches} de ${totalWords} palabras (${percentage}%)`;
+            resultHTML += `</div>`;
+            
+            if (incorrectMatches > 0) {
+                resultHTML += `<p>Emparejamientos incorrectos: ${incorrectMatches}</p>`;
+            }
+            
+            resultHTML += `<p>Total de palabras a emparejar: ${totalWords}</p>`;
+            
+            resultHTML += `<div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">`;
+            resultHTML += `<h4>Detalle de emparejamientos:</h4>`;
+            
+            if (matchAttempts.length === 0) {
+                resultHTML += `<p>No se realizaron emparejamientos.</p>`;
+            } else {
+                matchAttempts.forEach(attempt => {
+                    const isCorrect = currentMatchWords.some(word => 
+                        word.spanish === attempt.spanish && word.english === attempt.english
+                    );
+                    
+                    resultHTML += `<p>${isCorrect ? '✅' : '❌'} "${attempt.spanish}" ↔ "${attempt.english}"</p>`;
+                });
+            }
+            
+            resultHTML += `</div>`;
+            
+            const unmatchedSpanishWords = currentMatchWords
+                .filter(word => !matches.some(match => match.spanish === word.spanish))
+                .map(word => word.spanish);
+            
+            const unmatchedEnglishWords = currentMatchWords
+                .filter(word => !matches.some(match => match.english === word.english))
+                .map(word => word.english);
+            
+            if (unmatchedSpanishWords.length > 0 || unmatchedEnglishWords.length > 0) {
+                resultHTML += `<div style="margin-top: 15px;">`;
+                resultHTML += `<h4>Palabras no emparejadas correctamente:</h4>`;
+                
+                if (unmatchedSpanishWords.length > 0) {
+                    resultHTML += `<p><strong>Español:</strong> ${unmatchedSpanishWords.join(', ')}</p>`;
+                }
+                
+                if (unmatchedEnglishWords.length > 0) {
+                    resultHTML += `<p><strong>Inglés:</strong> ${unmatchedEnglishWords.join(', ')}</p>`;
+                }
+                
+                resultHTML += `</div>`;
+            }
+            
+            resultHTML += `<div class="controls" style="margin-top: 20px;">`;
+            resultHTML += `<button id="retryMatchBtn" class="btn"><i class="fas fa-redo"></i> Repetir ejercicio</button>`;
+            resultHTML += `<button id="backToConfigFromMatchBtn" class="btn btn-secondary"><i class="fas fa-cog"></i> Cambiar configuración</button>`;
+            resultHTML += `</div>`;
+            
+            const matchResultContent = document.createElement('div');
+            matchResultContent.innerHTML = resultHTML;
+            
+            const matchResultContainer = document.getElementById('matchResult');
+            matchResultContainer.innerHTML = '';
+            matchResultContainer.appendChild(matchResultContent);
+            matchResultContainer.classList.remove('hidden');
+            
+            matchResultContainer.querySelector('#retryMatchBtn').addEventListener('click', startMatchExercise);
+            matchResultContainer.querySelector('#backToConfigFromMatchBtn').addEventListener('click', () => {
+                document.querySelector('.tab-button[data-tab="config"]').click();
+            });
+            
+            const allSpanishWords = [...document.querySelectorAll('#spanishColumn .word-item')];
+            const allEnglishWords = [...document.querySelectorAll('#englishColumn .word-item')];
+            
+            allSpanishWords.forEach(wordElement => {
+                wordElement.style.display = 'block';
+                wordElement.style.opacity = '1';
+            });
+            
+            allEnglishWords.forEach(wordElement => {
+                wordElement.style.display = 'block';
+                wordElement.style.opacity = '1';
+            });
+        }
+        
+        // Función para reiniciar el ejercicio de relación
+        function resetMatches() {
+            if (selectedSpanishWord) {
+                selectedSpanishWord.element.classList.remove('selected');
+                selectedSpanishWord = null;
+            }
+            
+            if (selectedEnglishWord) {
+                selectedEnglishWord.element.classList.remove('selected');
+                selectedEnglishWord = null;
+            }
+            
+            matchAttempts = [];
+            matches = [];
+            matchedPairsMap.clear();
+            document.getElementById('matchedPairsList').innerHTML = '';
+            
+            const allSpanishWords = [...document.querySelectorAll('#spanishColumn .word-item')];
+            const allEnglishWords = [...document.querySelectorAll('#englishColumn .word-item')];
+            
+            allSpanishWords.forEach(wordElement => {
+                wordElement.classList.remove('matched', 'selected');
+                wordElement.style.display = 'block';
+                wordElement.style.opacity = '1';
+                wordElement.style.borderColor = '';
+            });
+            
+            allEnglishWords.forEach(wordElement => {
+                wordElement.classList.remove('matched', 'selected');
+                wordElement.style.display = 'block';
+                wordElement.style.opacity = '1';
+                wordElement.style.borderColor = '';
+            });
+            
+            document.getElementById('matchResult').classList.add('hidden');
+            document.getElementById('matchResult').innerHTML = '';
+        }
+        
+        // Función para mezclar un array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Función para inicializar la aplicación
+        function initializeApp() {
+            // Inicializar con una entrada vacía
+            addWordInput();
+            
+            // Cargar palabras de ejemplo
+            loadSampleWords();
+            
+            // Configurar event listeners
+            document.getElementById('addWordBtn').addEventListener('click', () => addWordInput());
+            
+            document.getElementById('clearWordsBtn').addEventListener('click', () => {
+                const wordListContainer = document.getElementById('wordList');
+                wordListContainer.innerHTML = '';
+                addWordInput();
+                showMessage('Todas las palabras han sido eliminadas', 'info');
+            });
+            
+            document.getElementById('loadSampleBtn').addEventListener('click', loadSampleWords);
+            document.getElementById('startPracticeBtn').addEventListener('click', startPractice);
+            document.getElementById('startMatchBtn').addEventListener('click', startMatchExercise);
+            
+            // Botones de práctica
+            document.getElementById('validateBtn').addEventListener('click', validateAnswer);
+            document.getElementById('prevBtn').addEventListener('click', goToPrevQuestion);
+            document.getElementById('nextBtn').addEventListener('click', goToNextQuestion);
+            document.getElementById('finishPracticeBtn').addEventListener('click', showFinishConfirmation);
+            
+            document.getElementById('confirmFinishBtn').addEventListener('click', finishExercise);
+            document.getElementById('cancelFinishBtn').addEventListener('click', () => {
+                document.getElementById('finishConfirmation').style.display = 'none';
+            });
+            
+            document.getElementById('checkMatchesBtn').addEventListener('click', checkMatches);
+            document.getElementById('resetMatchesBtn').addEventListener('click', resetMatches);
+            
+            // Permitir presionar Enter para validar respuesta
+            document.getElementById('answerInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    validateAnswer();
+                }
+            });
+            
+            document.getElementById('scoreDisplay').addEventListener('change', () => {
+                updateScoreDisplay(false);
+            });
+            
+            // Event listeners para pestañas
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Event listener para cargar archivo
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        }
+        
+        // Inicializar la aplicación cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
