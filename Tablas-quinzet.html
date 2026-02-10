@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Método Quinzet – App Responsiva</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+/* ================= ESTILOS RESPONSIVOS ================= */
+:root {
+    --primary: #4a6cf7;
+    --bg: #f4f7fa;
+    --card: #ffffff;
+    --text: #333;
+    --success: #d1fae5;
+    --success-text: #065f46;
+    --error: #fee2e2;
+    --error-text: #991b1b;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  margin: 0;
+  padding: 15px;
+  color: var(--text);
+  padding-bottom: 80px; /* Espacio para el teclado en móvil */
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Controles superiores */
+.controls-container {
+    background: var(--card);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px; /* Evita zoom en iOS */
+    width: 100%;
+    max-width: 300px;
+}
+
+/* Botones adaptables */
+button {
+  padding: 12px 16px; /* Más grandes para el dedo */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #e0e0e0;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  touch-action: manipulation; /* Mejora respuesta táctil */
+}
+
+button:active { transform: scale(0.98); }
+button.active { background: var(--primary); color: white; }
+button:disabled { opacity: 0.5; }
+
+/* Selección de Niveles */
+#levels, #ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+#levels button, #ops button {
+    flex: 1 1 auto; /* Crecen para llenar huecos en móvil */
+    min-width: 80px;
+    max-width: 150px;
+}
+
+/* Temporizador */
+#timer {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 10px 0;
+  font-feature-settings: "tnum"; /* Números de ancho fijo para que no baile */
+}
+
+/* ================= GRID DE OPERACIONES ================= */
+/* Aquí está la magia responsiva */
+.grid {
+  display: grid;
+  /* En PC: varias columnas. En móvil: se ajusta a 2 o 1 columna automáticamente */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+  gap: 12px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.op {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.op span {
+    font-size: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.op input { 
+  width: 60px; 
+  padding: 8px; 
+  text-align: center; 
+  font-size: 18px; 
+  border: 1px solid #ccc; 
+  border-radius: 6px;
+  font-weight: bold;
+  /* Configuración teclado numérico móvil */
+  inputmode: decimal; 
+  pattern: "[0-9]*";
+}
+
+.op input:focus { 
+    border-color: var(--primary); 
+    outline: none; 
+    background: #eef2ff; 
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+}
+
+/* Feedback de colores */
+.op input.correct { background-color: var(--success); border-color: var(--success-text); color: var(--success-text); }
+.op input.wrong { background-color: var(--error); border-color: var(--error-text); color: var(--error-text); }
+
+#result {
+    margin-top: 20px;
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+}
+
+/* Botón flotante para terminar en móvil (opcional si hay scroll largo) */
+#finishFloat {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 100;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧮 Método Quinzet</h1>
+
+<div class="controls-container">
+  <div class="input-row">
+      <input type="text" id="student" placeholder="Nombre del alumno/a">
+  </div>
+  <div class="input-row">
+      <button id="examBtn" onclick="toggleExam()">🔒 Examen</button>
+      <button id="classBtn" onclick="toggleClassMode()">👥 Clase</button>
+  </div>
+</div>
+
+<div id="levels"></div>
+<div id="ops"></div>
+
+<div id="timer">02:00</div>
+<div style="text-align:center; margin-bottom:10px; font-size:14px; color:#666;" id="record"></div>
+
+<div class="grid" id="grid"></div>
+<div id="result"></div>
+
+<button id="finishFloat" onclick="finish()">Terminar</button>
+
+<script>
+/* ==========================================
+   DATOS INTEGRADOS DEL PDF (Quinzet)
+   Niveles 1 a 6 extraídos y formateados
+   ========================================== */
+const QUINZET = {
+  primero: {
+    sumas: ["1+3","1+2","1+0","1+1","1+4","2+1","2+2","2+0","2+3","2+4","3+0","3+1","0+3","0+4","4+1"],
+    restas: ["2-1","2-0","3-1","3-2","4-1","4-2","4-3","4-4","3-3","1-0","2-2","1-1","3-0","4-0"]
+  },
+  segundo: {
+    sumas: [
+      "2+3","1+6","3+3","4+2","2+6","1+9","3+6","4+5","2+9","1+7",
+      "3+9","4+1","2+5","1+3","3+2","4+3","2+3","1+1","3+8","4+8",
+      "2+5","1+8","3+7","4+7","2+4","1+4","3+3","4+9","2+9","1+5",
+      "3+5","4+6","2+6","1+6","3+4","4+5","2+7","1+0","3+0","4+7"
+    ],
+    restas: [
+      "5-4","7-6","9-7","8-3","5-5","6-5","9-1","10-7","5-1","4-2",
+      "5-1","10-9","4-3","2-1","5-3","9-6","5-2","1-1","7-5","7-4",
+      "5-1","3-2","7-3","9-7","3-1","5-1","4-0","6-5","2-2","6-1",
+      "4-2","7-3","5-3","5-4","7-4","10-3","4-2","2-0","6-5","5-4"
+    ]
+  },
+  tercero: {
+    sumas: [
+      "8+3","5+6","9+3","4+2","8+6","5+9","9+6","4+5","8+9","5+7",
+      "9+9","4+8","8+5","5+3","9+2","4+3","8+3","5+6","9+8","4+8",
+      "8+5","5+8","9+7","4+7","8+4","5+7","9+3","4+9","8+9","5+5",
+      "9+5","4+6","8+6","5+6","9+4","4+5","8+7","5+3","9+8","4+7"
+    ],
+    restas: [
+      "7-4","9-5","8-7","9-6","8-6","10-7","9-5","9-2","10-7","8-4",
+      "10-5","6-4","8-5","7-2","9-3","7-6","8-5","7-4","10-8","9-2",
+      "7-4","10-6","8-3","5-2","10-3","8-7","10-5","7-3","6-2","9-4",
+      "9-7","8-6","9-2","10-4","9-7","10-3","7-5","9-8","7-4","7-5"
+    ],
+    multi: [
+      "1x8","2x7","3x5","2x8","3x9","2x4","1x5","4x3","2x9","3x8",
+      "2x3","5x1","4x0","8x2","5x4","2x4","3x7","2x2","2x6","3x6",
+      "1x7","1x3","5x2","5x3","4x6","3x7","2x9","1x6","2x6","2x8",
+      "2x6","2x7","1x9","2x5","3x7","3x5","5x8","5x2","4x5","4x2"
+    ]
+  },
+  cuarto: {
+    sumas: [
+      "9+3","9+6","9+9","9+5","9+3","9+5","9+4","9+9","9+6","9+7",
+      "9+5","9+9","9+4","9+7","9+3","6+4","6+9","6+7","6+3","6+6",
+      "6+8","6+7","6+5","6+6","6+3","6+9","6+3","6+4","6+8","6+7"
+    ],
+    restas: [
+      "7-4","7-5","13-7","17-6","9-7","10-7","7-5","12-7","11-7","8-4",
+      "13-5","6-4","14-8","17-2","7-3","7-6","13-5","8-5","15-8","10-6",
+      "7-4","17-6","13-8","5-2","14-3","8-7","11-5","17-6","7-2","17-4"
+    ],
+    multi: [
+      "2x8","5x7","4x5","7x8","3x9","8x4","9x5","6x3","4x9","3x8",
+      "4x3","8x6","6x5","8x5","9x4","7x4","3x7","9x2","4x8","6x6",
+      "7x2","8x3","7x6","9x3","5x6","9x7","2x9","3x6","2x6","8x8"
+    ],
+    divisiones: [
+      "28:7","12:4","72:8","27:9","27:3","36:6","27:9","24:6","14:7","30:6",
+      "18:9","16:4","40:8","48:6","50:5","24:8","36:9","40:8","28:7","63:9",
+      "24:3","18:6","42:7","48:6","81:9","32:8","28:7","72:8","12:3","36:6"
+    ]
+  },
+  quinto: {
+    sumas: [
+      "7+3","7+6","7+9","7+5","7+3","7+5","7+4","7+9","7+6","7+4",
+      "7+5","7+6","7+4","7+7","7+3","9+6","9+2","9+7","9+3","9+6",
+      "9+8","9+7","9+9","9+6","9+3","9+4","9+3","9+5","9+8","9+7"
+    ],
+    restas: [
+      "9-4","9-5","13-7","16-9","9-6","10-7","9-5","12-9","11-7","8-4",
+      "13-5","6-4","14-8","17-2","9-3","7-6","13-5","8-5","15-8","10-6",
+      "7-4","16-6","13-8","5-2","14-3","8-7","11-5","17-9","7-2","19-4"
+    ],
+    multi: [
+      "9x8","5x8","4x5","8x9","3x9","8x4","9x5","6x4","4x9","7x8",
+      "4x3","8x6","6x5","8x6","9x4","8x5","3x8","9x6","4x8","6x6",
+      "9x8","8x3","7x6","9x3","5x6","7x9","2x9","3x6","9x6","8x8"
+    ],
+    divisiones: [
+      "56:7","36:4","64:8","54:9","27:3","36:6","45:9","48:6","49:7","24:6",
+      "63:9","16:4","24:8","42:6","45:5","24:8","72:9","56:8","28:7","36:9",
+      "24:3","30:6","35:7","18:6","81:9","40:8","21:7","64:8","18:3","32:4"
+    ]
+  },
+  sexto: {
+    sumas: [
+      "16+4","18+2","12+6","14+4","14+6","12+3","16+7","18+5","12+9","14+1",
+      "14+8","12+6","16+9","18+3","16+2","15+4","17+2","11+6","13+4","17+6",
+      "12+3","19+7","13+5","15+9","19+1","17+8","13+6","11+9","17+3","15+2"
+    ],
+    restas: [
+      "16-4","18-2","12-6","14-4","14-6","12-4","16-4","18-2","12-6","14-4",
+      "14-6","12-4","16-4","18-2","16-4","17-6","15-2","11-6","19-4","17-6",
+      "11-4","15-4","17-2","13-6","13-4","15-6","17-4","19-4","19-2","17-4"
+    ],
+    multi: [
+      "9x4","15x2","10x3","9x4","11x6","8x4","9x7","8x9","11x6","7x6",
+      "6x9","10x4","15x3","7x4","11x6","9x2","8x2","7x3","4x9","9x6",
+      "15x2","12x2","5x3","3x8","10x2","14x2","8x6","6x7","7x8","9x4"
+    ],
+    divisiones: [
+      "12:2","18:3","12:4","24:6","54:9","40:4","36:9","14:2","12:2","32:4",
+      "64:8","28:4","36:6","28:7","28:4","15:5","24:2","12:6","25:5","72:9",
+      "80:8","56:7","36:6","56:8","63:9","60:6","32:8","36:9","18:3","66:6"
+    ]
+  }
+};
+
+/* ================= VARIABLES ================= */
+let currentLevel = null;
+let currentOp = null;
+let time = 120;
+let clock = null;
+let examMode = false;
+let classMode = false;
+let classList = [];
+let classResults = [];
+let currentStudentIndex = 0;
+
+/* ================= DOM ELEMENTS ================= */
+const levelsDiv = document.getElementById("levels");
+const opsDiv = document.getElementById("ops");
+const timer = document.getElementById("timer");
+const grid = document.getElementById("grid");
+const result = document.getElementById("result");
+const record = document.getElementById("record");
+const student = document.getElementById("student");
+const finishBtn = document.getElementById("finishFloat");
+
+/* ================= INICIALIZACIÓN ================= */
+// Crear botones de nivel dinámicamente
+Object.keys(QUINZET).forEach(level => {
+  const b = document.createElement("button");
+  b.textContent = level.toUpperCase();
+  b.onclick = () => selectLevel(level, b);
+  levelsDiv.appendChild(b);
+});
+
+function selectLevel(level, btn) {
+  currentLevel = level;
+  setActive(levelsDiv, btn);
+  opsDiv.innerHTML = "";
+  grid.innerHTML = "";
+  result.textContent = "";
+  finishBtn.style.display = "none";
+  timer.textContent = "02:00";
+  
+  // Mostrar subtipos (Suma, Resta, etc.)
+  Object.keys(QUINZET[level]).forEach(opKey => {
+    const b = document.createElement("button");
+    let label = opKey.toUpperCase();
+    if(opKey === 'multi') label = '✖️ MULTI';
+    if(opKey === 'divisiones') label = '➗ DIVISIÓN';
+    if(opKey === 'sumas') label = '➕ SUMAS';
+    if(opKey === 'restas') label = '➖ RESTAS';
+    
+    b.textContent = label;
+    b.onclick = () => selectOp(opKey, b);
+    opsDiv.appendChild(b);
+  });
+}
+
+function selectOp(op, btn) {
+  currentOp = op;
+  setActive(opsDiv, btn);
+  updateRecordDisplay();
+  start();
+}
+
+function setActive(container, btn) {
+  [...container.children].forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+/* ================= JUEGO ================= */
+function start() {
+  clearInterval(clock);
+  time = 120; 
+  result.textContent = "";
+  result.style.display = "none";
+  grid.innerHTML = "";
+  finishBtn.style.display = "block"; // Mostrar botón flotante en móvil
+
+  if (classMode) {
+    student.value = classList[currentStudentIndex];
+    student.disabled = true;
+  }
+
+  const operations = QUINZET[currentLevel][currentOp];
+  
+  operations.forEach((opStr, index) => {
+    const d = document.createElement("div");
+    d.className = "op";
+    d.innerHTML = `
+      <span>${formatOp(opStr)} =</span>
+      <input type="number" inputmode="decimal" pattern="[0-9]*" data-op="${opStr}" id="input_${index}">
+    `;
+    grid.appendChild(d);
+  });
+
+  // Auto-foco inteligente (solo en PC para no abrir teclado en móvil de golpe)
+  if(window.innerWidth > 768) {
+     setTimeout(() => document.getElementById("input_0")?.focus(), 100);
+  }
+
+  updateTimerDisplay();
+  if (examMode) lockTabs();
+  
+  clock = setInterval(tick, 1000);
+}
+
+function tick() {
+  time--;
+  updateTimerDisplay();
+  if (time <= 0) finish();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(time / 60);
+  const s = time % 60;
+  timer.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  timer.style.color = time < 10 ? "#ef4444" : "#4a6cf7";
+}
+
+function finish() {
+  clearInterval(clock);
+  finishBtn.style.display = "none";
+  let ok = 0, total = 0;
+
+  document.querySelectorAll("input[data-op]").forEach(i => {
+    total++;
+    const userVal = i.value.trim();
+    if (userVal !== "") {
+        // Cálculo seguro reemplazando símbolos visuales por operadores JS
+        const safeOp = i.dataset.op.replace(":", "/").replace("x", "*");
+        // Usamos una función simple para evaluar la operación matemática básica
+        try {
+            const correctVal = eval(safeOp); 
+            if (parseFloat(userVal) === correctVal) {
+                ok++;
+                i.classList.add("correct");
+            } else {
+                i.classList.add("wrong");
+            }
+        } catch(e) { console.error(e); }
+    }
+    i.disabled = true;
+  });
+
+  const improved = saveRecord(ok);
+  
+  // Scroll hacia el resultado
+  result.style.display = "block";
+  let msg = `<h3>¡Tiempo terminado!</h3>`;
+  msg += `<p style="font-size:1.2rem">Has acertado <strong>${ok}</strong> operaciones.</p>`;
+  if (improved) msg += `<p style="color:var(--success-text); font-weight:bold;">🏆 ¡Nuevo Récord!</p>`;
+  
+  result.innerHTML = msg;
+  result.scrollIntoView({ behavior: 'smooth' });
+
+  updateRecordDisplay();
+  if (classMode) setTimeout(() => handleClassResult(ok), 2000);
+}
+
+/* ================= UTILIDADES ================= */
+function formatOp(op) {
+  return op.replace("x", " × ").replace(":", " ÷ ").replace("+", " + ").replace("-", " - ");
+}
+
+// Navegación con Enter (PC y algunos teclados Android)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+        const inputs = Array.from(document.querySelectorAll('input[data-op]'));
+        const index = inputs.indexOf(e.target);
+        if (index > -1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    }
+});
+
+/* ================= GESTIÓN DE RÉCORDS ================= */
+function recordKey() {
+  if (!student.value || !currentLevel || !currentOp) return null;
+  return `qz_${student.value.trim().toLowerCase()}_${currentLevel}_${currentOp}`;
+}
+
+function saveRecord(score) {
+  const key = recordKey();
+  if (!key) return false;
+  const prev = Number(localStorage.getItem(key)) || 0;
+  if (score > prev) {
+    localStorage.setItem(key, score);
+    return true;
+  }
+  return false;
+}
+
+function updateRecordDisplay() {
+  if (!student.value) {
+      record.textContent = "Introduce tu nombre arriba para guardar progreso";
+      return;
+  }
+  const k = recordKey();
+  const r = k ? (localStorage.getItem(k) || 0) : 0;
+  record.textContent = r > 0 ? `🏅 Tu Récord: ${r}` : "";
+}
+
+/* ================= MODOS EXAMEN / CLASE ================= */
+function toggleExam() {
+  examMode = !examMode;
+  const btn = document.getElementById("examBtn");
+  btn.textContent = examMode ? "🔓 Salir Examen" : "🔒 Examen";
+  btn.style.background = examMode ? "#fee2e2" : "#e0e0e0";
+  if(examMode && clock) lockTabs();
+  else unlockTabs();
+}
+
+function lockTabs() {
+  document.querySelectorAll("#levels button, #ops button").forEach(b => b.disabled = true);
+}
+function unlockTabs() {
+  document.querySelectorAll("#levels button, #ops button").forEach(b => b.disabled = false);
+}
+
+function toggleClassMode() {
+  if (!classMode) {
+      const names = prompt("Nombres de alumnos separados por coma (ej: Ana, Pepe, Luis):");
+      if (!names) return;
+      classList = names.split(",").map(n => n.trim()).filter(Boolean);
+      if(!classList.length) return;
+
+      classMode = true;
+      classResults = [];
+      currentStudentIndex = 0;
+      const btn = document.getElementById("classBtn");
+      btn.textContent = "Salir Clase";
+      btn.classList.add("active");
+      
+      student.value = classList[0];
+      student.disabled = true;
+      alert(`Empieza: ${classList[0]}. Elige Nivel para comenzar.`);
+  } else {
+      classMode = false;
+      document.getElementById("classBtn").textContent = "👥 Clase";
+      document.getElementById("classBtn").classList.remove("active");
+      student.disabled = false;
+      student.value = "";
+  }
+}
+
+function handleClassResult(ok) {
+  classResults.push({
+    alumno: classList[currentStudentIndex],
+    aciertos: ok,
+    nivel: `${currentLevel} - ${currentOp}`
+  });
+  
+  currentStudentIndex++;
+
+  if (currentStudentIndex < classList.length) {
+    if(confirm(`Turno de ${classList[currentStudentIndex]}. ¿Listo?`)) {
+        start(); 
+    } else {
+        showClassResults();
+        classMode = false;
+        unlockTabs();
+    }
+  } else {
+    showClassResults();
+    classMode = false;
+    document.getElementById("classBtn").textContent = "👥 Clase";
+    document.getElementById("classBtn").classList.remove("active");
+    student.disabled = false;
+    unlockTabs();
+  }
+}
+
+function showClassResults() {
+  let html = "<h3>📊 Resultados Clase</h3>";
+  html += "<div style='overflow-x:auto'><table border='1' cellspacing='0' cellpadding='8' style='width:100%; border-collapse:collapse; text-align:left;'>";
+  html += "<tr style='background:#f0f0f0'><th>Nombre</th><th>Pts</th><th>Nivel</th></tr>";
+  classResults.forEach(r => {
+    html += `<tr><td>${r.alumno}</td><td><strong>${r.aciertos}</strong></td><td>${r.nivel}</td></tr>`;
+  });
+  html += "</table></div>";
+  result.innerHTML = html;
+  result.style.display = "block";
+  result.scrollIntoView();
+}
+</script>
+
+</body>
+</html>
