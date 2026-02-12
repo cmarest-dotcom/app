@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Practica Tablas de Multiplicar</title>
+    <style>
+        /* Todos los estilos se mantienen igual */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            transition: background-color 0.5s ease;
+        }
+
+        body.bg-success {
+            background: #28a745;
+        }
+
+        body.bg-failure {
+            background: #dc3545;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 25px;
+            max-width: 1100px;
+            width: 100%;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .config-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: visible;
+        }
+
+        .config-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .config-title {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tables-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 50px;
+        }
+
+        .table-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .table-checkbox:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .table-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .table-checkbox label {
+            cursor: pointer;
+            font-size: 1em;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .difficulty-option input[type="radio"] {
+            display: none;
+        }
+
+        .difficulty-option label {
+            display: block;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .difficulty-option input[type="radio"]:checked + label {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .config-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .config-item {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .config-item label {
+            font-size: 1.1em;
+            color: #555;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .config-item select {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            outline: none;
+            align-self: center;
+            margin-top: auto;
+        }
+
+        .btn-primary {
+            background: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-large {
+            font-size: 1.3em;
+            padding: 15px 50px;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .counter, .timer {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .timer.warning {
+            color: #dc3545;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            overflow-y: auto;
+            flex: 1;
+            padding: 5px;
+        }
+
+        .exercise-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .exercise-text {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .exercise-input {
+            width: 70px;
+            padding: 8px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+        }
+
+        .exercise-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        }
+
+        .exercise-input.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .exercise-input.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            padding-top: 10px;
+        }
+
+        .btn-finish {
+            background: #28a745;
+            padding: 12px 40px;
+            font-size: 1.1em;
+        }
+
+        .btn-finish:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #667eea;
+            border-radius: 30px;
+            margin-bottom: 25px;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: #5a6fd8;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 12px 30px;
+            font-size: 1.1em;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+        }
+
+        .btn-accept {
+            background: #17a2b8;
+        }
+
+        .result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .result-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .grade {
+            font-size: 8em;
+            font-weight: bold;
+            margin: 20px 0;
+            line-height: 1;
+        }
+
+        .grade-success {
+            color: #28a745;
+        }
+
+        .grade-failure {
+            color: #dc3545;
+        }
+
+        .result-text {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .result-stats {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-result {
+            padding: 12px 25px;
+            font-size: 1.1em;
+        }
+
+        .btn-close {
+            background: #6c757d;
+        }
+
+        .btn-close:hover {
+            background: #5a6268;
+        }
+
+        .btn-report {
+            background: #17a2b8;
+        }
+
+        .btn-report:hover {
+            background: #138496;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        @media (max-width: 900px) {
+            .exercises-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .config-row {
+                flex-direction: column;
+            }
+            
+            .config-item {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .exercises-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .tables-row {
+                border-radius: 20px;
+            }
+            
+            .grade {
+                font-size: 6em;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .exercises-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .grade {
+                font-size: 4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Tablas de Multiplicar</h1>
+        
+        <!-- Panel de Configuración -->
+        <div id="configPanel" class="config-panel">
+            <!-- Selección de Tablas -->
+            <div class="config-section">
+                <div class="config-title">
+                    <span>📊 Selecciona las tablas:</span>
+                </div>
+                <div id="tablesRow" class="tables-row">
+                    <!-- Se generarán dinámicamente las checkboxes -->
+                </div>
+            </div>
+            
+            <!-- Selección de Nivel -->
+            <div class="config-section">
+                <div class="config-title">
+                    <span>🎯 Nivel de dificultad:</span>
+                </div>
+                <div class="difficulty-selector">
+                    <div class="difficulty-option">
+                        <input type="radio" name="difficulty" id="easy" value="easy" checked>
+                        <label for="easy">🌱 Fácil</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" name="difficulty" id="medium" value="medium">
+                        <label for="medium">⚡ Medio</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" name="difficulty" id="hard" value="hard">
+                        <label for="hard">🚀 Difícil</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila de Nº Ejercicios y Tiempo -->
+            <div class="config-section">
+                <div class="config-row">
+                    <div class="config-item">
+                        <label>🔢 Ejercicios:</label>
+                        <select id="exercisesCountSelect">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30" selected>30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>⏱️ Tiempo:</label>
+                        <select id="timeSelect">
+                            <option value="60">1 min</option>
+                            <option value="120" selected>2 min</option>
+                            <option value="180">3 min</option>
+                            <option value="240">4 min</option>
+                            <option value="300">5 min</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="configError" class="error-message"></div>
+            <button id="startBtn" class="btn btn-primary btn-large">¡Comenzar!</button>
+        </div>
+
+        <!-- Área de Juego -->
+        <div id="gameArea" class="game-area hidden">
+            <div class="game-header">
+                <div class="game-info">
+                    <div id="difficultyDisplay" class="difficulty-badge">Fácil</div>
+                    <div id="progressCounter" class="counter">0/<span id="totalExercisesDisplay">30</span></div>
+                </div>
+                <div id="timer" class="timer">2:00</div>
+            </div>
+            
+            <div id="exercisesGrid" class="exercises-grid">
+                <!-- Se generarán dinámicamente los ejercicios -->
+            </div>
+            
+            <div class="actions">
+                <button id="finishBtn" class="btn btn-finish">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Nombre para Informe -->
+    <div id="nameModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-title">📝 Nombre del alumno/a</div>
+            <input type="text" id="studentNameInput" class="modal-input" placeholder="Opcional - Escribe tu nombre" autocomplete="off">
+            <div class="modal-actions">
+                <button id="cancelNameBtn" class="btn btn-modal btn-cancel">Cancelar</button>
+                <button id="acceptNameBtn" class="btn btn-modal btn-accept">Generar Informe</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Resultados -->
+    <div id="resultScreen" class="result-screen hidden">
+        <div class="result-content">
+            <div id="gradeDisplay" class="grade"></div>
+            <div id="resultMessage" class="result-text"></div>
+            <div id="resultStats" class="result-stats"></div>
+            <div class="result-actions">
+                <button id="closeBtn" class="btn btn-close btn-result">Cerrar</button>
+                <button id="reportBtn" class="btn btn-report btn-result">📄 Ver Informe PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        class MultiplicationGame {
+            constructor() {
+                this.exercises = [];
+                this.responses = [];
+                this.timer = null;
+                this.timeLeft = 120;
+                this.gameActive = false;
+                this.selectedTables = new Set();
+                this.difficulty = 'easy';
+                this.exercisesCount = 30;
+                this.studentName = '';
+                this.difficultyNames = {
+                    'easy': 'Fácil',
+                    'medium': 'Medio',
+                    'hard': 'Difícil'
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.createTableCheckboxes();
+                this.attachEventListeners();
+                
+                // Seleccionar nivel fácil por defecto
+                document.getElementById('easy').checked = true;
+            }
+
+            createTableCheckboxes() {
+                const container = document.getElementById('tablesRow');
+                container.innerHTML = '';
+                
+                for (let i = 1; i <= 10; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'table-checkbox';
+                    div.innerHTML = `
+                        <input type="checkbox" id="table${i}" value="${i}">
+                        <label for="table${i}">${i}</label>
+                    `;
+                    container.appendChild(div);
+                }
+            }
+
+            attachEventListeners() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('finishBtn').addEventListener('click', () => this.finishGame());
+                document.getElementById('closeBtn').addEventListener('click', () => this.closeResults());
+                document.getElementById('reportBtn').addEventListener('click', () => this.showNameModal());
+                document.getElementById('acceptNameBtn').addEventListener('click', () => this.generatePDFReport());
+                document.getElementById('cancelNameBtn').addEventListener('click', () => this.hideNameModal());
+                
+                document.getElementById('timeSelect').addEventListener('change', (e) => {
+                    this.timeLeft = parseInt(e.target.value);
+                });
+
+                document.getElementById('exercisesCountSelect').addEventListener('change', (e) => {
+                    this.exercisesCount = parseInt(e.target.value);
+                });
+
+                document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.difficulty = e.target.value;
+                    });
+                });
+            }
+
+            showNameModal() {
+                document.getElementById('studentNameInput').value = this.studentName || '';
+                document.getElementById('nameModal').classList.remove('hidden');
+                
+                // Enfocar el campo de nombre
+                setTimeout(() => {
+                    document.getElementById('studentNameInput').focus();
+                }, 100);
+            }
+
+            hideNameModal() {
+                document.getElementById('nameModal').classList.add('hidden');
+            }
+
+            getSelectedTables() {
+                const checkboxes = document.querySelectorAll('#tablesRow input[type="checkbox"]:checked');
+                this.selectedTables.clear();
+                checkboxes.forEach(cb => this.selectedTables.add(parseInt(cb.value)));
+                
+                if (this.difficulty === 'hard') {
+                    const hardTables = Array.from(this.selectedTables).filter(t => t >= 6 && t <= 9);
+                    if (hardTables.length === 0 && this.selectedTables.size > 0) {
+                        document.getElementById('configError').textContent = '⚠️ Nivel difícil requiere tablas 6, 7, 8 o 9';
+                        return false;
+                    }
+                }
+                
+                return this.selectedTables.size > 0;
+            }
+
+            getTablesList() {
+                const tables = Array.from(this.selectedTables).sort((a, b) => a - b);
+                return tables.join(', ');
+            }
+
+            getMinMultiplier() {
+                switch(this.difficulty) {
+                    case 'easy': return 1;
+                    case 'medium': return 4;
+                    case 'hard': return 5;
+                    default: return 1;
+                }
+            }
+
+            getMaxMultiplier() {
+                switch(this.difficulty) {
+                    case 'hard': return 9;
+                    default: return 10;
+                }
+            }
+
+            generateUniqueExercises() {
+                this.exercises = [];
+                let tables = Array.from(this.selectedTables);
+                
+                if (this.difficulty === 'hard') {
+                    tables = tables.filter(t => t >= 6 && t <= 9);
+                }
+                
+                const minMultiplier = this.getMinMultiplier();
+                const maxMultiplier = this.getMaxMultiplier();
+                
+                // Generar todas las combinaciones posibles
+                let allCombinations = [];
+                for (let table of tables) {
+                    for (let mult = minMultiplier; mult <= maxMultiplier; mult++) {
+                        allCombinations.push({
+                            multiplicand: table,
+                            multiplier: mult,
+                            result: table * mult
+                        });
+                    }
+                }
+                
+                // Si no hay suficientes combinaciones, permitir repeticiones para alcanzar el número solicitado
+                if (allCombinations.length === 0) {
+                    // Si no hay tablas seleccionadas válidas, usar tablas por defecto
+                    const defaultTables = this.difficulty === 'hard' ? [6, 7, 8, 9] : [2, 3, 4, 5, 6, 7, 8, 9];
+                    for (let table of defaultTables) {
+                        for (let mult = minMultiplier; mult <= maxMultiplier; mult++) {
+                            allCombinations.push({
+                                multiplicand: table,
+                                multiplier: mult,
+                                result: table * mult
+                            });
+                        }
+                    }
+                }
+                
+                // Mezclar array
+                for (let i = allCombinations.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allCombinations[i], allCombinations[j]] = [allCombinations[j], allCombinations[i]];
+                }
+                
+                // Generar ejercicios SIN REPETIR dentro de la sesión
+                const selectedExercises = [];
+                const usedKeys = new Set();
+                
+                for (let i = 0; i < allCombinations.length && selectedExercises.length < this.exercisesCount; i++) {
+                    const ex = allCombinations[i];
+                    const key = `${ex.multiplicand}x${ex.multiplier}`;
+                    
+                    if (!usedKeys.has(key)) {
+                        usedKeys.add(key);
+                        selectedExercises.push({
+                            ...ex,
+                            userAnswer: null,
+                            isCorrect: false
+                        });
+                    }
+                }
+                
+                // Si todavía no tenemos suficientes, permitimos repeticiones
+                if (selectedExercises.length < this.exercisesCount) {
+                    let index = 0;
+                    while (selectedExercises.length < this.exercisesCount) {
+                        const ex = allCombinations[index % allCombinations.length];
+                        selectedExercises.push({
+                            ...ex,
+                            userAnswer: null,
+                            isCorrect: false
+                        });
+                        index++;
+                    }
+                }
+                
+                this.exercises = selectedExercises.slice(0, this.exercisesCount);
+            }
+
+            renderExercises() {
+                const container = document.getElementById('exercisesGrid');
+                container.innerHTML = '';
+                
+                let columns = 5;
+                if (this.exercisesCount <= 20) {
+                    columns = 4;
+                } else if (this.exercisesCount <= 30) {
+                    columns = 5;
+                } else if (this.exercisesCount <= 40) {
+                    columns = 6;
+                } else {
+                    columns = 7;
+                }
+                
+                container.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                this.exercises.forEach((exercise, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'exercise-item';
+                    div.innerHTML = `
+                        <span class="exercise-text">${exercise.multiplicand} x ${exercise.multiplier}</span>
+                        <input type="number" id="answer${index}" class="exercise-input" placeholder="?" 
+                               ${this.gameActive ? '' : 'disabled'}>
+                    `;
+                    container.appendChild(div);
+                });
+                
+                this.responses = new Array(this.exercises.length).fill(null);
+                this.attachInputListeners();
+                
+                document.getElementById('totalExercisesDisplay').textContent = this.exercises.length;
+                document.getElementById('progressCounter').textContent = `0/${this.exercises.length}`;
+                
+                // Enfocar el primer input
+                setTimeout(() => {
+                    if (this.gameActive) {
+                        const firstInput = document.getElementById('answer0');
+                        if (firstInput) firstInput.focus();
+                    }
+                }, 100);
+            }
+
+            attachInputListeners() {
+                for (let i = 0; i < this.exercises.length; i++) {
+                    const input = document.getElementById(`answer${i}`);
+                    if (input) {
+                        input.addEventListener('input', (e) => {
+                            this.responses[i] = e.target.value ? parseInt(e.target.value) : null;
+                            this.updateProgress();
+                        });
+                        
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const nextInput = document.getElementById(`answer${i + 1}`);
+                                if (nextInput) {
+                                    nextInput.focus();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            updateProgress() {
+                const answered = this.responses.filter(r => r !== null).length;
+                document.getElementById('progressCounter').textContent = `${answered}/${this.exercises.length}`;
+            }
+
+            startGame() {
+                if (!this.getSelectedTables()) {
+                    document.getElementById('configError').textContent = '⚠️ Selecciona al menos una tabla';
+                    return;
+                }
+                
+                document.getElementById('configError').textContent = '';
+                document.getElementById('configPanel').classList.add('hidden');
+                document.getElementById('gameArea').classList.remove('hidden');
+                
+                document.getElementById('difficultyDisplay').textContent = this.difficultyNames[this.difficulty];
+                
+                const timeSelect = document.getElementById('timeSelect');
+                this.timeLeft = parseInt(timeSelect.value);
+                this.gameActive = true;
+                
+                this.updateTimerDisplay();
+                this.generateUniqueExercises();
+                this.renderExercises();
+                this.startTimer();
+            }
+
+            startTimer() {
+                const timerDisplay = document.getElementById('timer');
+                
+                this.timer = setInterval(() => {
+                    if (this.timeLeft > 0) {
+                        this.timeLeft--;
+                        this.updateTimerDisplay();
+                        
+                        if (this.timeLeft <= 10) {
+                            timerDisplay.classList.add('warning');
+                        }
+                    } else {
+                        this.finishGame();
+                    }
+                }, 1000);
+            }
+
+            updateTimerDisplay() {
+                const timerDisplay = document.getElementById('timer');
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            calculateScore() {
+                let correct = 0;
+                
+                for (let i = 0; i < this.exercises.length; i++) {
+                    const input = document.getElementById(`answer${i}`);
+                    if (input) {
+                        const userAnswer = parseInt(input.value);
+                        const isCorrect = userAnswer === this.exercises[i].result;
+                        this.exercises[i].isCorrect = isCorrect;
+                        this.exercises[i].userAnswer = userAnswer;
+                        
+                        input.classList.remove('correct', 'incorrect');
+                        if (input.value !== '') {
+                            input.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        }
+                        
+                        if (isCorrect) correct++;
+                    }
+                }
+                
+                return correct;
+            }
+
+            finishGame() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                }
+                
+                this.gameActive = false;
+                const correct = this.calculateScore();
+                const totalExercises = this.exercises.length;
+                const score = (correct / totalExercises) * 10;
+                const roundedScore = Math.round(score * 10) / 10;
+                const passed = correct >= (totalExercises / 2);
+                
+                document.body.className = passed ? 'bg-success' : 'bg-failure';
+                
+                const gradeDisplay = document.getElementById('gradeDisplay');
+                gradeDisplay.textContent = `${roundedScore}/10`;
+                gradeDisplay.className = `grade ${passed ? 'grade-success' : 'grade-failure'}`;
+                
+                document.getElementById('resultMessage').innerHTML = passed 
+                    ? '🎉 ¡Excelente!' 
+                    : '💪 ¡Sigue practicando!';
+                
+                const incorrect = this.exercises.filter(e => !e.isCorrect && e.userAnswer !== null && !isNaN(e.userAnswer)).length;
+                const sinResponder = this.exercises.filter(e => e.userAnswer === null || isNaN(e.userAnswer)).length;
+                
+                document.getElementById('resultStats').innerHTML = `
+                    Nivel: ${this.difficultyNames[this.difficulty]}<br>
+                    Tablas: ${this.getTablesList()}<br>
+                    Ejercicios: ${totalExercises}<br>
+                    Correctas: ${correct} | Falladas: ${incorrect} | Sin contestar: ${sinResponder}
+                `;
+                
+                document.getElementById('resultScreen').classList.remove('hidden');
+                
+                for (let i = 0; i < this.exercises.length; i++) {
+                    const input = document.getElementById(`answer${i}`);
+                    if (input) input.disabled = true;
+                }
+            }
+
+            generatePDFReport() {
+                // Guardar el nombre del alumno
+                this.studentName = document.getElementById('studentNameInput').value.trim();
+                this.hideNameModal();
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const totalExercises = this.exercises.length;
+                
+                // Título
+                doc.setFontSize(20);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Informe de Práctica - Tablas de Multiplicar', 20, 15);
+                
+                // Línea decorativa
+                doc.setDrawColor(102, 126, 234);
+                doc.setLineWidth(0.5);
+                doc.line(20, 20, 190, 20);
+                
+                // Información general en dos columnas
+                doc.setFontSize(10);
+                doc.setTextColor(80, 80, 80);
+                
+                // Columna izquierda - Fecha siempre visible
+                doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 30);
+                
+                // Nombre del alumno (si se ha proporcionado)
+                let yPos = 36;
+                if (this.studentName) {
+                    doc.text(`Alumno/a: ${this.studentName}`, 20, yPos);
+                    yPos += 6;
+                }
+                
+                doc.text(`Nivel: ${this.difficultyNames[this.difficulty]}`, 20, yPos);
+                doc.text(`Tablas: ${this.getTablesList()}`, 20, yPos + 6);
+                
+                // Columna derecha
+                doc.text(`Tiempo: ${document.getElementById('timeSelect').selectedOptions[0].text}`, 120, 30);
+                doc.text(`Ejercicios: ${totalExercises}`, 120, 36);
+                
+                // Estadísticas principales - Ajustar posición Y según si hay nombre
+                let statsY = this.studentName ? 62 : 56;
+                if (this.studentName) {
+                    statsY = 68;
+                }
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Resultados:', 20, statsY);
+                
+                const correct = this.exercises.filter(e => e.isCorrect).length;
+                const incorrect = this.exercises.filter(e => !e.isCorrect && e.userAnswer !== null && !isNaN(e.userAnswer)).length;
+                const sinResponder = this.exercises.filter(e => e.userAnswer === null || isNaN(e.userAnswer)).length;
+                const nota = (correct / totalExercises * 10).toFixed(1);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(40, 167, 69);
+                doc.text(`Correctas: ${correct}`, 30, statsY + 8);
+                doc.setTextColor(220, 53, 69);
+                doc.text(`Falladas: ${incorrect}`, 30, statsY + 14);
+                doc.setTextColor(108, 117, 125);
+                doc.text(`Sin contestar: ${sinResponder}`, 30, statsY + 20);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(102, 126, 234);
+                doc.text(`NOTA FINAL: ${nota}/10`, 120, statsY + 8);
+                
+                // Dividir ejercicios en dos grupos
+                const mitad = Math.ceil(this.exercises.length / 2);
+                const ejerciciosCol1 = this.exercises.slice(0, mitad);
+                const ejerciciosCol2 = this.exercises.slice(mitad);
+                
+                const tableConfig = {
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [102, 126, 234],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 8,
+                        halign: 'center'
+                    },
+                    bodyStyles: {
+                        fontSize: 8
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 12, halign: 'center', fillColor: [102, 126, 234], textColor: 255, fontStyle: 'bold' },
+                        1: { cellWidth: 22, halign: 'center' },
+                        2: { cellWidth: 18, halign: 'center' },
+                        3: { cellWidth: 22, halign: 'center' },
+                        4: { cellWidth: 22, halign: 'center' }
+                    },
+                    margin: { left: 10, right: 10 },
+                    didParseCell: function(data) {
+                        if (data.column.index === 0 && data.row.index > 0) {
+                            data.cell.styles.fillColor = [102, 126, 234];
+                            data.cell.styles.textColor = 255;
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        
+                        if (data.column.index === 3) {
+                            const estado = data.cell.raw;
+                            if (estado === 'Acertada') {
+                                data.cell.styles.textColor = [40, 167, 69];
+                            } else if (estado === 'Fallada') {
+                                data.cell.styles.textColor = [220, 53, 69];
+                            } else {
+                                data.cell.styles.textColor = [108, 117, 125];
+                            }
+                        }
+                    }
+                };
+                
+                // Calcular posición Y inicial según contenido
+                let startY = this.studentName ? 88 : 76;
+                if (this.studentName) {
+                    startY = 94;
+                }
+                
+                if (ejerciciosCol1.length > 0) {
+                    const tableData1 = ejerciciosCol1.map((ex, index) => {
+                        let estado = ex.isCorrect ? 'Acertada' : 
+                                    (ex.userAnswer && !isNaN(ex.userAnswer) ? 'Fallada' : 'Sin contestar');
+                        const respuestaUsuario = ex.userAnswer && !isNaN(ex.userAnswer) ? ex.userAnswer : '-';
+                        const respuestaCorrecta = ex.isCorrect ? '-' : ex.result.toString();
+                        
+                        return [
+                            index + 1,
+                            `${ex.multiplicand}x${ex.multiplier}`,
+                            respuestaUsuario,
+                            estado,
+                            respuestaCorrecta
+                        ];
+                    });
+                    
+                    doc.autoTable({
+                        ...tableConfig,
+                        startY: startY,
+                        head: [['Ej.', 'Op', 'Resp', 'Estado', 'Correcta']],
+                        body: tableData1,
+                        margin: { left: 10 }
+                    });
+                }
+                
+                if (ejerciciosCol2.length > 0) {
+                    const tableData2 = ejerciciosCol2.map((ex, index) => {
+                        let estado = ex.isCorrect ? 'Acertada' : 
+                                    (ex.userAnswer && !isNaN(ex.userAnswer) ? 'Fallada' : 'Sin contestar');
+                        const respuestaUsuario = ex.userAnswer && !isNaN(ex.userAnswer) ? ex.userAnswer : '-';
+                        const respuestaCorrecta = ex.isCorrect ? '-' : ex.result.toString();
+                        
+                        return [
+                            index + 1 + mitad,
+                            `${ex.multiplicand}x${ex.multiplier}`,
+                            respuestaUsuario,
+                            estado,
+                            respuestaCorrecta
+                        ];
+                    });
+                    
+                    doc.autoTable({
+                        ...tableConfig,
+                        startY: startY,
+                        head: [['Ej.', 'Op', 'Resp', 'Estado', 'Correcta']],
+                        body: tableData2,
+                        margin: { left: 105 }
+                    });
+                }
+                
+                const finalY = Math.max(
+                    doc.lastAutoTable.finalY + 15,
+                    doc.autoTable.previous ? doc.autoTable.previous.finalY + 15 : 250
+                );
+                
+                doc.setFontSize(11);
+                
+                if (correct >= (totalExercises / 2)) {
+                    doc.setTextColor(40, 167, 69);
+                    doc.text('¡ENHORABUENA! Has superado la práctica.', 20, finalY);
+                    doc.setFontSize(9);
+                    doc.setTextColor(80, 80, 80);
+                    doc.text('Sigue así, ¡vas por buen camino!', 20, finalY + 6);
+                } else {
+                    doc.setTextColor(220, 53, 69);
+                    doc.text('¡ÁNIMO! Sigue practicando para mejorar.', 20, finalY);
+                    doc.setFontSize(9);
+                    doc.setTextColor(80, 80, 80);
+                    doc.text('Revisa los ejercicios fallados y vuelve a intentarlo.', 20, finalY + 6);
+                }
+                
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Practica Tablas de Multiplicar', 20, 285);
+                doc.text(new Date().toLocaleTimeString(), 170, 285);
+                
+                // Nombre del archivo incluyendo el nombre del alumno si existe
+                const fileName = this.studentName 
+                    ? `informe-${this.studentName.replace(/\s+/g, '_')}-${new Date().getTime()}.pdf`
+                    : `informe-multiplicaciones-${new Date().getTime()}.pdf`;
+                
+                doc.save(fileName);
+            }
+
+            closeResults() {
+                document.body.className = '';
+                document.getElementById('resultScreen').classList.add('hidden');
+                document.getElementById('configPanel').classList.remove('hidden');
+                document.getElementById('gameArea').classList.add('hidden');
+                
+                document.querySelectorAll('#tablesRow input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+                
+                document.getElementById('timer').classList.remove('warning');
+                
+                document.getElementById('timeSelect').value = '120';
+                this.timeLeft = 120;
+                
+                document.getElementById('exercisesCountSelect').value = '30';
+                this.exercisesCount = 30;
+                
+                document.getElementById('easy').checked = true;
+                this.difficulty = 'easy';
+                this.studentName = '';
+            }
+        }
+
+        const game = new MultiplicationGame();
+    </script>
+</body>
+</html>
