@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Práctica de Verbos Irregulares</title>
+  <style>
+    :root{
+      --bg: #f7f7ff;
+      --card: #ffffff;
+      --ink: #2b2b2b;
+      --muted: #6b7280;
+
+      --p1:#fde2e4; /* rosa pastel */
+      --p2:#e2f0cb; /* verde pastel */
+      --p3:#dbeafe; /* azul pastel */
+      --p4:#faedcd; /* vainilla pastel */
+      --p5:#e9d5ff; /* lila pastel */
+
+      --ok:#0f766e;
+      --err:#b42318;
+
+      --shadow: 0 10px 25px rgba(17,24,39,.08);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background: radial-gradient(1200px 800px at 10% 10%, var(--p3), transparent 55%),
+                  radial-gradient(1200px 800px at 90% 20%, var(--p5), transparent 55%),
+                  radial-gradient(1200px 800px at 60% 90%, var(--p2), transparent 55%),
+                  var(--bg);
+      padding: 22px;
+    }
+
+    .wrap{ max-width: 980px; margin: 0 auto; }
+    header{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    h1{
+      margin:0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .subtitle{ margin:0; color:var(--muted); font-size: 13px; }
+
+    .tabs{
+      display:flex; flex-wrap:wrap; gap:10px;
+      margin: 16px 0 14px;
+    }
+
+    .tab-btn{
+      border:0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(17,24,39,.08);
+      transition: transform .06s ease, opacity .2s ease;
+      opacity:.9;
+    }
+    .tab-btn:hover{ opacity:1; }
+    .tab-btn:active{ transform: translateY(1px); }
+
+    .tab-btn[data-tab="0"]{ background: var(--p4); }
+    .tab-btn[data-tab="1"]{ background: var(--p1); }
+    .tab-btn[data-tab="2"]{ background: var(--p2); }
+    .tab-btn[data-tab="3"]{ background: var(--p3); }
+
+    .tab-btn.active{
+      outline: 3px solid rgba(17,24,39,.08);
+      opacity:1;
+    }
+
+    .card{
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .row{
+      display:flex; gap:12px; flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.8);
+      box-shadow: 0 8px 18px rgba(17,24,39,.06);
+      font-weight: 700;
+    }
+
+    .score{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .score strong{ color: var(--ink); }
+    .badge{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(17,24,39,.08);
+    }
+
+    .btn{
+      border:0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(17,24,39,.10);
+      transition: transform .06s ease, opacity .2s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{ background: var(--p5); }
+    .btn.soft{ background: rgba(255,255,255,.9); border:1px solid rgba(17,24,39,.08); }
+    .btn.danger{ background: #ffe4e6; }
+
+    input, select{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.9);
+      outline: none;
+      min-width: 180px;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(17,24,39,.06);
+    }
+    td, th{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(17,24,39,.06);
+      vertical-align: middle;
+      font-size: 14px;
+    }
+    tr:last-child td{ border-bottom:0; }
+
+    .muted{ color: var(--muted); }
+    .feedback{ margin-top: 10px; font-weight: 800; }
+    .ok{ color: var(--ok); }
+    .err{ color: var(--err); }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 820px){
+      .grid2{ grid-template-columns: 1fr; }
+      header{ flex-direction:column; align-items:flex-start; }
+      .score{ justify-content:flex-start; }
+    }
+
+    .list{
+      margin-top: 12px;
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(17,24,39,.06);
+    }
+    .item code{
+      background: rgba(17,24,39,.04);
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Práctica de Verbos Irregulares (Infinitivo · Pasado · Participio)</h1>
+      <p class="subtitle">Pestañas con 10 ejercicios y nota sobre 10 · Añade tus verbos en la Pestaña 0</p>
+    </div>
+    <div class="score" id="globalInfo">
+      <span class="badge" id="verbsCountBadge">0 verbos</span>
+      <button class="btn soft" id="resetAllBtn" title="Reinicia verbos y resultados">Reiniciar</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="0">PESTAÑA 0 · Añadir verbos</button>
+    <button class="tab-btn" data-tab="1">PESTAÑA 1 · Relaciona</button>
+    <button class="tab-btn" data-tab="2">PESTAÑA 2 · Completa 2 formas</button>
+    <button class="tab-btn" data-tab="3">PESTAÑA 3 · Forma aleatoria</button>
+  </nav>
+
+  <section class="card" id="tab0">
+    <div class="row" style="justify-content:space-between;">
+      <div class="pill">➕ Añadir / actualizar verbo</div>
+      <div class="muted">Se guarda en este navegador (localStorage)</div>
+    </div>
+
+    <div class="grid2" style="margin-top:14px;">
+      <div>
+        <label class="muted">Verbo en español</label><br/>
+        <input id="esInput" placeholder="ej: traer" />
+      </div>
+      <div>
+        <label class="muted">Infinitivo en inglés</label><br/>
+        <input id="infInput" placeholder="ej: bring" />
+      </div>
+      <div>
+        <label class="muted">Pasado en inglés</label><br/>
+        <input id="pastInput" placeholder="ej: brought" />
+      </div>
+      <div>
+        <label class="muted">Participio en inglés</label><br/>
+        <input id="ppInput" placeholder="ej: brought" />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn primary" id="addVerbBtn">Guardar verbo</button>
+      <button class="btn soft" id="clearFormBtn">Limpiar</button>
+      <span class="muted" id="tab0Msg"></span>
+    </div>
+
+    <div style="margin-top:18px;">
+      <div class="row" style="justify-content:space-between;">
+        <div class="pill">📚 Lista de verbos</div>
+        <span class="muted">Puedes borrar elementos si te equivocas</span>
+      </div>
+      <div class="list" id="verbsList"></div>
+    </div>
+  </section>
+
+  <section class="card" id="tab1" style="display:none;">
+    <div class="row" style="justify-content:space-between;">
+      <div class="pill">🔗 Relaciona español → inglés (infinitivo)</div>
+      <div class="score">
+        <span>Ejercicio: <strong id="t1Progress">0/10</strong></span>
+        <span class="badge">Aciertos: <strong id="t1Correct">0</strong>/10</span>
+        <span class="badge">Nota: <strong id="t1Score">0.0</strong>/10</span>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      Elige el infinitivo correcto para cada verbo en español y pulsa <b>Comprobar</b>.
+    </p>
+
+    <table id="t1Table"></table>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn primary" id="t1CheckBtn">Comprobar</button>
+      <button class="btn soft" id="t1NewBtn">Nuevo ejercicio (10)</button>
+      <div class="feedback" id="t1Feedback"></div>
+    </div>
+  </section>
+
+  <section class="card" id="tab2" style="display:none;">
+    <div class="row" style="justify-content:space-between;">
+      <div class="pill">✍️ Te doy el infinitivo → tú escribes pasado y participio</div>
+      <div class="score">
+        <span>Ejercicio: <strong id="t2Progress">0/10</strong></span>
+        <span class="badge">Aciertos: <strong id="t2Correct">0</strong>/10</span>
+        <span class="badge">Nota: <strong id="t2Score">0.0</strong>/10</span>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;" class="pill" id="t2Prompt">Infinitivo: —</div>
+
+    <div class="grid2" style="margin-top:12px;">
+      <div>
+        <label class="muted">Pasado (Past)</label><br/>
+        <input id="t2Past" placeholder="escribe el pasado" />
+      </div>
+      <div>
+        <label class="muted">Participio (Past Participle)</label><br/>
+        <input id="t2PP" placeholder="escribe el participio" />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn primary" id="t2SubmitBtn">Enviar</button>
+      <button class="btn soft" id="t2RestartBtn">Reiniciar (10)</button>
+      <div class="feedback" id="t2Feedback"></div>
+    </div>
+  </section>
+
+  <section class="card" id="tab3" style="display:none;">
+    <div class="row" style="justify-content:space-between;">
+      <div class="pill">🎯 Verbo en español + forma aleatoria (inf/past/pp)</div>
+      <div class="score">
+        <span>Ejercicio: <strong id="t3Progress">0/10</strong></span>
+        <span class="badge">Aciertos: <strong id="t3Correct">0</strong>/10</span>
+        <span class="badge">Nota: <strong id="t3Score">0.0</strong>/10</span>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="pill" id="t3Prompt">—</div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label class="muted">Tu respuesta</label><br/>
+      <input id="t3Answer" placeholder="escribe la forma pedida" />
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn primary" id="t3SubmitBtn">Enviar</button>
+      <button class="btn soft" id="t3RestartBtn">Reiniciar (10)</button>
+      <div class="feedback" id="t3Feedback"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================
+   Datos (con localStorage)
+========================= */
+const STORAGE_KEY = "irregularVerbsApp_v2";
+const DEFAULT_VERBS = [
+  { es: "traer",   inf: "bring", past: "brought", pp: "brought" },
+  { es: "comprar", inf: "buy",   past: "bought",  pp: "bought"  },
+  { es: "luchar",  inf: "fight", past: "fought",  pp: "fought"  },
+  { es: "enseñar", inf: "teach", past: "taught",  pp: "taught"  },
+  { es: "pensar",  inf: "think", past: "thought", pp: "thought" },
+  { es: "coger",   inf: "catch", past: "caught",  pp: "caught"  }
+];
+
+function loadVerbs(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_VERBS));
+    return [...DEFAULT_VERBS];
+  }
+  try{
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || parsed.length === 0) throw new Error("invalid");
+    return parsed;
+  }catch{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_VERBS));
+    return [...DEFAULT_VERBS];
+  }
+}
+
+function saveVerbs(arr){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+let verbs = loadVerbs();
+
+/* =========================
+   Utilidades
+========================= */
+function norm(s){ return (s ?? "").toString().trim().toLowerCase(); }
+
+function shuffle(a){
+  const arr = [...a];
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function sampleN(source, n){
+  const src = [...source];
+  if(src.length === 0) return [];
+  if(src.length >= n){
+    return shuffle(src).slice(0,n);
+  }
+  // Si hay menos de n verbos, repetimos aleatoriamente hasta completar n
+  const out = [];
+  while(out.length < n){
+    out.push(src[Math.floor(Math.random()*src.length)]);
+  }
+  return out;
+}
+
+function setBadge(){
+  document.getElementById("verbsCountBadge").textContent = `${verbs.length} verbos`;
+}
+
+/* =========================
+   Tabs
+========================= */
+const tabBtns = document.querySelectorAll(".tab-btn");
+const tabs = {
+  0: document.getElementById("tab0"),
+  1: document.getElementById("tab1"),
+  2: document.getElementById("tab2"),
+  3: document.getElementById("tab3")
+};
+
+function showTab(n){
+  Object.values(tabs).forEach(el => el.style.display = "none");
+  tabs[n].style.display = "block";
+  tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === String(n)));
+}
+
+tabBtns.forEach(btn => btn.addEventListener("click", () => {
+  showTab(Number(btn.dataset.tab));
+}));
+
+/* =========================
+   Pestaña 0: CRUD verbos
+========================= */
+const esInput = document.getElementById("esInput");
+const infInput = document.getElementById("infInput");
+const pastInput = document.getElementById("pastInput");
+const ppInput = document.getElementById("ppInput");
+const tab0Msg = document.getElementById("tab0Msg");
+const verbsList = document.getElementById("verbsList");
+
+function renderVerbsList(){
+  verbsList.innerHTML = "";
+  const ordered = [...verbs].sort((a,b)=> a.es.localeCompare(b.es, "es"));
+
+  ordered.forEach(v => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div>
+        <div><strong>${v.es}</strong> <span class="muted">→</span>
+          <code>${v.inf}</code> · <code>${v.past}</code> · <code>${v.pp}</code>
+        </div>
+        <div class="muted" style="font-size:12px;">Infinitivo · Pasado · Participio</div>
+      </div>
+      <div class="row">
+        <button class="btn soft" data-edit="${v.es}">Editar</button>
+        <button class="btn danger" data-del="${v.es}">Borrar</button>
+      </div>
+    `;
+    verbsList.appendChild(div);
+  });
+
+  verbsList.querySelectorAll("[data-del]").forEach(b=>{
+    b.addEventListener("click", () => {
+      const key = b.getAttribute("data-del");
+      verbs = verbs.filter(x => norm(x.es) !== norm(key));
+      saveVerbs(verbs);
+      setBadge();
+      renderVerbsList();
+      tab0Msg.textContent = "✅ Verbo borrado.";
+      // refrescar actividades si estaban montadas
+      t1BuildNew(); t2Restart(); t3Restart();
+    });
+  });
+
+  verbsList.querySelectorAll("[data-edit]").forEach(b=>{
+    b.addEventListener("click", () => {
+      const key = b.getAttribute("data-edit");
+      const v = verbs.find(x => norm(x.es) === norm(key));
+      if(!v) return;
+      esInput.value = v.es;
+      infInput.value = v.inf;
+      pastInput.value = v.past;
+      ppInput.value = v.pp;
+      tab0Msg.textContent = "✏️ Edita y pulsa Guardar para actualizar.";
+      showTab(0);
+    });
+  });
+}
+
+document.getElementById("addVerbBtn").addEventListener("click", () => {
+  const es = norm(esInput.value);
+  const inf = norm(infInput.value);
+  const past = norm(pastInput.value);
+  const pp = norm(ppInput.value);
+
+  if(!es || !inf || !past || !pp){
+    tab0Msg.textContent = "❗ Completa los 4 campos.";
+    tab0Msg.className = "muted";
+    return;
+  }
+
+  const existingIndex = verbs.findIndex(v => norm(v.es) === es || norm(v.inf) === inf);
+  const newVerb = { es, inf, past, pp };
+
+  if(existingIndex >= 0){
+    verbs[existingIndex] = newVerb;
+    tab0Msg.textContent = "✅ Verbo actualizado.";
+  }else{
+    verbs.push(newVerb);
+    tab0Msg.textContent = "✅ Verbo añadido.";
+  }
+
+  saveVerbs(verbs);
+  setBadge();
+  renderVerbsList();
+  t1BuildNew(); t2Restart(); t3Restart();
+});
+
+document.getElementById("clearFormBtn").addEventListener("click", () => {
+  esInput.value = ""; infInput.value = ""; pastInput.value = ""; ppInput.value = "";
+  tab0Msg.textContent = "";
+});
+
+document.getElementById("resetAllBtn").addEventListener("click", () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_VERBS));
+  verbs = loadVerbs();
+  setBadge();
+  renderVerbsList();
+  t1BuildNew(); t2Restart(); t3Restart();
+  tab0Msg.textContent = "🔄 Reiniciado a la lista por defecto.";
+});
+
+/* =========================
+   Pestaña 1: Relaciona
+========================= */
+let t1Set = [];
+function t1UpdateCounters(correct=0, done=0){
+  document.getElementById("t1Correct").textContent = String(correct);
+  document.getElementById("t1Progress").textContent = `${done}/10`;
+  document.getElementById("t1Score").textContent = (correct).toFixed(1);
+}
+
+function t1BuildNew(){
+  t1Set = sampleN(verbs, 10);
+  const options = shuffle(t1Set.map(v=>v.inf));
+  const table = document.getElementById("t1Table");
+  table.innerHTML = "";
+
+  const thead = document.createElement("tr");
+  thead.innerHTML = `<th>Español</th><th>Elige el infinitivo</th>`;
+  table.appendChild(thead);
+
+  t1Set.forEach((v, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${v.es}</strong></td>
+      <td>
+        <select id="t1sel${i}">
+          <option value="">--elige--</option>
+          ${options.map(o => `<option value="${o}">${o}</option>`).join("")}
+        </select>
+      </td>
+    `;
+    table.appendChild(tr);
+  });
+
+  document.getElementById("t1Feedback").textContent = "";
+  t1UpdateCounters(0, 0);
+}
+
+document.getElementById("t1CheckBtn").addEventListener("click", () => {
+  if(t1Set.length === 0) return;
+  let correct = 0;
+  let answered = 0;
+
+  t1Set.forEach((v, i) => {
+    const val = norm(document.getElementById("t1sel"+i).value);
+    if(val) answered++;
+    if(val && val === norm(v.inf)) correct++;
+  });
+
+  t1UpdateCounters(correct, 10);
+  const fb = document.getElementById("t1Feedback");
+  fb.className = "feedback " + (correct >= 7 ? "ok" : "err");
+  fb.textContent = `Resultado final: ${correct}/10 · Nota: ${correct.toFixed(1)}/10`;
+});
+
+document.getElementById("t1NewBtn").addEventListener("click", () => {
+  t1BuildNew();
+});
+
+/* =========================
+   Pestaña 2: Infinitivo -> Past + PP
+========================= */
+let t2Set = [];
+let t2Index = 0;
+let t2Correct = 0;
+
+function t2UpdateCounters(){
+  document.getElementById("t2Correct").textContent = String(t2Correct);
+  document.getElementById("t2Progress").textContent = `${Math.min(t2Index,10)}/10`;
+  document.getElementById("t2Score").textContent = (t2Correct).toFixed(1);
+}
+
+function t2ShowCurrent(){
+  const prompt = document.getElementById("t2Prompt");
+  if(t2Index >= 10){
+    prompt.textContent = "✅ Ejercicio terminado";
+    return;
+  }
+  prompt.textContent = `Infinitivo: ${t2Set[t2Index].inf}`;
+}
+
+function t2Restart(){
+  t2Set = sampleN(verbs, 10);
+  t2Index = 0;
+  t2Correct = 0;
+  document.getElementById("t2Past").value = "";
+  document.getElementById("t2PP").value = "";
+  document.getElementById("t2Feedback").textContent = "";
+  t2UpdateCounters();
+  t2ShowCurrent();
+}
+
+document.getElementById("t2SubmitBtn").addEventListener("click", () => {
+  if(t2Index >= 10) return;
+
+  const v = t2Set[t2Index];
+  const past = norm(document.getElementById("t2Past").value);
+  const pp = norm(document.getElementById("t2PP").value);
+
+  const fb = document.getElementById("t2Feedback");
+  if(!past || !pp){
+    fb.className = "feedback err";
+    fb.textContent = "❗ Completa las dos casillas.";
+    return;
+  }
+
+  const okPast = past === norm(v.past);
+  const okPP = pp === norm(v.pp);
+
+  if(okPast && okPP){
+    t2Correct++;
+    fb.className = "feedback ok";
+    fb.textContent = "✅ Correcto";
+  }else{
+    fb.className = "feedback err";
+    fb.textContent = `❌ Incorrecto. Correcto: past="${v.past}" · pp="${v.pp}"`;
+  }
+
+  t2Index++;
+  document.getElementById("t2Past").value = "";
+  document.getElementById("t2PP").value = "";
+  t2UpdateCounters();
+  t2ShowCurrent();
+
+  if(t2Index >= 10){
+    fb.className = "feedback " + (t2Correct >= 7 ? "ok" : "err");
+    fb.textContent = `Resultado final: ${t2Correct}/10 · Nota: ${t2Correct.toFixed(1)}/10`;
+  }
+});
+
+document.getElementById("t2RestartBtn").addEventListener("click", () => {
+  t2Restart();
+});
+
+/* =========================
+   Pestaña 3: Español + forma aleatoria
+========================= */
+let t3Set = [];
+let t3Index = 0;
+let t3Correct = 0;
+let t3Current = null;
+
+function t3UpdateCounters(){
+  document.getElementById("t3Correct").textContent = String(t3Correct);
+  document.getElementById("t3Progress").textContent = `${Math.min(t3Index,10)}/10`;
+  document.getElementById("t3Score").textContent = (t3Correct).toFixed(1);
+}
+
+function t3Pick(){
+  if(t3Index >= 10) return null;
+  const v = t3Set[t3Index];
+  const kinds = ["inf", "past", "pp"];
+  const kind = kinds[Math.floor(Math.random()*kinds.length)];
+  return { v, kind };
+}
+
+function t3ShowCurrent(){
+  const prompt = document.getElementById("t3Prompt");
+  if(t3Index >= 10){
+    prompt.textContent = "✅ Ejercicio terminado";
+    return;
+  }
+  t3Current = t3Pick();
+  const label =
+    t3Current.kind === "inf" ? "INFINITIVO" :
+    t3Current.kind === "past" ? "PASADO" : "PARTICIPIO";
+  prompt.textContent = `Verbo en español: ${t3Current.v.es} · Escribe: ${label}`;
+}
+
+function t3Restart(){
+  t3Set = sampleN(verbs, 10);
+  t3Index = 0;
+  t3Correct = 0;
+  document.getElementById("t3Answer").value = "";
+  document.getElementById("t3Feedback").textContent = "";
+  t3UpdateCounters();
+  t3ShowCurrent();
+}
+
+document.getElementById("t3SubmitBtn").addEventListener("click", () => {
+  if(t3Index >= 10) return;
+  const ans = norm(document.getElementById("t3Answer").value);
+  const fb = document.getElementById("t3Feedback");
+
+  if(!ans){
+    fb.className = "feedback err";
+    fb.textContent = "❗ Escribe una respuesta.";
+    return;
+  }
+
+  const v = t3Current.v;
+  const expected = norm(v[t3Current.kind]);
+
+  if(ans === expected){
+    t3Correct++;
+    fb.className = "feedback ok";
+    fb.textContent = "✅ Correcto";
+  }else{
+    fb.className = "feedback err";
+    fb.textContent = `❌ Incorrecto. Correcto: "${v[t3Current.kind]}"`;
+  }
+
+  t3Index++;
+  document.getElementById("t3Answer").value = "";
+  t3UpdateCounters();
+  t3ShowCurrent();
+
+  if(t3Index >= 10){
+    fb.className = "feedback " + (t3Correct >= 7 ? "ok" : "err");
+    fb.textContent = `Resultado final: ${t3Correct}/10 · Nota: ${t3Correct.toFixed(1)}/10`;
+  }
+});
+
+document.getElementById("t3RestartBtn").addEventListener("click", () => {
+  t3Restart();
+});
+
+/* =========================
+   Inicialización
+========================= */
+setBadge();
+renderVerbsList();
+t1BuildNew();
+t2Restart();
+t3Restart();
+</script>
+
+</body>
+</html>
