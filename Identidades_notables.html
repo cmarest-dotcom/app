@@ -1,0 +1,1016 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identidades notables</title>
+  <style>
+    :root {
+      --bg: #f7f1f8;
+      --config-bg: #f6eefe;
+      --card: #ffffff;
+      --text: #374151;
+      --muted: #6b7280;
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --secondary-pastel: #cde7ff;
+      --secondary-pastel-text: #285680;
+      --success-pastel: #cfeedd;
+      --success-pastel-text: #2d6a4f;
+      --accent-pastel: #ffe6ee;
+      --accent-pastel-text: #9d4d6c;
+      --border: #e9dff2;
+      --ok: #15803d;
+      --ok-soft: #dcfce7;
+      --bad: #b91c1c;
+      --bad-soft: #fee2e2;
+      --warn: #92400e;
+      --warn-soft: #fef3c7;
+      --shadow: 0 12px 30px rgba(91, 74, 116, 0.10);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.35s ease;
+    }
+    .app { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-btn {
+      background: #efe4ff; color: #6d41b3; border: 1px solid #dbc8fa;
+      border-radius: 999px; padding: 10px 16px; font-weight: 800;
+    }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .check-group { display: grid; gap: 10px; margin-top: 2px; }
+    .check-option {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 14px; background: #fff; font-weight: 600;
+    }
+    .check-option input[type="checkbox"] { width: 18px; height: 18px; margin: 0; }
+    .screen { display: none; animation: fadeIn 0.25s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+    .card {
+      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border); padding: 24px;
+    }
+    .config-card { background: var(--config-bg); }
+    h1,h2,h3 { margin-top: 0; }
+    .subtitle { color: var(--muted); margin-top: -6px; margin-bottom: 20px; line-height: 1.45; }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    label { font-weight: 700; font-size: .95rem; }
+    select, input, textarea, button { font: inherit; }
+    select, input[type="number"], input[type="text"], textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px 14px; background: white; color: var(--text);
+    }
+    .range-wrap { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+    input[type="range"] { width: 100%; }
+    .pill {
+      background: #f4e8ff; color: #6b46c1; border-radius: 999px; padding: 8px 12px;
+      font-weight: 700; min-width: 92px; text-align: center;
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    button {
+      border: none; border-radius: 14px; padding: 12px 18px; cursor: pointer;
+      font-weight: 700; transition: transform .12s ease, opacity .12s ease, background .2s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .btn-primary { background: #d9c2ff; color: #4b2b82; }
+    .btn-primary:hover { background: #c9a5ff; }
+    .btn-secondary { background: var(--secondary-pastel); color: var(--secondary-pastel-text); }
+    .btn-success { background: var(--success-pastel); color: var(--success-pastel-text); }
+    .topbar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+      align-items: center; margin-bottom: 18px;
+    }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; }
+    .stat {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 14px;
+      padding: 10px 14px; min-width: 132px;
+    }
+    .stat .label { font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+    .stat .value { font-size: 1.05rem; font-weight: 800; }
+    .exercise-box {
+      text-align: center; padding: 28px 16px; background: #f8fbff; border: 1px dashed #bcd1f5;
+      border-radius: 18px; margin-bottom: 18px;
+    }
+    .exercise-text { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: .02em; }
+    .helper { font-size: .95rem; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+    .input-tools { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+    .tool-btn { background: #ffe8ef; color: var(--accent-pastel-text); padding: 10px 14px; min-width: 56px; }
+    textarea { min-height: 96px; resize: vertical; font-size: 1.05rem; }
+    .feedback { margin-top: 14px; padding: 14px 16px; border-radius: 14px; display: none; line-height: 1.45; font-weight: 700; }
+    .feedback.show { display: block; }
+    .feedback.ok { background: var(--ok-soft); color: var(--ok); }
+    .feedback.bad { background: var(--bad-soft); color: var(--bad); }
+    .feedback.warn { background: var(--warn-soft); color: var(--warn); }
+    .results-banner { text-align: center; padding: 18px; border-radius: 18px; margin-bottom: 20px; font-weight: 800; font-size: 1.15rem; }
+    .results-grid { display: grid; gap: 12px; margin-top: 18px; }
+    .result-item {
+      border: 1px solid var(--border); border-left: 8px solid #cbd5e1; background: #fff;
+      border-radius: 14px; padding: 14px;
+    }
+    .result-item.ok { border-left-color: var(--ok); }
+    .result-item.bad { border-left-color: var(--bad); }
+    .result-ex { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .tiny { color: var(--muted); font-size: .92rem; line-height: 1.4; }
+    .modal {
+      position: fixed; inset: 0; background: rgba(15,23,42,.48); display: none;
+      align-items: center; justify-content: center; padding: 20px; z-index: 999;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: min(560px,100%); background: white; border-radius: 20px;
+      padding: 24px; box-shadow: var(--shadow);
+    }
+    .score-big { font-size: clamp(2.2rem,8vw,4rem); font-weight: 900; margin: 12px 0 6px; text-align: center; }
+    .center { text-align: center; }
+    
+    .toggle-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top: 8px; }
+    .toggle-row input[type=checkbox] { width:18px; height:18px; }
+    .muted-box {
+      background:#fff8fb; border:1px solid #f2dce6; border-radius:14px; padding:12px 14px;
+      color:#7a5b68; font-size:.93rem;
+    }
+
+    .hidden { display:none !important; }
+
+    @media (max-width:640px) {
+      .app { padding: 14px; }
+      .card { padding: 18px; }
+      .stat { min-width: 100%; }
+      .btn-row button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tabs">
+      <button id="tabConfig" class="tab-btn active" type="button">Configuración</button>
+      <button id="tabActivity" class="tab-btn" type="button">Actividad</button>
+    </div>
+
+    <section id="configScreen" class="screen active">
+      <div class="card config-card">
+        <h1>Práctica de identidades notables</h1>
+        <p class="subtitle">Configura la actividad, practica una a una las expresiones y genera un informe final en PDF para compartir con el profesorado.</p>
+        <div class="grid two">
+          <div class="field">
+            <label>Tipo de ejercicio</label>
+            <div class="check-group">
+              <label class="check-option"><input type="checkbox" class="exercise-type-checkbox" value="square_sum" checked> Cuadrado de una suma</label>
+              <label class="check-option"><input type="checkbox" class="exercise-type-checkbox" value="square_diff" checked> Cuadrado de una resta</label>
+              <label class="check-option"><input type="checkbox" class="exercise-type-checkbox" value="sum_times_diff" checked> Suma por diferencia</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="difficulty">Nivel de dificultad</label>
+            <select id="difficulty">
+              <option value="easy">Fácil</option>
+              <option value="medium">Medio</option>
+              <option value="hard">Difícil</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="activityCount">Número de actividades</label>
+            <div class="range-wrap">
+              <input type="range" id="activityCount" min="3" max="10" step="1" value="5">
+              <div class="pill" id="activityCountValue">5</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="timeLimit">Tiempo total</label>
+            <div class="range-wrap">
+              <input type="range" id="timeLimit" min="30" max="300" step="30" value="120">
+              <div class="pill" id="timeLimitValue">2:00</div>
+            </div>
+            <label class="toggle-row"><input type="checkbox" id="noTime"> Sin tiempo</label>
+          </div>
+
+          <div class="field">
+            <label for="feedbackMode">Cuándo visualizar si la respuesta es correcta</label>
+            <select id="feedbackMode">
+              <option value="instant">Durante el ejercicio</option>
+              <option value="final">Al final del ejercicio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="startBtn" class="btn-primary" type="button">Iniciar actividad</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="activityScreen" class="screen">
+      <div class="card">
+        <div class="topbar">
+          <div>
+            <h2 style="margin-bottom:6px;">Actividad en marcha</h2>
+            <div class="tiny">Escribe el desarrollo final simplificado de cada identidad notable.</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="label">Ejercicio</div><div class="value" id="progressStat">1 / 5</div></div>
+            <div class="stat"><div class="label">Aciertos</div><div class="value" id="scoreStat">0</div></div>
+            <div class="stat"><div class="label">Tiempo</div><div class="value" id="timerStat">2:00</div></div>
+          </div>
+        </div>
+
+        <div class="exercise-box">
+          <div class="exercise-text" id="exerciseDisplay"></div>
+          <div class="helper">Usa el botón de exponente para escribir potencias. Ejemplo: <strong>x²</strong> o <strong>x^2</strong>.</div>
+        </div>
+
+        <div class="field">
+          <label for="answerInput">Resultado final</label>
+          <textarea id="answerInput" placeholder="Escribe aquí el desarrollo simplificado..."></textarea>
+        </div>
+
+        <div class="input-tools">
+          <button class="tool-btn" type="button" data-insert="^">^</button>
+          <button class="tool-btn" type="button" data-insert="²">²</button>
+          <button class="tool-btn" type="button" data-insert="³">³</button>
+          <button class="tool-btn" type="button" data-insert="+">+</button>
+          <button class="tool-btn" type="button" data-insert="-">−</button>
+          <button class="tool-btn" type="button" data-insert="/">/</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="checkNextBtn" class="btn-primary" type="button">Comprobar</button>
+          <button id="continueBtn" class="btn-success hidden" type="button">Continuar</button>
+          <button id="finishNowBtn" class="btn-secondary" type="button">Terminar ahora</button>
+        </div>
+
+        <div id="feedbackBox" class="feedback"></div>
+      </div>
+    </section>
+
+    <section id="resultsScreen" class="screen">
+      <div class="card">
+        <h2 class="center">Resultado final</h2>
+        <div id="resultsBanner" class="results-banner"></div>
+        <div id="scoreBig" class="score-big">0%</div>
+        <div class="center tiny" id="summaryLine"></div>
+        <div class="results-grid" id="resultsList"></div>
+        <div class="btn-row">
+          <button id="backToConfigBtn" class="btn-secondary" type="button">Finalizar</button>
+          <button id="openReportBtn" class="btn-success" type="button">Informe</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="reportModal" class="modal">
+    <div class="modal-card">
+      <h3>Generar informe PDF</h3>
+      <p class="subtitle">Escribe los datos del alumno o alumna para incluirlos en el informe descargable.</p>
+      <div class="grid two">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="studentName">Nombre completo</label>
+          <input id="studentName" type="text" placeholder="Nombre y apellidos">
+        </div>
+        <div class="field">
+          <label for="studentCourse">Curso</label>
+          <input id="studentCourse" type="text" placeholder="Ejemplo: 2º ESO A">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="downloadPdfBtn" class="btn-primary" type="button">Descargar PDF</button>
+        <button id="closeModalBtn" class="btn-secondary" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const state = {
+      config: null,
+      exercises: [],
+      currentIndex: 0,
+      correctCount: 0,
+      timerId: null,
+      timeRemaining: 0,
+      finishedByTimeout: false,
+      startedAt: null,
+      endedAt: null
+    };
+
+    const screens = {
+      config: document.getElementById('configScreen'),
+      activity: document.getElementById('activityScreen'),
+      results: document.getElementById('resultsScreen')
+    };
+
+    const exerciseTypeCheckboxes = Array.from(document.querySelectorAll('.exercise-type-checkbox'));
+    const difficultyEl = document.getElementById('difficulty');
+    const activityCountEl = document.getElementById('activityCount');
+    const activityCountValueEl = document.getElementById('activityCountValue');
+    const timeLimitEl = document.getElementById('timeLimit');
+    const timeLimitValueEl = document.getElementById('timeLimitValue');
+    const noTimeEl = document.getElementById('noTime');
+    const feedbackModeEl = document.getElementById('feedbackMode');
+    const startBtn = document.getElementById('startBtn');
+    const progressStatEl = document.getElementById('progressStat');
+    const scoreStatEl = document.getElementById('scoreStat');
+    const timerStatEl = document.getElementById('timerStat');
+    const exerciseDisplayEl = document.getElementById('exerciseDisplay');
+    const answerInputEl = document.getElementById('answerInput');
+    const feedbackBoxEl = document.getElementById('feedbackBox');
+    const checkNextBtn = document.getElementById('checkNextBtn');
+    const finishNowBtn = document.getElementById('finishNowBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const resultsBannerEl = document.getElementById('resultsBanner');
+    const scoreBigEl = document.getElementById('scoreBig');
+    const summaryLineEl = document.getElementById('summaryLine');
+    const resultsListEl = document.getElementById('resultsList');
+    const backToConfigBtn = document.getElementById('backToConfigBtn');
+    const openReportBtn = document.getElementById('openReportBtn');
+    const reportModalEl = document.getElementById('reportModal');
+    const studentNameEl = document.getElementById('studentName');
+    const studentCourseEl = document.getElementById('studentCourse');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const tabConfigBtn = document.getElementById('tabConfig');
+    const tabActivityBtn = document.getElementById('tabActivity');
+
+    function showScreen(name) {
+      Object.values(screens).forEach(el => el.classList.remove('active'));
+      screens[name].classList.add('active');
+      tabConfigBtn.classList.toggle('active', name === 'config');
+      tabActivityBtn.classList.toggle('active', name === 'activity');
+    }
+
+    function getSelectedExerciseTypes() {
+      return exerciseTypeCheckboxes.filter(el => el.checked).map(el => el.value);
+    }
+
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function toSuperscriptDigits(str) {
+      const map = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+      return String(str).split('').map(ch => map[ch] || ch).join('');
+    }
+
+    function formatMathText(expr) {
+      return String(expr)
+        .replace(/\^([0-9]+)/g, (_, exp) => toSuperscriptDigits(exp))
+        .replace(/\*/g, '');
+    }
+
+    activityCountEl.addEventListener('input', () => { activityCountValueEl.textContent = activityCountEl.value; });
+    timeLimitEl.addEventListener('input', () => {
+      timeLimitValueEl.textContent = noTimeEl.checked ? 'Sin tiempo' : formatTime(Number(timeLimitEl.value));
+    });
+    noTimeEl.addEventListener('change', () => {
+      const disabled = noTimeEl.checked;
+      timeLimitEl.disabled = disabled;
+      timeLimitEl.style.opacity = disabled ? '0.5' : '1';
+      timeLimitValueEl.textContent = disabled ? 'Sin tiempo' : formatTime(Number(timeLimitEl.value));
+    });
+
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', () => insertAtCursor(answerInputEl, btn.dataset.insert));
+    });
+
+    function insertAtCursor(textarea, text) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const current = textarea.value;
+      textarea.value = current.slice(0, start) + text + current.slice(end);
+      textarea.focus();
+      const pos = start + text.length;
+      textarea.setSelectionRange(pos, pos);
+    }
+
+    function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; }
+    function simplifyFraction(n, d) { const g = gcd(n, d); d = d < 0 ? -d : d; n = d < 0 ? -n : n; return { n: n/g, d: d/g }; }
+
+    function frac(n, d=1) {
+      if (d === 0) throw new Error('División por cero');
+      if (n === 0) return {n:0,d:1};
+      const sign = d < 0 ? -1 : 1;
+      n *= sign; d *= sign;
+      const g = gcd(n, d);
+      return {n:n/g, d:d/g};
+    }
+    function fracMul(a,b){ return frac(a.n*b.n, a.d*b.d); }
+    function fracAdd(a,b){ return frac(a.n*b.d + b.n*a.d, a.d*b.d); }
+    function fracNeg(a){ return {n:-a.n,d:a.d}; }
+    function fracEq(a,b){ return a.n===b.n && a.d===b.d; }
+    function fracIsZero(a){ return a.n===0; }
+    function fracToString(a){
+      if (a.d === 1) return String(a.n);
+      return `${a.n}/${a.d}`;
+    }
+
+    function monomialKey(varsMap) {
+      return Object.keys(varsMap).sort().map(k => varsMap[k]===1 ? k : `${k}^${varsMap[k]}`).join('*');
+    }
+
+    function parseVarString(vars) {
+      const map = {};
+      if (!vars) return map;
+      for (const ch of vars) map[ch] = (map[ch] || 0) + 1;
+      return map;
+    }
+
+    function cloneVarMap(map) {
+      return JSON.parse(JSON.stringify(map));
+    }
+
+    function multiplyMonomials(m1, m2) {
+      const vars = cloneVarMap(m1.vars);
+      for (const [k,v] of Object.entries(m2.vars)) vars[k] = (vars[k] || 0) + v;
+      return { coeff: fracMul(m1.coeff, m2.coeff), vars };
+    }
+
+    function squareMonomial(m) {
+      const vars = {};
+      for (const [k,v] of Object.entries(m.vars)) vars[k] = v * 2;
+      return { coeff: fracMul(m.coeff, m.coeff), vars };
+    }
+
+    function monomialToDisplay(m) {
+      const key = monomialKey(m.vars);
+      const coeff = m.coeff;
+      if (!key) return fracToString(coeff);
+      if (fracEq(coeff, frac(1))) return key.replace(/\*/g,'');
+      if (fracEq(coeff, frac(-1))) return '-' + key.replace(/\*/g,'');
+      return fracToString(coeff) + key.replace(/\*/g,'');
+    }
+
+    function degreeOfKey(key){
+  if(!key) return 0;
+  return key.split('*').reduce((sum,part)=>{
+    if(part.includes('^')) return sum + Number(part.split('^')[1]);
+    return sum + 1;
+  },0);
+}
+
+function polynomialToString(polyMap) {
+  const terms = Object.entries(polyMap)
+    .filter(([,c]) => !fracIsZero(c))
+    .sort((a,b) => {
+      // Orden por grado DESCENDENTE
+      const degDiff = degreeOfKey(b[0]) - degreeOfKey(a[0]);
+      if(degDiff !== 0) return degDiff;
+      // Si mismo grado, orden alfabético
+      return a[0].localeCompare(b[0]);
+    });
+
+  if (!terms.length) return '0';
+
+  return terms.map(([key, coeff], idx) => {
+    const sign = coeff.n < 0 ? '-' : '+';
+    const absCoeff = frac(Math.abs(coeff.n), coeff.d);
+
+    let term = '';
+    if (!key) {
+      term = fracToString(absCoeff);
+    } else if (fracEq(absCoeff, frac(1))) {
+      term = key.replace(/\*/g,'');
+    } else {
+      term = fracToString(absCoeff) + key.replace(/\*/g,'');
+    }
+
+    if (idx === 0) return (sign === '-' ? '-' : '') + term;
+    return ` ${sign} ${term}`;
+  }).join('');
+}
+
+    function addPolyTerm(polyMap, monomial, factor=frac(1)) {
+      const key = monomialKey(monomial.vars);
+      const coeff = fracMul(monomial.coeff, factor);
+      polyMap[key] = polyMap[key] ? fracAdd(polyMap[key], coeff) : coeff;
+      if (fracIsZero(polyMap[key])) delete polyMap[key];
+    }
+
+    function makeTerm(coeffObj, vars) {
+      return { coeff: coeffObj, vars: parseVarString(vars) };
+    }
+
+    function termToDisplayInput(term) {
+      const key = monomialKey(term.vars).replace(/\*/g,'');
+      if (!key) return fracToString(term.coeff);
+      if (fracEq(term.coeff, frac(1))) return key;
+      if (fracEq(term.coeff, frac(-1))) return '-' + key;
+      return fracToString(term.coeff) + key;
+    }
+
+    function createEasyTerms() {
+      return [makeTerm(frac(1), 'x'), makeTerm(frac(randomChoice([2,3,4,5,6,7,8,9])), '')];
+    }
+    function createMediumTerm() {
+      const coeff = frac(randomChoice([1,2,3,4,5,6]));
+      const vars = randomChoice(['x','y','a','b','m','n','xy','ab','mn']);
+      return makeTerm(coeff, vars);
+    }
+    function createHardTerm() {
+      const vars = randomChoice(['x','y','ab','xy','mn','abc','xyz']);
+      if (Math.random() < 0.7) {
+        const simp = frac(randomChoice([1,2,3,4,5,6,7]), randomChoice([2,3,4,5,6,7,8]));
+        return makeTerm(simp, vars);
+      }
+      return makeTerm(frac(randomChoice([1,2,3,4,5])), vars);
+    }
+    function generateDistinctTerms(difficulty) {
+      let a, b;
+      if (difficulty === 'easy') [a,b] = createEasyTerms();
+      else if (difficulty === 'medium') { a = createMediumTerm(); b = createMediumTerm(); }
+      else { a = createHardTerm(); b = createHardTerm(); }
+      let guard = 0;
+      while (termToDisplayInput(a) === termToDisplayInput(b) && guard < 20) {
+        b = difficulty === 'medium' ? createMediumTerm() : difficulty === 'hard' ? createHardTerm() : createEasyTerms()[1];
+        guard++;
+      }
+      return [a,b];
+    }
+
+    function buildExpectedPolynomial(type, a, b) {
+      const poly = {};
+      if (type === 'square_sum') {
+        addPolyTerm(poly, squareMonomial(a));
+        addPolyTerm(poly, multiplyMonomials(a,b), frac(2));
+        addPolyTerm(poly, squareMonomial(b));
+      } else if (type === 'square_diff') {
+        addPolyTerm(poly, squareMonomial(a));
+        addPolyTerm(poly, multiplyMonomials(a,b), frac(-2));
+        addPolyTerm(poly, squareMonomial(b));
+      } else {
+        addPolyTerm(poly, squareMonomial(a));
+        addPolyTerm(poly, squareMonomial(b), frac(-1));
+      }
+      return poly;
+    }
+
+    function buildExercise(type, difficulty) {
+      const [a, b] = generateDistinctTerms(difficulty);
+      let expressionDisplay = '';
+      if (type === 'square_sum') expressionDisplay = `(${termToDisplayInput(a)} + ${termToDisplayInput(b)})²`;
+      else if (type === 'square_diff') expressionDisplay = `(${termToDisplayInput(a)} - ${termToDisplayInput(b)})²`;
+      else expressionDisplay = `(${termToDisplayInput(a)} + ${termToDisplayInput(b)})(${termToDisplayInput(a)} - ${termToDisplayInput(b)})`;
+
+      const expectedPoly = buildExpectedPolynomial(type, a, b);
+      return {
+        type,
+        difficulty,
+        expressionDisplay,
+        expectedPoly,
+        expectedText: polynomialToString(expectedPoly),
+        answer: '',
+        isCorrect: false,
+        checked: false,
+        feedbackMessage: ''
+      };
+    }
+
+    function buildExerciseSet(config) {
+      const list = [];
+      for (let i = 0; i < config.activityCount; i++) {
+        list.push(buildExercise(randomChoice(config.exerciseTypes), config.difficulty));
+      }
+      return list;
+    }
+
+    function normalizeForParser(input) {
+      return input.trim()
+        .replace(/\s+/g, '')
+        .replace(/−/g, '-')
+        .replace(/²/g, '^2')
+        .replace(/³/g, '^3')
+        .replace(/⁴/g, '^4')
+        .replace(/⁵/g, '^5')
+        .replace(/⁶/g, '^6')
+        .replace(/⁷/g, '^7')
+        .replace(/⁸/g, '^8')
+        .replace(/⁹/g, '^9')
+        .replace(/⁰/g, '^0');
+    }
+
+    function parseCoeffPrefix(prefix) {
+      if (prefix === '' || prefix === '+') return frac(1);
+      if (prefix === '-') return frac(-1);
+      if (/^[+-]?\d+$/.test(prefix)) return frac(Number(prefix), 1);
+      if (/^[+-]?\d+\/\d+$/.test(prefix)) {
+        const [n,d] = prefix.split('/').map(Number);
+        return frac(n,d);
+      }
+      throw new Error('Coeficiente no válido');
+    }
+
+    function parseMonomialToken(token) {
+      let i = 0;
+      while (i < token.length && /[+\-0-9/]/.test(token[i])) i++;
+      const prefix = token.slice(0, i);
+      const rest = token.slice(i);
+      const coeff = parseCoeffPrefix(prefix);
+      const vars = {};
+      let j = 0;
+      while (j < rest.length) {
+        const ch = rest[j];
+        if (!/[a-zA-Z]/.test(ch)) throw new Error('Monomio no válido');
+        j++;
+        let exp = 1;
+        if (rest[j] === '^') {
+          j++;
+          let num = '';
+          while (j < rest.length && /\d/.test(rest[j])) { num += rest[j]; j++; }
+          if (!num) throw new Error('Exponente no válido');
+          exp = Number(num);
+        }
+        vars[ch] = (vars[ch] || 0) + exp;
+      }
+      return { coeff, vars };
+    }
+
+    function splitPolynomial(expr) {
+      const tokens = [];
+      let current = '';
+      for (let i = 0; i < expr.length; i++) {
+        const ch = expr[i];
+        if ((ch === '+' || ch === '-') && i !== 0) {
+          tokens.push(current);
+          current = ch;
+        } else {
+          current += ch;
+        }
+      }
+      if (current) tokens.push(current);
+      return tokens;
+    }
+
+    function parsePolynomial(expr) {
+      const cleaned = normalizeForParser(expr);
+      if (!cleaned) throw new Error('Vacío');
+      const poly = {};
+      const tokens = splitPolynomial(cleaned);
+      for (const token of tokens) {
+        const mono = parseMonomialToken(token);
+        addPolyTerm(poly, mono);
+      }
+      return poly;
+    }
+
+    function polyEquals(a, b) {
+      const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+      for (const k of keys) {
+        const av = a[k] || frac(0);
+        const bv = b[k] || frac(0);
+        if (!fracEq(av, bv)) return false;
+      }
+      return true;
+    }
+
+    function compareAlgebra(userInput, expectedPoly) {
+      if (!normalizeForParser(userInput)) return { ok:false, error:'No se ha escrito ninguna respuesta.' };
+      try {
+        const userPoly = parsePolynomial(userInput);
+        return { ok: polyEquals(userPoly, expectedPoly) };
+      } catch {
+        return { ok:false, error:'La respuesta no se ha podido interpretar. Escribe un polinomio final simplificado, por ejemplo: x^2+6x+9' };
+      }
+    }
+
+    function resetFeedback() { feedbackBoxEl.className = 'feedback'; feedbackBoxEl.textContent = ''; }
+    function showFeedback(message, type) { feedbackBoxEl.className = `feedback show ${type}`; feedbackBoxEl.innerHTML = message; }
+
+    function updateActivityUI() {
+      const ex = state.exercises[state.currentIndex];
+      progressStatEl.textContent = `${state.currentIndex + 1} / ${state.exercises.length}`;
+      scoreStatEl.textContent = String(state.correctCount);
+      timerStatEl.textContent = state.config?.noTime ? 'Sin tiempo' : formatTime(state.timeRemaining);
+      exerciseDisplayEl.textContent = formatMathText(ex.expressionDisplay);
+      answerInputEl.value = ex.answer || '';
+      resetFeedback();
+      continueBtn.classList.add('hidden');
+      checkNextBtn.disabled = false;
+      answerInputEl.disabled = false;
+      answerInputEl.focus();
+    }
+
+    function startTimer() {
+      clearInterval(state.timerId);
+      if (state.config.noTime) {
+        timerStatEl.textContent = 'Sin tiempo';
+        return;
+      }
+      state.timerId = setInterval(() => {
+        state.timeRemaining -= 1;
+        timerStatEl.textContent = formatTime(Math.max(0, state.timeRemaining));
+        if (state.timeRemaining <= 0) {
+          clearInterval(state.timerId);
+          finishActivity(true);
+        }
+      }, 1000);
+    }
+
+    function startActivity() {
+      const selectedExerciseTypes = getSelectedExerciseTypes();
+      if (!selectedExerciseTypes.length) {
+        alert('Selecciona al menos un tipo de ejercicio.');
+        return;
+      }
+      state.config = {
+        exerciseTypes: selectedExerciseTypes,
+        difficulty: difficultyEl.value,
+        activityCount: Number(activityCountEl.value),
+        timeLimit: Number(timeLimitEl.value),
+        feedbackMode: feedbackModeEl.value,
+        noTime: noTimeEl.checked
+      };
+      state.exercises = buildExerciseSet(state.config);
+      state.currentIndex = 0;
+      state.correctCount = 0;
+      state.timeRemaining = state.config.noTime ? 0 : state.config.timeLimit;
+      state.startedAt = new Date();
+      state.endedAt = null;
+      document.body.style.background = 'var(--bg)';
+      showScreen('activity');
+      updateActivityUI();
+      startTimer();
+    }
+
+    function saveCurrentAnswer() {
+      const ex = state.exercises[state.currentIndex];
+      ex.answer = answerInputEl.value.trim();
+    }
+
+    function evaluateExercise(index) {
+      const ex = state.exercises[index];
+      const result = compareAlgebra(ex.answer, ex.expectedPoly);
+      ex.checked = true;
+      ex.isCorrect = result.ok;
+      if (result.ok) ex.feedbackMessage = `Correcta. Una forma equivalente del resultado es <strong>${escapeHtml(formatMathText(ex.expectedText))}</strong>.`;
+      else ex.feedbackMessage = `${result.error || 'No es equivalente al desarrollo correcto.'}<br>Resultado correcto equivalente: <strong>${escapeHtml(formatMathText(ex.expectedText))}</strong>.`;
+      return ex.isCorrect;
+    }
+
+    function nextStep() {
+      saveCurrentAnswer();
+      const ex = state.exercises[state.currentIndex];
+      const wasChecked = ex.checked;
+      const wasCorrect = ex.isCorrect;
+      const nowCorrect = evaluateExercise(state.currentIndex);
+
+      if (!wasChecked && nowCorrect) state.correctCount += 1;
+      if (wasChecked && !wasCorrect && nowCorrect) state.correctCount += 1;
+      if (wasChecked && wasCorrect && !nowCorrect) state.correctCount -= 1;
+      scoreStatEl.textContent = String(state.correctCount);
+
+      if (state.config.feedbackMode === 'instant') {
+        showFeedback(ex.feedbackMessage, ex.isCorrect ? 'ok' : 'bad');
+        continueBtn.classList.remove('hidden');
+        checkNextBtn.disabled = true;
+        answerInputEl.disabled = true;
+        return;
+      }
+
+      if (state.currentIndex < state.exercises.length - 1) {
+        state.currentIndex += 1;
+        updateActivityUI();
+      } else {
+        finishActivity(false);
+      }
+    }
+
+    function continueAfterFeedback() {
+      if (state.currentIndex < state.exercises.length - 1) {
+        state.currentIndex += 1;
+        updateActivityUI();
+      } else {
+        finishActivity(false);
+      }
+    }
+
+    function finishActivity(byTimeout = false) {
+      clearInterval(state.timerId);
+      if (state.exercises.length) saveCurrentAnswer();
+      state.endedAt = new Date();
+      let totalCorrect = 0;
+      state.exercises.forEach((ex, index) => {
+        if (!ex.checked) {
+          if (index === state.currentIndex) ex.answer = answerInputEl.value.trim();
+          evaluateExercise(index);
+        }
+        if (ex.isCorrect) totalCorrect += 1;
+      });
+      state.correctCount = totalCorrect;
+      renderResults(byTimeout);
+      showScreen('results');
+    }
+
+    function renderResults(byTimeout) {
+      const total = state.exercises.length;
+      const score = total ? Math.round((state.correctCount / total) * 100) : 0;
+      const pass = score >= 50;
+      document.body.style.background = pass
+        ? 'linear-gradient(180deg, #dcfce7 0%, #f0fdf4 100%)'
+        : 'linear-gradient(180deg, #fee2e2 0%, #fff1f2 100%)';
+      resultsBannerEl.textContent = pass
+        ? 'Buen trabajo. Has alcanzado al menos el 50%.'
+        : 'Necesitas seguir practicando. Has quedado por debajo del 50%.';
+      resultsBannerEl.style.background = pass ? 'var(--ok-soft)' : 'var(--bad-soft)';
+      resultsBannerEl.style.color = pass ? 'var(--ok)' : 'var(--bad)';
+      scoreBigEl.textContent = `${score}%`;
+      summaryLineEl.textContent = `${state.correctCount} de ${total} correctas${byTimeout ? ' · Tiempo agotado' : ''}`;
+      resultsListEl.innerHTML = state.exercises.map((ex, i) => `
+        <div class="result-item ${ex.isCorrect ? 'ok' : 'bad'}">
+          <div class="result-ex">${i+1}. ${formatMathText(ex.expressionDisplay)}</div>
+          <div><strong>Tu respuesta:</strong> ${escapeHtml(ex.answer || 'Sin respuesta')}</div>
+          <div><strong>Resultado correcto equivalente:</strong> ${escapeHtml(formatMathText(ex.expectedText))}</div>
+          <div class="tiny" style="margin-top:6px;"><strong>${ex.isCorrect ? 'Correcta' : 'Incorrecta'}</strong></div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function configLabel(type) {
+      const map = {
+        square_sum: 'Cuadrado de una suma',
+        square_diff: 'Cuadrado de una resta',
+        sum_times_diff: 'Suma por diferencia',
+        easy: 'Fácil',
+        medium: 'Medio',
+        hard: 'Difícil',
+        instant: 'Durante el ejercicio',
+        final: 'Al final del ejercicio'
+      };
+      return map[type] || type;
+    }
+    function configTypesLabel(types) { return types.map(configLabel).join(', '); }
+
+    async function generatePdf() {
+      if (!window.jspdf) {
+        alert('No se ha podido cargar la librería del PDF.');
+        return;
+      }
+      const studentName = studentNameEl.value.trim() || 'Sin nombre';
+      const studentCourse = studentCourseEl.value.trim() || 'Sin curso';
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const margin = 14;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const total = state.exercises.length;
+      const score = total ? Math.round((state.correctCount / total) * 100) : 0;
+      const pass = score >= 50;
+      let y = 16;
+
+      const ensureSpace = (needed = 10) => {
+        if (y + needed > pageHeight - 16) {
+          doc.addPage();
+          y = 16;
+        }
+      };
+
+      const addWrappedText = (text, x, yPos, width, lineHeight = 5) => {
+        const lines = doc.splitTextToSize(String(text), width);
+        doc.text(lines, x, yPos);
+        return lines.length * lineHeight;
+      };
+
+      doc.setFillColor(247, 238, 254);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, 36, 4, 4, 'F');
+      doc.setDrawColor(221, 204, 245);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, 36, 4, 4, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Informe de práctica: identidades notables', margin + 4, y + 9);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Alumno o alumna: ${studentName}`, margin + 4, y + 17);
+      doc.text(`Curso: ${studentCourse}`, margin + 4, y + 23);
+      doc.text(`Fecha: ${new Date().toLocaleString('es-ES')}`, margin + 4, y + 29);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(pass ? 21 : 185, pass ? 128 : 28, pass ? 61 : 28);
+      doc.text(`${score}%`, pageWidth - margin - 22, y + 15, { align: 'center' });
+      doc.setFontSize(10);
+      doc.text(pass ? 'Resultado positivo' : 'Resultado a mejorar', pageWidth - margin - 22, y + 23, { align: 'center' });
+      doc.setTextColor(55, 65, 81);
+      y += 46;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Configuración inicial', margin, y);
+      y += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      const configLines = [
+        `Tipo de ejercicio: ${configTypesLabel(state.config.exerciseTypes)}`,
+        `Dificultad: ${configLabel(state.config.difficulty)}`,
+        `Número de actividades: ${state.config.activityCount}`,
+        `Tiempo configurado: ${state.config.noTime ? 'Sin tiempo' : formatTime(state.config.timeLimit)}`,
+        `Corrección visible: ${configLabel(state.config.feedbackMode)}`,
+        `Aciertos: ${state.correctCount} de ${total}`
+      ];
+      configLines.forEach(line => {
+        ensureSpace(6);
+        doc.text(line, margin, y);
+        y += 5.5;
+      });
+      y += 4;
+
+      const drawTableHeader = () => {
+        ensureSpace(14);
+        doc.setFillColor(230, 243, 255);
+        doc.rect(margin, y, pageWidth - margin * 2, 10, 'F');
+        doc.setDrawColor(200, 218, 240);
+        doc.rect(margin, y, pageWidth - margin * 2, 10);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Nº', margin + 3, y + 6.5);
+        doc.text('Ejercicio', margin + 15, y + 6.5);
+        doc.text('Tu respuesta', margin + 70, y + 6.5);
+        doc.text('Correcta', margin + 132, y + 6.5);
+        doc.text('Estado', pageWidth - margin - 18, y + 6.5, { align: 'center' });
+        y += 10;
+      };
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Resultados detallados', margin, y);
+      y += 6;
+      drawTableHeader();
+
+      const colX = [margin, margin + 10, margin + 65, margin + 127, pageWidth - margin - 26];
+      const colW = [10, 55, 62, 40, 26];
+
+      state.exercises.forEach((ex, index) => {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        const exLines = doc.splitTextToSize(formatMathText(ex.expressionDisplay), colW[1] - 3);
+        const ansLines = doc.splitTextToSize(ex.answer || 'Sin respuesta', colW[2] - 3);
+        const corrLines = doc.splitTextToSize(formatMathText(ex.expectedText), colW[3] - 3);
+        const statusLines = doc.splitTextToSize(ex.isCorrect ? 'Correcta' : 'Incorrecta', colW[4] - 4);
+        const maxLines = Math.max(exLines.length, ansLines.length, corrLines.length, statusLines.length, 1);
+        const rowH = Math.max(10, maxLines * 5 + 4);
+        ensureSpace(rowH + 2);
+        if (y + rowH > pageHeight - 16) {
+          doc.addPage();
+          y = 16;
+          drawTableHeader();
+        }
+        doc.setDrawColor(220, 220, 220);
+        doc.rect(colX[0], y, pageWidth - margin * 2, rowH);
+        for (let i = 1; i < colX.length; i++) doc.line(colX[i], y, colX[i], y + rowH);
+        doc.text(String(index + 1), colX[0] + 3, y + 6);
+        doc.text(exLines, colX[1] + 2, y + 6);
+        doc.text(ansLines, colX[2] + 2, y + 6);
+        doc.text(corrLines, colX[3] + 2, y + 6);
+        if (ex.isCorrect) {
+          doc.setTextColor(21, 128, 61);
+        } else {
+          doc.setTextColor(185, 28, 28);
+        }
+        doc.text(statusLines, colX[4] + colW[4] / 2, y + 6, { align: 'center' });
+        doc.setTextColor(55, 65, 81);
+        y += rowH;
+      });
+
+      const safeName = studentName.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'alumno';
+      doc.save(`informe_identidades_${safeName}.pdf`);
+      reportModalEl.classList.remove('show');
+    }
+
+    startBtn.addEventListener('click', (event) => { event.preventDefault(); startActivity(); });
+    tabConfigBtn.addEventListener('click', () => showScreen('config'));
+    tabActivityBtn.addEventListener('click', () => { if (state.exercises.length) showScreen('activity'); });
+    checkNextBtn.addEventListener('click', nextStep);
+    continueBtn.addEventListener('click', continueAfterFeedback);
+    finishNowBtn.addEventListener('click', () => finishActivity(false));
+    backToConfigBtn.addEventListener('click', () => {
+      document.body.style.background = 'var(--bg)';
+      showScreen('config');
+    });
+    openReportBtn.addEventListener('click', () => reportModalEl.classList.add('show'));
+    closeModalBtn.addEventListener('click', () => reportModalEl.classList.remove('show'));
+    downloadPdfBtn.addEventListener('click', generatePdf);
+    answerInputEl.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') nextStep();
+    });
+  </script>
+</body>
+</html>
