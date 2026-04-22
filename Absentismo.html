@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Absentismo</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+  :root{
+    --bg1:#fff7fb;
+    --bg2:#f7fbff;
+    --panel:#ffffffee;
+    --text:#4b4453;
+    --muted:#7c7483;
+    --line:#e7dfea;
+    --header:#ecdff6;
+    --header2:#dff2f2;
+    --shadow:0 10px 25px rgba(141,126,151,.16);
+    --shadow-soft:0 6px 14px rgba(141,126,151,.10);
+
+    --pink:#f8d7e8;
+    --blue:#d9eef7;
+    --green:#e7f5df;
+    --orange:#fbe8c8;
+
+    --red-soft:#ffd8d8;
+    --orange-soft:#ffe6c7;
+    --blue-soft:#eef7ff;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    padding:28px;
+    font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, #fff1f7 0%, transparent 32%),
+      radial-gradient(circle at top right, #eef9ff 0%, transparent 28%),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+    min-height:100vh;
+  }
+
+  .app{
+    max-width:1280px;
+    margin:0 auto;
+    background:var(--panel);
+    border:1px solid rgba(231,223,234,.9);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  .hero{
+    padding:28px 30px 20px;
+    background:linear-gradient(135deg, #f7e8f7 0%, #e8f5fb 100%);
+    border-bottom:1px solid var(--line);
+  }
+
+  h1{
+    margin:0 0 8px;
+    font-size:30px;
+    line-height:1.15;
+    color:#5a4b67;
+  }
+
+  .subtitle{
+    margin:0;
+    color:var(--muted);
+    font-size:15px;
+  }
+
+  .content{
+    padding:24px 30px 30px;
+  }
+
+  .panel{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:20px;
+    box-shadow:var(--shadow-soft);
+    padding:18px;
+    margin-bottom:18px;
+  }
+
+  .file-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+  }
+
+  .file-label{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px;
+    border-radius:16px;
+    background:linear-gradient(180deg, #ffffff 0%, #f8f2fb 100%);
+    border:1px solid #e6dbea;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      0 5px 10px rgba(141,126,151,.08);
+    cursor:pointer;
+    font-weight:600;
+    color:#5a4b67;
+  }
+
+  .file-label:hover{ transform:translateY(-1px); }
+
+  input[type="file"]{ display:none; }
+
+  .file-name{
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    padding:12px 16px;
+    border-radius:16px;
+    font-weight:700;
+    color:#5a4b67;
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.95),
+      inset 0 -3px 0 rgba(110,92,123,.08),
+      0 7px 14px rgba(141,126,151,.12);
+    border:1px solid rgba(181,166,190,.45);
+    min-height:46px;
+  }
+
+  .btn:hover{
+    transform:translateY(-1px);
+    filter:saturate(1.05);
+  }
+
+  .btn:active{
+    transform:translateY(1px);
+    box-shadow:
+      inset 0 2px 4px rgba(110,92,123,.08),
+      0 3px 6px rgba(141,126,151,.10);
+  }
+
+  .btn.pink{ background:linear-gradient(180deg, #ffe8f1 0%, var(--pink) 100%); }
+  .btn.blue{ background:linear-gradient(180deg, #ecf8ff 0%, var(--blue) 100%); }
+  .btn.green{ background:linear-gradient(180deg, #f2fbec 0%, var(--green) 100%); }
+  .btn.orange{ background:linear-gradient(180deg, #fff4e3 0%, var(--orange) 100%); }
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;
+    margin-top:6px;
+  }
+
+  .stat{
+    border-radius:18px;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg, #fff 0%, #fcfbff 100%);
+    box-shadow:var(--shadow-soft);
+  }
+
+  .stat .k{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  .stat .v{
+    font-size:26px;
+    font-weight:800;
+    color:#5a4b67;
+  }
+
+  .table-wrap{
+    overflow:auto;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:white;
+  }
+
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width:980px;
+  }
+
+  th, td{
+    padding:12px 14px;
+    border-bottom:1px solid #efe7f2;
+    text-align:left;
+    vertical-align:middle;
+    font-size:14px;
+  }
+
+  thead th{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:linear-gradient(180deg, var(--header) 0%, var(--header2) 100%);
+    color:#5a4b67;
+    font-size:14px;
+  }
+
+  tbody tr:nth-child(even){ background:#fdfbff; }
+  tbody tr:hover{ background:#f8fbff; }
+
+  .rojo{
+    background:linear-gradient(90deg, #fff2f2 0%, var(--red-soft) 100%) !important;
+  }
+
+  .naranja{
+    background:linear-gradient(90deg, #fff8ef 0%, var(--orange-soft) 100%) !important;
+  }
+
+  .pill{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    border:1px solid rgba(0,0,0,.06);
+    background:#f7f3fa;
+    color:#5a4b67;
+  }
+
+  .pill.rojo{
+    background:#ffdada !important;
+    border-color:#efb5b5;
+  }
+
+  .pill.naranja{
+    background:#ffe8cb !important;
+    border-color:#edc996;
+  }
+
+  .empty{
+    padding:26px;
+    text-align:center;
+    color:var(--muted);
+    font-style:italic;
+  }
+
+  .helper{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  @media (max-width: 720px){
+    body{ padding:16px; }
+    .hero, .content{ padding-left:18px; padding-right:18px; }
+    h1{ font-size:24px; }
+    .btn{ width:100%; }
+    .controls{ display:grid; grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <h1>Control de absentismo</h1>
+      <p class="subtitle">Carga tu hoja Excel, genera el resumen automáticamente y exporta informes completos o solo del alumnado con seguimiento.</p>
+    </div>
+
+    <div class="content">
+      <div class="panel">
+        <div class="file-wrap">
+          <label class="file-label" for="fileInput">📄 Seleccionar archivo Excel</label>
+          <span id="fileName" class="file-name">Ningún archivo seleccionado</span>
+          <input type="file" id="fileInput" accept=".xls,.xlsx">
+        </div>
+        <div class="helper">La aplicación busca la columna <strong>“Alumno/a”</strong> y calcula automáticamente CI, CJ, J, I y R.</div>
+      </div>
+
+      <div class="panel">
+        <div class="controls">
+          <button class="btn pink" onclick="exportExcel()">Exportar Excel (todos)</button>
+          <button class="btn blue" onclick="exportPDF()">Exportar PDF (todos)</button>
+          <button class="btn orange" onclick="exportFilteredExcel()">Resumen absentista Excel</button>
+          <button class="btn orange" onclick="exportFilteredPDF()">Resumen absentista PDF</button>
+          <button class="btn green" onclick="exportTextExcel()">Informe redactado Excel</button>
+          <button class="btn green" onclick="exportTextPDF()">Informe redactado PDF</button>
+        </div>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stat"><div class="k">Total alumnado</div><div class="v" id="totalAlumnado">0</div></div>
+        <div class="stat"><div class="k">En seguimiento</div><div class="v" id="totalSeguimiento">0</div></div>
+        <div class="stat"><div class="k">Casos en rojo</div><div class="v" id="totalRojo">0</div></div>
+        <div class="stat"><div class="k">Casos en naranja</div><div class="v" id="totalNaranja">0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="table-wrap">
+          <table id="tabla">
+            <thead>
+              <tr>
+                <th>Alumno/a</th>
+                <th>CI</th>
+                <th>CJ</th>
+                <th>Total días</th>
+                <th>J</th>
+                <th>I</th>
+                <th>Total tramos</th>
+                <th>R</th>
+                <th>Estado</th>
+                <th>Resumen</th>
+              </tr>
+            </thead>
+            <tbody id="tablaBody">
+              <tr><td colspan="10" class="empty">Carga un archivo Excel para generar el resumen.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let datos = [];
+let filtrados = [];
+
+document.getElementById('fileInput').addEventListener('change', handleFile);
+
+function handleFile(e){
+  const file = e.target.files[0];
+  document.getElementById('fileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, {type:'array'});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet, {header:1, raw:false});
+    procesar(json);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function procesar(json){
+  const headerIndex = json.findIndex(row => Array.isArray(row) && row.some(c => String(c).trim() === "Alumno/a"));
+  if(headerIndex === -1){
+    alert('No se ha encontrado la columna "Alumno/a" en el archivo.');
+    return;
+  }
+
+  const filas = json.slice(headerIndex + 1);
+  datos = [];
+  filtrados = [];
+
+  filas.forEach(row => {
+    const nombre = row && row[0] ? String(row[0]).trim() : "";
+    if(!nombre) return;
+
+    let CI = 0, CJ = 0, J = 0, I = 0, R = 0;
+
+    row.slice(1).forEach(celda => {
+      if(celda === undefined || celda === null || celda === "") return;
+      const texto = String(celda).trim().toUpperCase();
+
+      if(texto === "CI"){ CI += 1; return; }
+      if(texto === "CJ"){ CJ += 1; return; }
+
+      const matchJ = texto.match(/(\d+)\s*J/);
+      const matchI = texto.match(/(\d+)\s*I/);
+      const matchR = texto.match(/(\d+)\s*R/);
+
+      if(matchJ) J += parseInt(matchJ[1], 10);
+      if(matchI) I += parseInt(matchI[1], 10);
+      if(matchR) R += parseInt(matchR[1], 10);
+    });
+
+    const totalDias = CI + CJ;
+    const totalTramos = J + I;
+
+    let estado = "";
+    if(totalDias >= 5) estado = "rojo";
+    else if(totalTramos >= 25) estado = "naranja";
+
+    const etiquetaEstado = estado === "rojo" ? "Rojo" : estado === "naranja" ? "Naranja" : "Normal";
+    const textoResumen = `${nombre} ha faltado ${CI}CI, ${CJ}CJ, ${J}J, ${I}I, ${R}R.`;
+
+    const fila = { nombre, CI, CJ, totalDias, J, I, totalTramos, R, estado, etiquetaEstado, textoResumen };
+    datos.push(fila);
+
+    if(estado === "rojo" || estado === "naranja"){
+      filtrados.push(fila);
+    }
+  });
+
+  pintarTabla();
+  actualizarIndicadores();
+}
+
+function pintarTabla(){
+  const tbody = document.getElementById("tablaBody");
+
+  if(datos.length === 0){
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">No se han encontrado registros de alumnado.</td></tr>';
+    return;
+  }
+
+  let html = "";
+  datos.forEach(d => {
+    const badge = d.estado
+      ? `<span class="pill ${d.estado}">${d.etiquetaEstado}</span>`
+      : `<span class="pill">Normal</span>`;
+
+    html += `
+      <tr class="${d.estado}">
+        <td>${escapeHtml(d.nombre)}</td>
+        <td>${d.CI}</td>
+        <td>${d.CJ}</td>
+        <td>${d.totalDias}</td>
+        <td>${d.J}</td>
+        <td>${d.I}</td>
+        <td>${d.totalTramos}</td>
+        <td>${d.R}</td>
+        <td>${badge}</td>
+        <td>${escapeHtml(d.textoResumen)}</td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function actualizarIndicadores(){
+  document.getElementById("totalAlumnado").textContent = datos.length;
+  document.getElementById("totalSeguimiento").textContent = filtrados.length;
+  document.getElementById("totalRojo").textContent = filtrados.filter(f => f.estado === "rojo").length;
+  document.getElementById("totalNaranja").textContent = filtrados.filter(f => f.estado === "naranja").length;
+}
+
+function datosParaExportarTodos(){
+  return datos.map(d => ({
+    "Alumno/a": d.nombre,
+    "CI": d.CI,
+    "CJ": d.CJ,
+    "Total días": d.totalDias,
+    "J": d.J,
+    "I": d.I,
+    "Total tramos": d.totalTramos,
+    "R": d.R,
+    "Estado": d.etiquetaEstado,
+    "Resumen": d.textoResumen
+  }));
+}
+
+function datosParaExportarFiltrados(){
+  return filtrados.map(d => ({
+    "Alumno/a": d.nombre,
+    "CI": d.CI,
+    "CJ": d.CJ,
+    "Total días": d.totalDias,
+    "J": d.J,
+    "I": d.I,
+    "Total tramos": d.totalTramos,
+    "R": d.R,
+    "Estado": d.etiquetaEstado
+  }));
+}
+
+function exportExcel(){
+  if(datos.length === 0){ alert("No hay datos para exportar."); return; }
+  const ws = XLSX.utils.json_to_sheet(datosParaExportarTodos());
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Resumen");
+  XLSX.writeFile(wb, "resumen_absentismo.xlsx");
+}
+
+function exportFilteredExcel(){
+  if(filtrados.length === 0){ alert("No hay alumnado rojo o naranja para exportar."); return; }
+  const ws = XLSX.utils.json_to_sheet(datosParaExportarFiltrados());
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Resumen absentista");
+  XLSX.writeFile(wb, "resumen_absentista.xlsx");
+}
+
+function exportTextExcel(){
+  if(filtrados.length === 0){ alert("No hay alumnado rojo o naranja para exportar."); return; }
+  const textos = filtrados.map(f => ({
+    "Alumno/a": f.nombre,
+    "Informe": f.textoResumen,
+    "Estado": f.etiquetaEstado
+  }));
+  const ws = XLSX.utils.json_to_sheet(textos);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Informe redactado");
+  XLSX.writeFile(wb, "informe_redactado_absentismo.xlsx");
+}
+
+function exportPDF(){
+  if(datos.length === 0){ alert("No hay datos para exportar."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  doc.setFontSize(14);
+  doc.text("Resumen completo de absentismo", 14, 12);
+  doc.setFontSize(9);
+  doc.text(`Total alumnado: ${datos.length}`, 14, 18);
+
+  const rows = datos.map(d => [d.nombre, d.CI, d.CJ, d.totalDias, d.J, d.I, d.totalTramos, d.R, d.etiquetaEstado]);
+  doc.autoTable({
+    startY: 22,
+    head: [["Alumno/a", "CI", "CJ", "Total días", "J", "I", "Total tramos", "R", "Estado"]],
+    body: rows,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+    headStyles: { fillColor: [236, 223, 246], textColor: [90, 75, 103] },
+    alternateRowStyles: { fillColor: [252, 249, 255] },
+    margin: { left: 10, right: 10 }
+  });
+  doc.save("resumen_absentismo.pdf");
+}
+
+function exportFilteredPDF(){
+  if(filtrados.length === 0){ alert("No hay alumnado rojo o naranja para exportar."); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+
+  doc.setFontSize(13);
+  doc.text("Resumen absentista", 14, 12);
+  doc.setFontSize(8.5);
+  doc.text(`Alumnado en seguimiento: ${filtrados.length}`, 14, 17);
+
+  const rows = filtrados.map(d => [d.nombre, d.CI, d.CJ, d.totalDias, d.J, d.I, d.totalTramos, d.R, d.etiquetaEstado]);
+
+  doc.autoTable({
+    startY: 21,
+    head: [["Alumno/a", "CI", "CJ", "Días", "J", "I", "Tramos", "R", "Estado"]],
+    body: rows,
+    theme: 'grid',
+    styles: {
+      fontSize: 7,
+      cellPadding: 1.5,
+      lineColor: [220, 212, 226],
+      lineWidth: 0.1,
+      overflow: 'linebreak',
+      valign: 'middle'
+    },
+    headStyles: {
+      fillColor: [236, 223, 246],
+      textColor: [90, 75, 103],
+      fontStyle: 'bold',
+      fontSize: 7.2
+    },
+    alternateRowStyles: { fillColor: [252, 249, 255] },
+    columnStyles: {
+      0: { cellWidth: 55 },
+      1: { cellWidth: 12, halign: 'center' },
+      2: { cellWidth: 12, halign: 'center' },
+      3: { cellWidth: 14, halign: 'center' },
+      4: { cellWidth: 12, halign: 'center' },
+      5: { cellWidth: 12, halign: 'center' },
+      6: { cellWidth: 18, halign: 'center' },
+      7: { cellWidth: 10, halign: 'center' },
+      8: { cellWidth: 22, halign: 'center' }
+    },
+    margin: { top: 21, left: 10, right: 10, bottom: 12 },
+    didParseCell: function(data) {
+      if(data.section === 'body' && data.row && data.row.raw){
+        const estado = data.row.raw[8];
+        if(estado === 'Rojo'){
+          data.cell.styles.fillColor = [255, 237, 237];
+        } else if(estado === 'Naranja'){
+          data.cell.styles.fillColor = [255, 245, 231];
+        }
+      }
+    }
+  });
+
+  doc.save("resumen_absentista.pdf");
+}
+
+function exportTextPDF(){
+  if(filtrados.length === 0){ alert("No hay alumnado rojo o naranja para exportar."); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  doc.setFontSize(13);
+  doc.text("Informe redactado de absentismo", 14, 12);
+  doc.setFontSize(8.5);
+  doc.text(`Alumnado en seguimiento: ${filtrados.length}`, 14, 17);
+
+  const rows = filtrados.map(f => [f.nombre, f.etiquetaEstado, f.textoResumen]);
+
+  doc.autoTable({
+    startY: 21,
+    head: [["Alumno/a", "Estado", "Informe"]],
+    body: rows,
+    theme: 'grid',
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      overflow: 'linebreak',
+      valign: 'top'
+    },
+    headStyles: {
+      fillColor: [223, 242, 242],
+      textColor: [90, 75, 103],
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: { fillColor: [252, 249, 255] },
+    columnStyles: {
+      0: { cellWidth: 42 },
+      1: { cellWidth: 22, halign: 'center' },
+      2: { cellWidth: 120 }
+    },
+    margin: { left: 10, right: 10, bottom: 12 },
+    didParseCell: function(data) {
+      if(data.section === 'body' && data.row && data.row.raw){
+        const estado = data.row.raw[1];
+        if(estado === 'Rojo'){
+          data.cell.styles.fillColor = [255, 237, 237];
+        } else if(estado === 'Naranja'){
+          data.cell.styles.fillColor = [255, 245, 231];
+        }
+      }
+    }
+  });
+
+  doc.save("informe_redactado_absentismo.pdf");
+}
+
+function escapeHtml(text){
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+</script>
+</body>
+</html>
