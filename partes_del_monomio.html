@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Práctica de monomios</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #182033;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --ok: #16a34a;
+      --bad: #dc2626;
+      --warn: #d97706;
+      --line: #dbe3ef;
+      --soft: #eef4ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #edf3ff 0%, #f8fafc 55%, #f1f5f9 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      width: min(1120px, calc(100% - 32px));
+      margin: 24px auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.7rem, 4vw, 2.6rem);
+      letter-spacing: -0.04em;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(255,255,255,.8);
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 16px 44px rgba(15, 23, 42, .08);
+    }
+
+    .card h2, .card h3 {
+      margin-top: 0;
+      letter-spacing: -0.025em;
+    }
+
+    .definition {
+      display: grid;
+      gap: 12px;
+    }
+
+    .definition-item {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+    }
+
+    .definition-item strong {
+      color: var(--primary-dark);
+    }
+
+    .example {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: var(--soft);
+      font-weight: 800;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 16px 0 8px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font: inherit;
+      background: white;
+      color: var(--text);
+    }
+
+    .option-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .checkline input {
+      transform: scale(1.15);
+    }
+
+    button.primary, button.secondary, button.ghost {
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 12px 28px rgba(37, 99, 235, .22);
+    }
+
+    button.primary:hover { background: var(--primary-dark); }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--primary-dark);
+      border: 1px solid var(--line);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, .48);
+      z-index: 50;
+    }
+
+    .modal-box {
+      width: min(480px, 100%);
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: 0 28px 80px rgba(15, 23, 42, .28);
+    }
+
+    .modal-box h2 {
+      margin-top: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .hidden { display: none !important; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-dark);
+      font-weight: 800;
+      border: 1px solid #cfe0ff;
+    }
+
+    .timer.warning { color: var(--warn); background: #fff7ed; border-color: #fed7aa; }
+    .timer.danger { color: var(--bad); background: #fef2f2; border-color: #fecaca; }
+
+    .progress {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 20px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa, #2563eb);
+      transition: width .3s ease;
+    }
+
+    .question {
+      display: grid;
+      gap: 18px;
+    }
+
+    .monomial-display {
+      text-align: center;
+      padding: 26px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border: 1px solid #cfe0ff;
+    }
+
+    .monomial-display .label {
+      color: var(--muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .8rem;
+    }
+
+    .monomial {
+      margin-top: 8px;
+      font-size: clamp(2rem, 7vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .feedback {
+      min-height: 54px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 750;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .feedback.ok {
+      color: var(--ok);
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .feedback.bad {
+      color: var(--bad);
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      font-size: .95rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #475569;
+    }
+
+    tr.correct td { background: #f0fdf4; }
+    tr.incorrect td { background: #fef2f2; }
+
+    .score {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .score-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .score-box strong {
+      display: block;
+      font-size: 2rem;
+      color: var(--primary-dark);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    @media (max-width: 860px) {
+      header, .grid, .topbar, .answer-grid, .option-row, .score {
+        grid-template-columns: 1fr;
+      }
+
+      header, .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .tabs { width: 100%; }
+      .tab { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <h1>Práctica de monomios</h1>
+        <p>Identifica coeficiente, parte literal y grado.</p>
+      </div>
+      <nav class="tabs" aria-label="Pestañas de la aplicación">
+        <button class="tab active" id="tabConfig" type="button">1. Configuración</button>
+        <button class="tab" id="tabPractice" type="button" disabled>2. Actividades</button>
+      </nav>
+    </header>
+
+    <main id="configView">
+      <div class="grid">
+        <section class="card">
+          <h2>Descripción</h2>
+          <div class="definition">
+            <div class="definition-item">
+              <strong>Monomio:</strong> expresión algebraica formada por un solo término: un coeficiente multiplicado por una parte literal.
+              <br><span class="example">−3x²y</span>
+            </div>
+            <div class="definition-item">
+              <strong>Coeficiente:</strong> número que multiplica a las letras. En <strong>−3x²y</strong>, el coeficiente es <strong>−3</strong>. Si no aparece número, el coeficiente suele ser <strong>1</strong> o <strong>−1</strong>.
+            </div>
+            <div class="definition-item">
+              <strong>Parte literal:</strong> conjunto de letras con sus exponentes. En <strong>−3x²y</strong>, la parte literal es <strong>x²y</strong>.
+            </div>
+            <div class="definition-item">
+              <strong>Grado:</strong> suma de los exponentes de la parte literal. En <strong>−3x²y</strong>, el grado es <strong>2 + 1 = 3</strong>.
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Configuración de la prueba</h2>
+          <form id="settingsForm">
+            <label for="difficulty">Nivel de dificultad</label>
+            <select id="difficulty">
+              <option value="facil">Fácil</option>
+              <option value="medio">Medio</option>
+              <option value="dificil">Difícil</option>
+            </select>
+
+            <div class="option-row">
+              <div>
+                <label for="count">Número de actividades</label>
+                <input id="count" type="number" min="5" max="20" value="10" />
+              </div>
+              <div>
+                <label for="checkMode">Corrección</label>
+                <select id="checkMode">
+                  <option value="instant">Comprobar en el momento</option>
+                  <option value="final">Comprobar al final</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="checkline" for="timed">
+              <input id="timed" type="checkbox" /> Activar tiempo
+            </label>
+
+            <label for="timeLimit">Tiempo total</label>
+            <select id="timeLimit" disabled>
+              <option value="30">30 segundos</option>
+              <option value="45">45 segundos</option>
+              <option value="60" selected>1 minuto</option>
+              <option value="90">1 minuto 30 segundos</option>
+              <option value="120">2 minutos</option>
+            </select>
+
+            <div class="actions">
+              <button class="primary" type="submit">Iniciar</button>
+              <button class="ghost" type="button" id="demoBtn">Cargar ejemplo rápido</button>
+            </div>
+            <p class="small">El alumnado podrá avanzar entre actividades y ver la nota final al terminar o cuando se agote el tiempo.</p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <main id="practiceView" class="hidden">
+      <section class="card">
+        <div class="topbar">
+          <div>
+            <h2 id="activityTitle">Actividad 1</h2>
+            <p class="small" id="activitySubtitle">Escribe los datos del monomio.</p>
+          </div>
+          <div class="pill timer" id="timerPill">Sin tiempo</div>
+        </div>
+
+        <div class="progress" aria-label="Progreso">
+          <span id="progressBar"></span>
+        </div>
+
+        <div id="questionArea" class="question">
+          <div class="monomial-display">
+            <div class="label">Monomio</div>
+            <div class="monomial" id="monomialText"></div>
+          </div>
+
+          <div class="answer-grid">
+            <div>
+              <label for="answerCoef">Coeficiente</label>
+              <input id="answerCoef" type="text" placeholder="Ej.: -3, 1/2, √2" autocomplete="off" />
+            </div>
+            <div>
+              <label for="answerLiteral">Parte literal</label>
+              <input id="answerLiteral" type="text" placeholder="Ej.: x^2y" autocomplete="off" />
+            </div>
+            <div>
+              <label for="answerDegree">Grado</label>
+              <input id="answerDegree" type="text" placeholder="Ej.: 3" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="feedback" id="feedback">Completa los tres campos.</div>
+
+          <div class="actions">
+            <button class="primary" type="button" id="checkBtn">Comprobar</button>
+            <button class="secondary" type="button" id="nextBtn">Siguiente</button>
+            <button class="ghost" type="button" id="finishBtn">Finalizar prueba</button>
+          </div>
+        </div>
+
+        <div id="resultArea" class="hidden">
+          <h2>Resultados</h2>
+          <div class="score">
+            <div class="score-box"><strong id="scoreValue">0</strong><span>Aciertos</span></div>
+            <div class="score-box"><strong id="totalValue">0</strong><span>Total</span></div>
+            <div class="score-box"><strong id="percentValue">0%</strong><span>Porcentaje</span></div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Monomio</th>
+                  <th>Tu respuesta</th>
+                  <th>Respuesta correcta</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody"></tbody>
+            </table>
+          </div>
+          <div class="actions">
+            <button class="primary" type="button" id="reportBtn">Informe</button>
+            <button class="secondary" type="button" id="retryBtn">Nueva prueba</button>
+            <button class="ghost" type="button" id="reviewBtn">Revisar configuración</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="reportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+      <div class="modal-box">
+        <h2 id="reportTitle">Descargar informe</h2>
+        <p class="small">Escribe los datos del alumno. El informe se preparará en una sola página A4 para guardar o imprimir en PDF.</p>
+        <label for="studentName">Nombre</label>
+        <input id="studentName" type="text" placeholder="Nombre del alumno/a" />
+        <label for="studentClass">Curso</label>
+        <input id="studentClass" type="text" placeholder="Ej.: 2.º ESO A" />
+        <div class="actions">
+          <button class="primary" type="button" id="downloadReportBtn">Descargar PDF</button>
+          <button class="ghost" type="button" id="closeReportBtn">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const els = {
+      tabConfig: document.getElementById('tabConfig'),
+      tabPractice: document.getElementById('tabPractice'),
+      configView: document.getElementById('configView'),
+      practiceView: document.getElementById('practiceView'),
+      settingsForm: document.getElementById('settingsForm'),
+      difficulty: document.getElementById('difficulty'),
+      count: document.getElementById('count'),
+      checkMode: document.getElementById('checkMode'),
+      timed: document.getElementById('timed'),
+      timeLimit: document.getElementById('timeLimit'),
+      demoBtn: document.getElementById('demoBtn'),
+      timerPill: document.getElementById('timerPill'),
+      activityTitle: document.getElementById('activityTitle'),
+      monomialText: document.getElementById('monomialText'),
+      progressBar: document.getElementById('progressBar'),
+      answerCoef: document.getElementById('answerCoef'),
+      answerLiteral: document.getElementById('answerLiteral'),
+      answerDegree: document.getElementById('answerDegree'),
+      feedback: document.getElementById('feedback'),
+      checkBtn: document.getElementById('checkBtn'),
+      nextBtn: document.getElementById('nextBtn'),
+      finishBtn: document.getElementById('finishBtn'),
+      questionArea: document.getElementById('questionArea'),
+      resultArea: document.getElementById('resultArea'),
+      scoreValue: document.getElementById('scoreValue'),
+      totalValue: document.getElementById('totalValue'),
+      percentValue: document.getElementById('percentValue'),
+      resultsBody: document.getElementById('resultsBody'),
+      retryBtn: document.getElementById('retryBtn'),
+      reviewBtn: document.getElementById('reviewBtn'),
+      reportBtn: document.getElementById('reportBtn'),
+      reportModal: document.getElementById('reportModal'),
+      studentName: document.getElementById('studentName'),
+      studentClass: document.getElementById('studentClass'),
+      downloadReportBtn: document.getElementById('downloadReportBtn'),
+      closeReportBtn: document.getElementById('closeReportBtn')
+    };
+
+    let state = {
+      settings: null,
+      exercises: [],
+      index: 0,
+      answers: [],
+      checkedCurrent: false,
+      remaining: 0,
+      timerId: null,
+      finished: false
+    };
+
+    const superscripts = { '0':'⁰', '1':'¹', '2':'²', '3':'³', '4':'⁴', '5':'⁵', '6':'⁶', '7':'⁷', '8':'⁸', '9':'⁹' };
+
+    function sup(n) {
+      return String(n).split('').map(ch => superscripts[ch] || ch).join('');
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(a); b = Math.abs(b);
+      while (b) [a, b] = [b, a % b];
+      return a || 1;
+    }
+
+    function fraction() {
+      let num = rand(1, 9) * pick([-1, 1]);
+      let den = rand(2, 9);
+      const g = gcd(num, den);
+      num /= g; den /= g;
+      if (den === 1) return String(num);
+      return `${num}/${den}`;
+    }
+
+    function rootCoefficient() {
+      return pick(['√2', '-√2', '√3', '-√3', '2√5', '-3√2']);
+    }
+
+    function makeLiteral(letterCount, minExp, maxExp) {
+      const letters = shuffle(['x', 'y', 'z', 'a', 'b']).slice(0, letterCount).sort();
+      const parts = letters.map(letter => {
+        const exponent = rand(minExp, maxExp);
+        return { letter, exponent };
+      });
+      const display = parts.map(p => p.letter + (p.exponent === 1 ? '' : sup(p.exponent))).join('');
+      const plain = parts.map(p => p.letter + (p.exponent === 1 ? '' : '^' + p.exponent)).join('');
+      const degree = parts.reduce((sum, p) => sum + p.exponent, 0);
+      return { display, plain, degree };
+    }
+
+    function renderCoefficient(coef) {
+      if (coef === '1') return '';
+      if (coef === '-1') return '-';
+      return coef;
+    }
+
+    function generateExercise(level) {
+      let coef, literal;
+
+      if (level === 'facil') {
+        coef = String(rand(-9, 9));
+        if (coef === '0') coef = '3';
+        literal = makeLiteral(rand(1, 2), 1, 3);
+      }
+
+      if (level === 'medio') {
+        coef = pick(['1', '-1', fraction(), fraction(), String(rand(2, 9)), String(rand(-9, -2))]);
+        literal = makeLiteral(rand(2, 3), 1, 4);
+      }
+
+      if (level === 'dificil') {
+        coef = pick(['1', '-1', fraction(), fraction(), rootCoefficient()]);
+        literal = makeLiteral(rand(3, 4), 1, 6);
+      }
+
+      return {
+        display: `${renderCoefficient(coef)}${literal.display}`,
+        coef,
+        literal: literal.plain,
+        literalDisplay: literal.display,
+        degree: String(literal.degree)
+      };
+    }
+
+    function normalizeCoef(value) {
+      return value.trim().replace(/−/g, '-').replace(/\s+/g, '').toLowerCase();
+    }
+
+    function normalizeLiteral(value) {
+      return value
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/²/g, '^2')
+        .replace(/³/g, '^3')
+        .replace(/⁴/g, '^4')
+        .replace(/⁵/g, '^5')
+        .replace(/⁶/g, '^6')
+        .replace(/⁷/g, '^7')
+        .replace(/⁸/g, '^8')
+        .replace(/⁹/g, '^9')
+        .toLowerCase();
+    }
+
+    function answerObject() {
+      return {
+        coef: els.answerCoef.value,
+        literal: els.answerLiteral.value,
+        degree: els.answerDegree.value
+      };
+    }
+
+    function isCorrect(ex, ans) {
+      const coefOk = normalizeCoef(ans.coef) === normalizeCoef(ex.coef);
+      const literalOk = normalizeLiteral(ans.literal) === normalizeLiteral(ex.literal);
+      const degreeOk = String(ans.degree).trim() === String(ex.degree);
+      return { coefOk, literalOk, degreeOk, all: coefOk && literalOk && degreeOk };
+    }
+
+    function saveCurrentAnswer() {
+      if (state.finished) return;
+      state.answers[state.index] = answerObject();
+    }
+
+    function switchView(view) {
+      const isConfig = view === 'config';
+      els.configView.classList.toggle('hidden', !isConfig);
+      els.practiceView.classList.toggle('hidden', isConfig);
+      els.tabConfig.classList.toggle('active', isConfig);
+      els.tabPractice.classList.toggle('active', !isConfig);
+    }
+
+    function startTest(settings) {
+      clearInterval(state.timerId);
+      const count = Math.min(20, Math.max(5, Number(settings.count) || 10));
+      state = {
+        settings: { ...settings, count },
+        exercises: Array.from({ length: count }, () => generateExercise(settings.difficulty)),
+        index: 0,
+        answers: Array.from({ length: count }, () => ({ coef: '', literal: '', degree: '' })),
+        checkedCurrent: false,
+        remaining: settings.timed ? Number(settings.timeLimit) : 0,
+        timerId: null,
+        finished: false
+      };
+
+      els.tabPractice.disabled = false;
+      els.questionArea.classList.remove('hidden');
+      els.resultArea.classList.add('hidden');
+      switchView('practice');
+      renderQuestion();
+      setupTimer();
+    }
+
+    function setupTimer() {
+      els.timerPill.className = 'pill timer';
+      if (!state.settings.timed) {
+        els.timerPill.textContent = 'Sin tiempo';
+        return;
+      }
+      updateTimerLabel();
+      state.timerId = setInterval(() => {
+        state.remaining--;
+        updateTimerLabel();
+        if (state.remaining <= 0) {
+          finishTest(true);
+        }
+      }, 1000);
+    }
+
+    function updateTimerLabel() {
+      const min = Math.floor(state.remaining / 60);
+      const sec = state.remaining % 60;
+      els.timerPill.textContent = `Tiempo: ${min}:${String(sec).padStart(2, '0')}`;
+      els.timerPill.classList.toggle('warning', state.remaining <= 30 && state.remaining > 10);
+      els.timerPill.classList.toggle('danger', state.remaining <= 10);
+    }
+
+    function renderQuestion() {
+      const ex = state.exercises[state.index];
+      const ans = state.answers[state.index];
+      state.checkedCurrent = false;
+
+      els.activityTitle.textContent = `Actividad ${state.index + 1} de ${state.exercises.length}`;
+      els.progressBar.style.width = `${(state.index / state.exercises.length) * 100}%`;
+      els.monomialText.textContent = ex.display;
+      els.answerCoef.value = ans.coef || '';
+      els.answerLiteral.value = ans.literal || '';
+      els.answerDegree.value = ans.degree || '';
+      els.feedback.className = 'feedback';
+      els.feedback.textContent = state.settings.checkMode === 'instant'
+        ? 'Completa los tres campos y pulsa “Comprobar”.'
+        : 'Completa la respuesta. La corrección se verá al final.';
+
+      els.checkBtn.classList.toggle('hidden', state.settings.checkMode !== 'instant');
+      els.nextBtn.textContent = state.index === state.exercises.length - 1 ? 'Terminar' : 'Siguiente';
+    }
+
+    function checkCurrent() {
+      saveCurrentAnswer();
+      const ex = state.exercises[state.index];
+      const result = isCorrect(ex, state.answers[state.index]);
+
+      if (result.all) {
+        els.feedback.className = 'feedback ok';
+        els.feedback.textContent = 'Correcto. Has identificado bien el coeficiente, la parte literal y el grado.';
+      } else {
+        const mistakes = [];
+        if (!result.coefOk) mistakes.push('coeficiente');
+        if (!result.literalOk) mistakes.push('parte literal');
+        if (!result.degreeOk) mistakes.push('grado');
+        els.feedback.className = 'feedback bad';
+        els.feedback.textContent = `Revisa: ${mistakes.join(', ')}. Respuesta correcta: coeficiente ${ex.coef}, parte literal ${ex.literal}, grado ${ex.degree}.`;
+      }
+      state.checkedCurrent = true;
+    }
+
+    function nextQuestion() {
+      saveCurrentAnswer();
+      if (state.settings.checkMode === 'instant' && !state.checkedCurrent) {
+        checkCurrent();
+        return;
+      }
+      if (state.index >= state.exercises.length - 1) {
+        finishTest(false);
+        return;
+      }
+      state.index++;
+      renderQuestion();
+    }
+
+    function finishTest(byTime) {
+      if (state.finished) return;
+      saveCurrentAnswer();
+      clearInterval(state.timerId);
+      state.finished = true;
+      els.questionArea.classList.add('hidden');
+      els.resultArea.classList.remove('hidden');
+      els.progressBar.style.width = '100%';
+      if (byTime) {
+        els.timerPill.textContent = 'Tiempo agotado';
+        els.timerPill.className = 'pill timer danger';
+      }
+      renderResults();
+    }
+
+    function renderResults() {
+      let score = 0;
+      els.resultsBody.innerHTML = '';
+
+      state.exercises.forEach((ex, i) => {
+        const ans = state.answers[i] || { coef: '', literal: '', degree: '' };
+        const result = isCorrect(ex, ans);
+        if (result.all) score++;
+
+        const tr = document.createElement('tr');
+        tr.className = result.all ? 'correct' : 'incorrect';
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td><strong>${ex.display}</strong></td>
+          <td>C: ${escapeHtml(ans.coef || '—')}<br>L: ${escapeHtml(ans.literal || '—')}<br>G: ${escapeHtml(ans.degree || '—')}</td>
+            <td>C: ${ex.coef}<br>L: ${ex.literal}<br>G: ${ex.degree}</td>
+            <td class="mark ${result.all ? 'ok' : 'bad'}">${result.all ? '✓' : '✗'}</td>
+        `;
+        els.resultsBody.appendChild(tr);
+      });
+
+      const percent = Math.round((score / state.exercises.length) * 100);
+      els.scoreValue.textContent = score;
+      els.totalValue.textContent = state.exercises.length;
+      els.percentValue.textContent = `${percent}%`;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    els.timed.addEventListener('change', () => {
+      els.timeLimit.disabled = !els.timed.checked;
+    });
+
+    els.settingsForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      startTest({
+        difficulty: els.difficulty.value,
+        count: els.count.value,
+        checkMode: els.checkMode.value,
+        timed: els.timed.checked,
+        timeLimit: els.timeLimit.value
+      });
+    });
+
+    els.demoBtn.addEventListener('click', () => {
+      els.difficulty.value = 'medio';
+      els.count.value = 5;
+      els.checkMode.value = 'instant';
+      els.timed.checked = false;
+      els.timeLimit.disabled = true;
+    });
+
+    els.checkBtn.addEventListener('click', checkCurrent);
+    els.nextBtn.addEventListener('click', nextQuestion);
+    els.finishBtn.addEventListener('click', () => finishTest(false));
+
+    [els.answerCoef, els.answerLiteral, els.answerDegree].forEach(input => {
+      input.addEventListener('input', () => {
+        state.checkedCurrent = false;
+        saveCurrentAnswer();
+      });
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          state.settings?.checkMode === 'instant' ? checkCurrent() : nextQuestion();
+        }
+      });
+    });
+
+    els.retryBtn.addEventListener('click', () => startTest(state.settings));
+
+    els.reportBtn.addEventListener('click', () => {
+      els.reportModal.classList.remove('hidden');
+      els.studentName.focus();
+    });
+
+    els.closeReportBtn.addEventListener('click', () => {
+      els.reportModal.classList.add('hidden');
+    });
+
+    els.reportModal.addEventListener('click', (event) => {
+      if (event.target === els.reportModal) els.reportModal.classList.add('hidden');
+    });
+
+    els.downloadReportBtn.addEventListener('click', () => {
+      const name = els.studentName.value.trim() || 'Sin nombre';
+      const course = els.studentClass.value.trim() || 'Sin curso';
+      openPrintableReport(name, course);
+      els.reportModal.classList.add('hidden');
+    });
+
+    function difficultyLabel(value) {
+      return value === 'facil' ? 'Fácil' : value === 'medio' ? 'Medio' : 'Difícil';
+    }
+
+    function checkModeLabel(value) {
+      return value === 'instant' ? 'Corrección inmediata' : 'Corrección al final';
+    }
+
+    function openPrintableReport(studentName, studentClass) {
+      let score = 0;
+      const rows = state.exercises.map((ex, i) => {
+        const ans = state.answers[i] || { coef: '', literal: '', degree: '' };
+        const result = isCorrect(ex, ans);
+        if (result.all) score++;
+        return `
+          <tr class="${result.all ? 'ok' : 'bad'}">
+            <td>${i + 1}</td>
+            <td><strong>${ex.display}</strong></td>
+            <td>Coef.: ${escapeHtml(ans.coef || '—')}<br>Literal: ${escapeHtml(ans.literal || '—')}<br>Grado: ${escapeHtml(ans.degree || '—')}</td>
+            <td>Coef.: ${ex.coef}<br>Literal: ${ex.literal}<br>Grado: ${ex.degree}</td>
+            <td>${result.all ? 'Correcto' : 'Incorrecto'}</td>
+          </tr>`;
+      }).join('');
+
+      const percent = Math.round((score / state.exercises.length) * 100);
+      const reportWindow = window.open('', '_blank');
+      reportWindow.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Informe de monomios</title>
+  <style>
+    @page { size: A4; margin: 8mm; }
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; margin: 0; color: #111827; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h1 { margin: 0 0 3px; font-size: 18px; }
+    h2 { margin: 8px 0 5px; font-size: 12px; border-bottom: 1px solid #9ca3af; padding-bottom: 2px; }
+    p { margin: 0; }
+    .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .badge { border: 1px solid #9ca3af; border-radius: 8px; padding: 5px 8px; background: #f9fafb; min-width: 120px; text-align: center; }
+    .badge strong { display: block; font-size: 17px; }
+    .meta, .score { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 7px 0; }
+    .meta div, .score div { border: 1px solid #9ca3af; border-radius: 8px; padding: 5px; background: #f9fafb; min-height: 30px; }
+    .score strong { font-size: 17px; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 5px; font-size: 8.5px; border: 2px ridge #9ca3af; border-radius: 10px; overflow: hidden; }
+    th, td { border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #6b7280; border-bottom: 1px solid #6b7280; padding: 3px 4px; vertical-align: top; text-align: left; line-height: 1.12; }
+    th { background: #e5e7eb; font-size: 8px; text-transform: uppercase; }
+    td:first-child, th:first-child { width: 22px; text-align: center; }
+    td:nth-child(2) { width: 17%; }
+    td:nth-child(3), td:nth-child(4) { width: 31%; }
+    td:last-child, th:last-child { width: 28px; text-align: center; }
+    .mark { font-weight: 900; font-size: 13px; }
+    .mark.ok { color: #15803d; }
+    .mark.bad { color: #b91c1c; }
+    .print-actions { margin: 8px 0; }
+    .print-actions button { padding: 8px 11px; border: 0; border-radius: 8px; background: #2563eb; color: white; font-weight: 700; cursor: pointer; }
+    @media print { .print-actions { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>Informe de monomios</h1>
+      <p>${escapeHtml(studentName)} · ${escapeHtml(studentClass)} · ${new Date().toLocaleDateString('es-ES')}</p>
+    </div>
+    <div class="badge"><strong>${score}/${state.exercises.length}</strong>${percent}%</div>
+  </div>
+  <div class="print-actions"><button onclick="window.print()">Guardar / imprimir en PDF</button></div>
+
+  <h2>Configuración</h2>
+  <div class="meta">
+    <div><strong>Nivel:</strong> ${difficultyLabel(state.settings.difficulty)}</div>
+    <div><strong>Actividades:</strong> ${state.settings.count}</div>
+    <div><strong>Tiempo:</strong> ${state.settings.timed ? state.settings.timeLimit + ' segundos' : 'Sin tiempo'}</div>
+    <div><strong>Corrección:</strong> ${checkModeLabel(state.settings.checkMode)}</div>
+  </div>
+
+  <h2>Resultado y respuestas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Monomio</th>
+        <th>Alumno</th>
+        <th>Correcta</th>
+        <th>Val.</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`);
+      reportWindow.document.close();
+      reportWindow.focus();
+      setTimeout(() => reportWindow.print(), 300);
+    }
+    els.reviewBtn.addEventListener('click', () => {
+      clearInterval(state.timerId);
+      switchView('config');
+    });
+
+    els.tabConfig.addEventListener('click', () => switchView('config'));
+    els.tabPractice.addEventListener('click', () => switchView('practice'));
+  </script>
+</body>
+</html>
