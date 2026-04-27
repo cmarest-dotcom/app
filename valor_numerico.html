@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valor numérico de monomios y polinomios</title>
+  <style>
+    :root {
+      --bg: #f7f1f8;
+      --config-bg: #f6eefe;
+      --card: #ffffff;
+      --text: #374151;
+      --muted: #6b7280;
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --secondary-pastel: #cde7ff;
+      --secondary-pastel-text: #285680;
+      --success-pastel: #cfeedd;
+      --success-pastel-text: #2d6a4f;
+      --accent-pastel: #ffe6ee;
+      --accent-pastel-text: #9d4d6c;
+      --border: #e9dff2;
+      --ok: #15803d;
+      --ok-soft: #dcfce7;
+      --bad: #b91c1c;
+      --bad-soft: #fee2e2;
+      --warn: #92400e;
+      --warn-soft: #fef3c7;
+      --shadow: 0 12px 30px rgba(91, 74, 116, 0.10);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.35s ease;
+    }
+    .app { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-btn {
+      background: #efe4ff; color: #6d41b3; border: 1px solid #dbc8fa;
+      border-radius: 999px; padding: 10px 16px; font-weight: 800;
+    }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .check-group { display: grid; gap: 10px; margin-top: 2px; }
+    .check-option {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 14px; background: #fff; font-weight: 600;
+    }
+    .check-option input[type="checkbox"] { width: 18px; height: 18px; margin: 0; }
+    .screen { display: none; animation: fadeIn 0.25s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+    .card {
+      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border); padding: 24px;
+    }
+    .config-card { background: var(--config-bg); }
+    h1,h2,h3 { margin-top: 0; }
+    .subtitle { color: var(--muted); margin-top: -6px; margin-bottom: 20px; line-height: 1.45; }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    label { font-weight: 700; font-size: .95rem; }
+    select, input, button { font: inherit; }
+    select, input[type="number"], input[type="text"] {
+      width: 100%; border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px 14px; background: white; color: var(--text);
+    }
+    .range-wrap { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+    input[type="range"] { width: 100%; }
+    .pill {
+      background: #f4e8ff; color: #6b46c1; border-radius: 999px; padding: 8px 12px;
+      font-weight: 700; min-width: 92px; text-align: center;
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    button {
+      border: none; border-radius: 14px; padding: 12px 18px; cursor: pointer;
+      font-weight: 700; transition: transform .12s ease, opacity .12s ease, background .2s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .btn-primary { background: #d9c2ff; color: #4b2b82; }
+    .btn-primary:hover { background: #c9a5ff; }
+    .btn-secondary { background: var(--secondary-pastel); color: var(--secondary-pastel-text); }
+    .btn-success { background: var(--success-pastel); color: var(--success-pastel-text); }
+    .topbar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+      align-items: center; margin-bottom: 18px;
+    }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; }
+    .stat {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 14px;
+      padding: 10px 14px; min-width: 132px;
+    }
+    .stat .label { font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+    .stat .value { font-size: 1.05rem; font-weight: 800; }
+    .exercise-box {
+      text-align: center; padding: 28px 16px; background: #f8fbff; border: 1px dashed #bcd1f5;
+      border-radius: 18px; margin-bottom: 18px;
+    }
+    .exercise-type-pill {
+      display: inline-block; margin-bottom: 12px; padding: 7px 12px; border-radius: 999px;
+      background: #eef2ff; color: #4f46e5; font-weight: 800; font-size: .9rem;
+    }
+    .exercise-text { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: .02em; }
+    .values-box {
+      margin: 14px auto 0; display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    }
+    .value-chip {
+      background: #fff; border: 1px solid #dbeafe; color: #1f4f7a;
+      border-radius: 999px; padding: 8px 12px; font-weight: 800;
+    }
+    .helper { font-size: .95rem; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+    .answer-row { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 12px; align-items: end; }
+    .feedback { margin-top: 14px; padding: 14px 16px; border-radius: 14px; display: none; line-height: 1.45; font-weight: 700; }
+    .feedback.show { display: block; }
+    .feedback.ok { background: var(--ok-soft); color: var(--ok); }
+    .feedback.bad { background: var(--bad-soft); color: var(--bad); }
+    .feedback.warn { background: var(--warn-soft); color: var(--warn); }
+    .results-banner { text-align: center; padding: 18px; border-radius: 18px; margin-bottom: 20px; font-weight: 800; font-size: 1.15rem; }
+    .results-grid { display: grid; gap: 12px; margin-top: 18px; }
+    .result-item {
+      border: 1px solid var(--border); border-left: 8px solid #cbd5e1; background: #fff;
+      border-radius: 14px; padding: 14px;
+    }
+    .result-item.ok { border-left-color: var(--ok); }
+    .result-item.bad { border-left-color: var(--bad); }
+    .result-ex { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .tiny { color: var(--muted); font-size: .92rem; line-height: 1.4; }
+    .modal {
+      position: fixed; inset: 0; background: rgba(15,23,42,.48); display: none;
+      align-items: center; justify-content: center; padding: 20px; z-index: 999;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: min(560px,100%); background: white; border-radius: 20px;
+      padding: 24px; box-shadow: var(--shadow);
+    }
+    .score-big { font-size: clamp(2.2rem,8vw,4rem); font-weight: 900; margin: 12px 0 6px; text-align: center; }
+    .center { text-align: center; }
+    .toggle-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top: 8px; }
+    .toggle-row input[type=checkbox] { width:18px; height:18px; }
+    .hidden { display:none !important; }
+    @media (max-width:640px) {
+      .app { padding: 14px; }
+      .card { padding: 18px; }
+      .stat { min-width: 100%; }
+      .btn-row button, .answer-row button { width: 100%; }
+      .answer-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tabs">
+      <button id="tabConfig" class="tab-btn active" type="button">Configuración</button>
+      <button id="tabPractice" class="tab-btn" type="button">Práctica</button>
+    </div>
+
+    <section id="configScreen" class="screen active">
+      <div class="card config-card">
+        <h1>Valor numérico de monomios y polinomios</h1>
+        <p class="subtitle">Configura la actividad y calcula el valor numérico sustituyendo cada letra por el valor indicado.</p>
+        <div class="grid two">
+          <div class="field">
+            <label for="difficulty">Nivel</label>
+            <select id="difficulty">
+              <option value="easy">Fácil</option>
+              <option value="medium">Medio</option>
+              <option value="hard">Difícil</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Tipo de expresión</label>
+            <div class="check-group">
+              <label class="check-option"><input type="checkbox" class="exercise-type-checkbox" value="monomial" checked> Monomios</label>
+              <label class="check-option"><input type="checkbox" class="exercise-type-checkbox" value="polynomial" checked> Polinomios</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="exerciseCount">Número de ejercicios</label>
+            <div class="range-wrap">
+              <input type="range" id="exerciseCount" min="1" max="10" step="1" value="5">
+              <div class="pill" id="exerciseCountValue">5</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="timeLimit">Tiempo total</label>
+            <div class="range-wrap">
+              <input type="range" id="timeLimit" min="30" max="300" step="30" value="120">
+              <div class="pill" id="timeLimitValue">2:00</div>
+            </div>
+            <label class="toggle-row"><input type="checkbox" id="noTime"> Sin tiempo</label>
+          </div>
+
+          <div class="field">
+            <label for="feedbackMode">Resultados</label>
+            <select id="feedbackMode">
+              <option value="instant">Durante el ejercicio</option>
+              <option value="final">Al final del ejercicio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="startBtn" class="btn-primary" type="button">Iniciar práctica</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="practiceScreen" class="screen">
+      <div class="card">
+        <div class="topbar">
+          <div>
+            <h2 style="margin-bottom:6px;">Práctica en marcha</h2>
+            <div class="tiny">Calcula el resultado final. Puedes escribir enteros o fracciones como <strong>-3/2</strong>.</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="label">Ejercicio</div><div class="value" id="progressStat">1 / 5</div></div>
+            <div class="stat"><div class="label">Aciertos</div><div class="value" id="scoreStat">0</div></div>
+            <div class="stat"><div class="label">Tiempo</div><div class="value" id="timerStat">2:00</div></div>
+          </div>
+        </div>
+
+        <div class="exercise-box">
+          <div class="exercise-type-pill" id="typePill">Monomio</div>
+          <div class="exercise-text" id="exerciseDisplay"></div>
+          <div class="values-box" id="valuesDisplay"></div>
+          <div class="helper">Sustituye cada letra por su valor y realiza las operaciones con prioridad: potencias, productos y sumas/restas.</div>
+        </div>
+
+        <div class="answer-row">
+          <div class="field">
+            <label for="answerInput">Resultado final</label>
+            <input id="answerInput" type="text" inputmode="text" placeholder="Ejemplo: 18 o -5/2">
+          </div>
+          <button id="checkBtn" class="btn-primary" type="button">Comprobar</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="continueBtn" class="btn-success hidden" type="button">Continuar</button>
+          <button id="finishNowBtn" class="btn-secondary" type="button">Terminar ahora</button>
+        </div>
+
+        <div id="feedbackBox" class="feedback"></div>
+      </div>
+    </section>
+
+    <section id="resultsScreen" class="screen">
+      <div class="card">
+        <h2 class="center">Resultado final</h2>
+        <div id="resultsBanner" class="results-banner"></div>
+        <div id="scoreBig" class="score-big">0%</div>
+        <div class="center tiny" id="summaryLine"></div>
+        <div class="results-grid" id="resultsList"></div>
+        <div class="btn-row">
+          <button id="backToConfigBtn" class="btn-secondary" type="button">Volver a configuración</button>
+          <button id="openReportBtn" class="btn-success" type="button">Informe</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="reportModal" class="modal">
+    <div class="modal-card">
+      <h3>Generar informe PDF</h3>
+      <p class="subtitle">Escribe los datos del alumno o alumna para incluirlos en el informe descargable.</p>
+      <div class="grid two">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="studentName">Nombre completo</label>
+          <input id="studentName" type="text" placeholder="Nombre y apellidos">
+        </div>
+        <div class="field">
+          <label for="studentCourse">Curso</label>
+          <input id="studentCourse" type="text" placeholder="Ejemplo: 2º ESO A">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="downloadPdfBtn" class="btn-primary" type="button">Descargar PDF</button>
+        <button id="closeModalBtn" class="btn-secondary" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const state = {
+      config: null,
+      exercises: [],
+      currentIndex: 0,
+      correctCount: 0,
+      timerId: null,
+      timeRemaining: 0,
+      startedAt: null,
+      endedAt: null
+    };
+
+    const screens = {
+      config: document.getElementById('configScreen'),
+      practice: document.getElementById('practiceScreen'),
+      results: document.getElementById('resultsScreen')
+    };
+
+    const tabConfigBtn = document.getElementById('tabConfig');
+    const tabPracticeBtn = document.getElementById('tabPractice');
+    const difficultyEl = document.getElementById('difficulty');
+    const exerciseTypeCheckboxes = Array.from(document.querySelectorAll('.exercise-type-checkbox'));
+    const exerciseCountEl = document.getElementById('exerciseCount');
+    const exerciseCountValueEl = document.getElementById('exerciseCountValue');
+    const timeLimitEl = document.getElementById('timeLimit');
+    const timeLimitValueEl = document.getElementById('timeLimitValue');
+    const noTimeEl = document.getElementById('noTime');
+    const feedbackModeEl = document.getElementById('feedbackMode');
+    const startBtn = document.getElementById('startBtn');
+    const progressStatEl = document.getElementById('progressStat');
+    const scoreStatEl = document.getElementById('scoreStat');
+    const timerStatEl = document.getElementById('timerStat');
+    const typePillEl = document.getElementById('typePill');
+    const exerciseDisplayEl = document.getElementById('exerciseDisplay');
+    const valuesDisplayEl = document.getElementById('valuesDisplay');
+    const answerInputEl = document.getElementById('answerInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const finishNowBtn = document.getElementById('finishNowBtn');
+    const feedbackBoxEl = document.getElementById('feedbackBox');
+    const resultsBannerEl = document.getElementById('resultsBanner');
+    const scoreBigEl = document.getElementById('scoreBig');
+    const summaryLineEl = document.getElementById('summaryLine');
+    const resultsListEl = document.getElementById('resultsList');
+    const backToConfigBtn = document.getElementById('backToConfigBtn');
+    const openReportBtn = document.getElementById('openReportBtn');
+    const reportModalEl = document.getElementById('reportModal');
+    const studentNameEl = document.getElementById('studentName');
+    const studentCourseEl = document.getElementById('studentCourse');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function showScreen(name) {
+      Object.values(screens).forEach(el => el.classList.remove('active'));
+      screens[name].classList.add('active');
+      tabConfigBtn.classList.toggle('active', name === 'config');
+      tabPracticeBtn.classList.toggle('active', name === 'practice');
+    }
+
+    function getSelectedTypes() {
+      return exerciseTypeCheckboxes.filter(el => el.checked).map(el => el.value);
+    }
+
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(a); b = Math.abs(b);
+      while (b) [a, b] = [b, a % b];
+      return a || 1;
+    }
+
+    function frac(n, d = 1) {
+      if (d === 0) throw new Error('Denominador cero');
+      if (n === 0) return { n: 0, d: 1 };
+      if (d < 0) { n = -n; d = -d; }
+      const g = gcd(n, d);
+      return { n: n / g, d: d / g };
+    }
+    function fracAdd(a, b) { return frac(a.n * b.d + b.n * a.d, a.d * b.d); }
+    function fracMul(a, b) { return frac(a.n * b.n, a.d * b.d); }
+    function fracPow(a, exp) {
+      let result = frac(1);
+      for (let i = 0; i < exp; i++) result = fracMul(result, a);
+      return result;
+    }
+    function fracEq(a, b) { return a.n === b.n && a.d === b.d; }
+    function fracToString(a) { return a.d === 1 ? String(a.n) : `${a.n}/${a.d}`; }
+
+    function parseFractionInput(text) {
+      const cleaned = String(text).trim().replace(',', '.').replace(/−/g, '-');
+      if (/^[+-]?\d+$/.test(cleaned)) return frac(Number(cleaned), 1);
+      if (/^[+-]?\d+\/\d+$/.test(cleaned)) {
+        const [n, d] = cleaned.split('/').map(Number);
+        return frac(n, d);
+      }
+      if (/^[+-]?\d+\.\d+$/.test(cleaned)) {
+        const sign = cleaned.startsWith('-') ? -1 : 1;
+        const unsigned = cleaned.replace(/^[+-]/, '');
+        const [whole, dec] = unsigned.split('.');
+        return frac(sign * Number(whole + dec), Math.pow(10, dec.length));
+      }
+      throw new Error('Formato no válido');
+    }
+
+    function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+    function toSuperscriptDigits(str) {
+      const map = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+      return String(str).split('').map(ch => map[ch] || ch).join('');
+    }
+
+    function termToText(term, first = true) {
+      const sign = term.coeff.n < 0 ? '-' : '+';
+      const absCoeff = frac(Math.abs(term.coeff.n), term.coeff.d);
+      const vars = Object.entries(term.vars)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([v, e]) => e === 1 ? v : v + toSuperscriptDigits(e))
+        .join('');
+      let body;
+      if (!vars) body = fracToString(absCoeff);
+      else if (fracEq(absCoeff, frac(1))) body = vars;
+      else body = fracToString(absCoeff) + vars;
+      if (first) return sign === '-' ? '-' + body : body;
+      return ` ${sign} ${body}`;
+    }
+
+    function expressionToText(terms) {
+      return terms.map((term, i) => termToText(term, i === 0)).join('');
+    }
+
+    function valuesToText(values) {
+      return Object.entries(values).sort((a,b) => a[0].localeCompare(b[0])).map(([k, v]) => `${k} = ${fracToString(v)}`).join(', ');
+    }
+
+    function evaluateTerm(term, values) {
+      let result = term.coeff;
+      for (const [variable, exp] of Object.entries(term.vars)) {
+        result = fracMul(result, fracPow(values[variable], exp));
+      }
+      return result;
+    }
+
+    function evaluateExpression(terms, values) {
+      return terms.reduce((acc, term) => fracAdd(acc, evaluateTerm(term, values)), frac(0));
+    }
+
+    function variablesForDifficulty(difficulty) {
+      if (difficulty === 'easy') return ['x'];
+      if (difficulty === 'medium') return ['x', 'y'];
+      return ['x', 'y', 'z'];
+    }
+
+    function coeffForDifficulty(difficulty) {
+      if (difficulty === 'easy') return frac(randomChoice([1, 2, 3, 4, 5, -1, -2, -3]));
+      if (difficulty === 'medium') return frac(randomChoice([1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5]));
+      if (Math.random() < 0.35) return frac(randomChoice([1, -1, 2, -2, 3, -3, 4, -4]), randomChoice([2, 3, 4, 5]));
+      return frac(randomChoice([1, 2, 3, 4, 5, 6, 7, -1, -2, -3, -4, -5, -6]));
+    }
+
+    function valuesForVariables(vars, difficulty) {
+      const values = {};
+      vars.forEach(v => {
+        if (difficulty === 'easy') values[v] = frac(randomChoice([-3, -2, -1, 1, 2, 3, 4]));
+        else if (difficulty === 'medium') values[v] = frac(randomChoice([-4, -3, -2, -1, 1, 2, 3, 4, 5]));
+        else values[v] = Math.random() < 0.25 ? frac(randomChoice([1, -1, 2, -2, 3, -3]), randomChoice([2, 3, 4])) : frac(randomChoice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]));
+      });
+      return values;
+    }
+
+    function makeVarsMap(availableVars, difficulty, isMonomial) {
+      const vars = {};
+      const count = isMonomial
+        ? (difficulty === 'easy' ? 1 : randomChoice([1, 2]))
+        : randomChoice([0, 1, 1, 2]);
+      shuffle(availableVars).slice(0, Math.max(1, count)).forEach(v => {
+        const maxExp = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 3 : 4;
+        vars[v] = randomInt(1, maxExp);
+      });
+      return vars;
+    }
+
+    function buildExercise(type, difficulty, usedSignatures) {
+      const availableVars = variablesForDifficulty(difficulty);
+      const activeVars = difficulty === 'easy' ? ['x'] : shuffle(availableVars).slice(0, randomInt(1, availableVars.length));
+      const values = valuesForVariables(activeVars, difficulty);
+      const termCount = type === 'monomial' ? 1 : difficulty === 'easy' ? 2 : difficulty === 'medium' ? randomChoice([2, 3]) : randomChoice([3, 4]);
+      let terms = [];
+      for (let i = 0; i < termCount; i++) {
+        const isConstant = type === 'polynomial' && i > 0 && Math.random() < (difficulty === 'easy' ? 0.35 : 0.22);
+        terms.push({
+          coeff: coeffForDifficulty(difficulty),
+          vars: isConstant ? {} : makeVarsMap(activeVars, difficulty, type === 'monomial')
+        });
+      }
+      let expression = expressionToText(terms);
+      let signature = `${expression}|${valuesToText(values)}`;
+      let guard = 0;
+      while (usedSignatures.has(signature) && guard < 50) {
+        terms = terms.map(term => ({ coeff: coeffForDifficulty(difficulty), vars: term.vars }));
+        expression = expressionToText(terms);
+        signature = `${expression}|${valuesToText(values)}`;
+        guard++;
+      }
+      usedSignatures.add(signature);
+      return {
+        type,
+        difficulty,
+        terms,
+        values,
+        expression,
+        expected: evaluateExpression(terms, values),
+        answer: '',
+        isCorrect: false,
+        checked: false,
+        signature
+      };
+    }
+
+    function buildExerciseSet(config) {
+      const usedSignatures = new Set();
+      const list = [];
+      for (let i = 0; i < config.exerciseCount; i++) {
+        const type = randomChoice(config.types);
+        list.push(buildExercise(type, config.difficulty, usedSignatures));
+      }
+      return list;
+    }
+
+    exerciseCountEl.addEventListener('input', () => { exerciseCountValueEl.textContent = exerciseCountEl.value; });
+    timeLimitEl.addEventListener('input', () => {
+      timeLimitValueEl.textContent = noTimeEl.checked ? 'Sin tiempo' : formatTime(Number(timeLimitEl.value));
+    });
+    noTimeEl.addEventListener('change', () => {
+      const disabled = noTimeEl.checked;
+      timeLimitEl.disabled = disabled;
+      timeLimitEl.style.opacity = disabled ? '0.5' : '1';
+      timeLimitValueEl.textContent = disabled ? 'Sin tiempo' : formatTime(Number(timeLimitEl.value));
+    });
+
+    function resetFeedback() { feedbackBoxEl.className = 'feedback'; feedbackBoxEl.textContent = ''; }
+    function showFeedback(message, type) { feedbackBoxEl.className = `feedback show ${type}`; feedbackBoxEl.innerHTML = message; }
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function updatePracticeUI() {
+      const ex = state.exercises[state.currentIndex];
+      progressStatEl.textContent = `${state.currentIndex + 1} / ${state.exercises.length}`;
+      scoreStatEl.textContent = String(state.correctCount);
+      timerStatEl.textContent = state.config.noTime ? 'Sin tiempo' : formatTime(state.timeRemaining);
+      typePillEl.textContent = ex.type === 'monomial' ? 'Monomio' : 'Polinomio';
+      exerciseDisplayEl.textContent = ex.expression;
+      valuesDisplayEl.innerHTML = Object.entries(ex.values).sort((a,b) => a[0].localeCompare(b[0])).map(([k, v]) => `<span class="value-chip">${k} = ${fracToString(v)}</span>`).join('');
+      answerInputEl.value = ex.answer || '';
+      answerInputEl.disabled = false;
+      checkBtn.disabled = false;
+      continueBtn.classList.add('hidden');
+      resetFeedback();
+      answerInputEl.focus();
+    }
+
+    function startTimer() {
+      clearInterval(state.timerId);
+      if (state.config.noTime) {
+        timerStatEl.textContent = 'Sin tiempo';
+        return;
+      }
+      state.timerId = setInterval(() => {
+        state.timeRemaining -= 1;
+        timerStatEl.textContent = formatTime(Math.max(0, state.timeRemaining));
+        if (state.timeRemaining <= 0) {
+          clearInterval(state.timerId);
+          finishPractice(true);
+        }
+      }, 1000);
+    }
+
+    function startPractice() {
+      const selectedTypes = getSelectedTypes();
+      if (!selectedTypes.length) {
+        alert('Selecciona monomios, polinomios o ambas opciones.');
+        return;
+      }
+      state.config = {
+        difficulty: difficultyEl.value,
+        types: selectedTypes,
+        exerciseCount: Number(exerciseCountEl.value),
+        timeLimit: Number(timeLimitEl.value),
+        noTime: noTimeEl.checked,
+        feedbackMode: feedbackModeEl.value
+      };
+      state.exercises = buildExerciseSet(state.config);
+      state.currentIndex = 0;
+      state.correctCount = 0;
+      state.timeRemaining = state.config.noTime ? 0 : state.config.timeLimit;
+      state.startedAt = new Date();
+      state.endedAt = null;
+      document.body.style.background = 'var(--bg)';
+      showScreen('practice');
+      updatePracticeUI();
+      startTimer();
+    }
+
+    function evaluateCurrent() {
+      const ex = state.exercises[state.currentIndex];
+      ex.answer = answerInputEl.value.trim();
+      ex.checked = true;
+      try {
+        const userValue = parseFractionInput(ex.answer);
+        ex.isCorrect = fracEq(userValue, ex.expected);
+      } catch {
+        ex.isCorrect = false;
+      }
+
+      state.correctCount = state.exercises.filter(item => item.isCorrect).length;
+      scoreStatEl.textContent = String(state.correctCount);
+
+      if (state.config.feedbackMode === 'instant') {
+        if (ex.isCorrect) {
+          showFeedback(`Correcto. Resultado final: <strong>${fracToString(ex.expected)}</strong>.`, 'ok');
+        } else {
+          showFeedback(`No es correcto. Resultado final: <strong>${fracToString(ex.expected)}</strong>.`, 'bad');
+        }
+        answerInputEl.disabled = true;
+        checkBtn.disabled = true;
+        continueBtn.classList.remove('hidden');
+        return;
+      }
+
+      if (state.currentIndex < state.exercises.length - 1) {
+        state.currentIndex += 1;
+        updatePracticeUI();
+      } else {
+        finishPractice(false);
+      }
+    }
+
+    function continuePractice() {
+      if (state.currentIndex < state.exercises.length - 1) {
+        state.currentIndex += 1;
+        updatePracticeUI();
+      } else {
+        finishPractice(false);
+      }
+    }
+
+    function finishPractice(byTimeout = false) {
+      clearInterval(state.timerId);
+      state.endedAt = new Date();
+      if (state.exercises.length && !state.exercises[state.currentIndex].checked) {
+        const ex = state.exercises[state.currentIndex];
+        ex.answer = answerInputEl.value.trim();
+        if (ex.answer) {
+          try { ex.isCorrect = fracEq(parseFractionInput(ex.answer), ex.expected); }
+          catch { ex.isCorrect = false; }
+        }
+        ex.checked = true;
+      }
+      let totalCorrect = 0;
+      state.exercises.forEach(ex => { if (ex.isCorrect) totalCorrect += 1; });
+      state.correctCount = totalCorrect;
+      renderResults(byTimeout);
+      showScreen('results');
+    }
+
+    function renderResults(byTimeout) {
+      const total = state.exercises.length;
+      const score = total ? Math.round((state.correctCount / total) * 100) : 0;
+      const pass = score >= 50;
+      document.body.style.background = pass
+        ? 'linear-gradient(180deg, #dcfce7 0%, #f0fdf4 100%)'
+        : 'linear-gradient(180deg, #fee2e2 0%, #fff1f2 100%)';
+      resultsBannerEl.textContent = pass
+        ? 'Buen trabajo. Has alcanzado al menos el 50%.'
+        : 'Necesitas seguir practicando. Has quedado por debajo del 50%.';
+      resultsBannerEl.style.background = pass ? 'var(--ok-soft)' : 'var(--bad-soft)';
+      resultsBannerEl.style.color = pass ? 'var(--ok)' : 'var(--bad)';
+      scoreBigEl.textContent = `${score}%`;
+      summaryLineEl.textContent = `${state.correctCount} de ${total} correctas${byTimeout ? ' · Tiempo agotado' : ''}`;
+      resultsListEl.innerHTML = state.exercises.map((ex, i) => `
+        <div class="result-item ${ex.isCorrect ? 'ok' : 'bad'}">
+          <div class="result-ex">${i + 1}. ${escapeHtml(ex.expression)}</div>
+          <div><strong>Valores:</strong> ${escapeHtml(valuesToText(ex.values))}</div>
+          <div><strong>Tu respuesta:</strong> ${escapeHtml(ex.answer || 'Sin respuesta')}</div>
+          <div><strong>Resultado final:</strong> ${escapeHtml(fracToString(ex.expected))}</div>
+          <div class="tiny" style="margin-top:6px;"><strong>${ex.isCorrect ? 'Correcta' : 'Incorrecta'}</strong></div>
+        </div>
+      `).join('');
+    }
+
+    function configLabel(value) {
+      const map = { easy: 'Fácil', medium: 'Medio', hard: 'Difícil', monomial: 'Monomios', polynomial: 'Polinomios', instant: 'Durante el ejercicio', final: 'Al final del ejercicio' };
+      return map[value] || value;
+    }
+
+    async function generatePdf() {
+      if (!window.jspdf) {
+        alert('No se ha podido cargar la librería del PDF.');
+        return;
+      }
+      const studentName = studentNameEl.value.trim() || 'Sin nombre';
+      const studentCourse = studentCourseEl.value.trim() || 'Sin curso';
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const margin = 8;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const usableWidth = pageWidth - margin * 2;
+      const total = state.exercises.length;
+      const score = total ? Math.round((state.correctCount / total) * 100) : 0;
+      const pass = score >= 50;
+      let y = 9;
+
+      doc.setFillColor(247, 238, 254);
+      doc.roundedRect(margin, y, usableWidth, 25, 3, 3, 'F');
+      doc.setDrawColor(221, 204, 245);
+      doc.roundedRect(margin, y, usableWidth, 25, 3, 3, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('Informe: valor numérico de monomios y polinomios', margin + 3, y + 7);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.text(`Alumno/a: ${studentName}`, margin + 3, y + 13);
+      doc.text(`Curso: ${studentCourse}`, margin + 3, y + 18);
+      doc.text(`Fecha: ${new Date().toLocaleString('es-ES')}`, margin + 3, y + 23);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(pass ? 21 : 185, pass ? 128 : 28, pass ? 61 : 28);
+      doc.text(`${score}%`, pageWidth - margin - 18, y + 12, { align: 'center' });
+      doc.setFontSize(8);
+      doc.text(`${state.correctCount}/${total} correctas`, pageWidth - margin - 18, y + 19, { align: 'center' });
+      doc.setTextColor(55, 65, 81);
+      y += 31;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text('Configuración', margin, y);
+      y += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.2);
+      const configText = [
+        `Tipo: ${state.config.types.map(configLabel).join(', ')}`,
+        `Nivel: ${configLabel(state.config.difficulty)}`,
+        `Ejercicios: ${state.config.exerciseCount}`,
+        `Tiempo: ${state.config.noTime ? 'Sin tiempo' : formatTime(state.config.timeLimit)}`,
+        `Resultados: ${configLabel(state.config.feedbackMode)}`
+      ].join('   |   ');
+      doc.text(doc.splitTextToSize(configText, usableWidth), margin, y);
+      y += 9;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text('Resultados detallados', margin, y);
+      y += 4;
+
+      const columns = [
+        { title: 'Nº', x: margin, w: 8 },
+        { title: 'Tipo', x: margin + 8, w: 20 },
+        { title: 'Expresión', x: margin + 28, w: 47 },
+        { title: 'Valores', x: margin + 75, w: 42 },
+        { title: 'Respuesta', x: margin + 117, w: 31 },
+        { title: 'Final', x: margin + 148, w: 25 },
+        { title: 'Estado', x: margin + 173, w: usableWidth - 173 }
+      ];
+
+      doc.setFillColor(230, 243, 255);
+      doc.rect(margin, y, usableWidth, 8, 'F');
+      doc.setDrawColor(200, 218, 240);
+      doc.rect(margin, y, usableWidth, 8);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      columns.forEach(col => doc.text(col.title, col.x + 1.2, y + 5.2));
+      y += 8;
+
+      const rowHeight = total <= 8 ? 18 : 16;
+      state.exercises.forEach((ex, index) => {
+        doc.setDrawColor(225, 225, 225);
+        doc.rect(margin, y, usableWidth, rowHeight);
+        columns.slice(1).forEach(col => doc.line(col.x, y, col.x, y + rowHeight));
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.2);
+        const rowValues = [
+          String(index + 1),
+          ex.type === 'monomial' ? 'Monomio' : 'Polinomio',
+          ex.expression,
+          valuesToText(ex.values),
+          ex.answer || 'Sin respuesta',
+          fracToString(ex.expected),
+          ex.isCorrect ? 'Correcta' : 'Incorrecta'
+        ];
+        rowValues.forEach((text, i) => {
+          const col = columns[i];
+          const lines = doc.splitTextToSize(String(text), col.w - 2).slice(0, 3);
+          if (i === 6) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(ex.isCorrect ? 21 : 185, ex.isCorrect ? 128 : 28, ex.isCorrect ? 61 : 28);
+          }
+          doc.text(lines, col.x + 1.2, y + 4.3);
+          if (i === 6) {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(55, 65, 81);
+          }
+        });
+        y += rowHeight;
+      });
+
+      doc.setFontSize(7);
+      doc.setTextColor(107, 114, 128);
+      doc.text('Informe generado automáticamente. El resultado final muestra el valor numérico correcto de cada expresión.', margin, 290);
+      doc.setTextColor(55, 65, 81);
+
+      const safeName = studentName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'alumno';
+      doc.save(`informe_valor_numerico_${safeName}.pdf`);
+      reportModalEl.classList.remove('show');
+    }
+
+    startBtn.addEventListener('click', startPractice);
+    tabConfigBtn.addEventListener('click', () => showScreen('config'));
+    tabPracticeBtn.addEventListener('click', () => { if (state.exercises.length) showScreen('practice'); });
+    checkBtn.addEventListener('click', evaluateCurrent);
+    continueBtn.addEventListener('click', continuePractice);
+    finishNowBtn.addEventListener('click', () => finishPractice(false));
+    backToConfigBtn.addEventListener('click', () => { document.body.style.background = 'var(--bg)'; showScreen('config'); });
+    openReportBtn.addEventListener('click', () => reportModalEl.classList.add('show'));
+    closeModalBtn.addEventListener('click', () => reportModalEl.classList.remove('show'));
+    downloadPdfBtn.addEventListener('click', generatePdf);
+    answerInputEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') evaluateCurrent();
+    });
+  </script>
+</body>
+</html>
