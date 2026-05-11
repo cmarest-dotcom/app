@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Credenciales A4 desde PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+        }
+        
+        .upload-section {
+            background-color: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+        
+        .upload-section:hover {
+            border-color: #3498db;
+            background-color: #e8f4fc;
+        }
+        
+        .upload-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .preview-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .preview-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-title h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .a4-container {
+            width: 794px;
+            height: 1123px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            border: 1px solid #ddd;
+            page-break-after: always;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            gap: 15px;
+        }
+        
+        .grid-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .credential-card {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+        }
+        
+        .student-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .credential-info {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .credential-info strong {
+            color: #3498db;
+        }
+        
+        .password {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            background-color: #e8f4fc;
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px dashed #3498db;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-download {
+            background-color: #27ae60;
+        }
+        
+        .btn-download:hover {
+            background-color: #219653;
+        }
+        
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .instructions {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .page-indicator {
+            margin: 0 10px;
+            padding: 5px 15px;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+        }
+        
+        .empty-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .pdf-info {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 850px) {
+            .a4-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1 / 1.414;
+            }
+            
+            .preview-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .preview-title > div {
+                margin-top: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Credenciales A4 desde PDF</h1>
+        <p class="description">Cargue un archivo PDF con datos de alumnos y genere tarjetas de credenciales en formato A4 dividido en 8 secciones</p>
+        
+        <div class="instructions">
+            <h3>Instrucciones de uso:</h3>
+            <ul>
+                <li>Suba un archivo PDF con los datos de los alumnos</li>
+                <li>El PDF debe contener: Apellidos, Nombre, Usuario y Clave</li>
+                <li>El sistema generará automáticamente el correo (usuario@g.educaand.es)</li>
+                <li>Cada página A4 contendrá 8 credenciales</li>
+                <li>Revise la vista previa y haga clic en "Descargar PDF" para guardar el resultado</li>
+            </ul>
+        </div>
+        
+        <div class="pdf-info">
+            <h3>Información sobre el PDF:</h3>
+            <p>El PDF se generará con todas las páginas necesarias para incluir todas las credenciales. Cada página A4 contendrá exactamente 8 credenciales.</p>
+        </div>
+        
+        <div class="upload-section">
+            <h3>Subir archivo PDF</h3>
+            <p>Seleccione un archivo PDF con los datos de alumnos</p>
+            <input type="file" id="pdf-file" class="file-input" accept=".pdf">
+            <div>
+                <button id="process-btn" class="btn">Procesar Archivo</button>
+            </div>
+            <div id="status-message" class="status-message"></div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <p>Procesando archivo PDF, por favor espere...</p>
+        </div>
+        
+        <div class="preview-section" id="preview-section">
+            <div class="preview-title">
+                <h2>Vista Previa de Credenciales A4</h2>
+                <div>
+                    <button id="prev-page" class="btn">Página Anterior</button>
+                    <span class="page-indicator">Página <span id="current-page">1</span> de <span id="total-pages">1</span></span>
+                    <button id="next-page" class="btn">Página Siguiente</button>
+                    <button id="download-btn" class="btn btn-download">Descargar PDF</button>
+                </div>
+            </div>
+            
+            <div id="pages-container">
+                <!-- Las páginas A4 se generarán dinámicamente aquí -->
+            </div>
+            
+            <h3 style="margin-top: 30px;">Datos Cargados</h3>
+            <table class="data-table" id="data-table">
+                <!-- Los datos del PDF se mostrarán aquí -->
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Configurar PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const pdfFileInput = document.getElementById('pdf-file');
+            const processBtn = document.getElementById('process-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const previewSection = document.getElementById('preview-section');
+            const pagesContainer = document.getElementById('pages-container');
+            const dataTable = document.getElementById('data-table');
+            const currentPageSpan = document.getElementById('current-page');
+            const totalPagesSpan = document.getElementById('total-pages');
+            const loadingElement = document.getElementById('loading');
+            const statusMessage = document.getElementById('status-message');
+            
+            let studentData = [];
+            let currentPage = 1;
+            let totalPages = 1;
+            
+            // Procesar archivo PDF
+            processBtn.addEventListener('click', function() {
+                const file = pdfFileInput.files[0];
+                
+                if (!file) {
+                    showStatus('Por favor, seleccione un archivo PDF', 'error');
+                    return;
+                }
+                
+                processPDFFile(file);
+            });
+            
+            // Función para mostrar mensajes de estado
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                if (type === 'success') {
+                    statusMessage.classList.add('status-success');
+                } else if (type === 'error') {
+                    statusMessage.classList.add('status-error');
+                }
+            }
+            
+            // Función para limpiar texto (eliminar "Usuario:" y "Clave:")
+            function cleanText(text) {
+                return text
+                    .replace(/Usuario:/gi, '')
+                    .replace(/Clave:/gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+            
+            // Función para procesar el archivo PDF
+            function processPDFFile(file) {
+                loadingElement.style.display = 'block';
+                showStatus('', '');
+                
+                const fileReader = new FileReader();
+                
+                fileReader.onload = function() {
+                    const typedarray = new Uint8Array(this.result);
+                    
+                    // Cargar el PDF
+                    pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                        // Obtener el número de páginas
+                        const numPages = pdf.numPages;
+                        let allStudentData = [];
+                        
+                        // Función para extraer texto con formato de una página
+                        function extractTextWithFormatFromPage(pageNum) {
+                            return pdf.getPage(pageNum).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    return {
+                                        pageNum: pageNum,
+                                        textContent: textContent
+                                    };
+                                });
+                            });
+                        }
+                        
+                        // Extraer texto con formato de todas las páginas
+                        const pagePromises = [];
+                        for (let i = 1; i <= numPages; i++) {
+                            pagePromises.push(extractTextWithFormatFromPage(i));
+                        }
+                        
+                        // Procesar todo el texto extraído
+                        Promise.all(pagePromises).then(function(pagesData) {
+                            // Procesar cada página
+                            pagesData.forEach(function(pageData) {
+                                processPageData(pageData.textContent, pageData.pageNum, allStudentData);
+                            });
+                            
+                            studentData = allStudentData;
+                            
+                            if (studentData.length === 0) {
+                                showStatus('No se encontraron datos válidos en el archivo PDF', 'error');
+                                loadingElement.style.display = 'none';
+                                return;
+                            }
+                            
+                            showStatus(`Se cargaron ${studentData.length} credenciales correctamente`, 'success');
+                            loadingElement.style.display = 'none';
+                            displayPreview();
+                        });
+                    }).catch(function(error) {
+                        console.error('Error al procesar el PDF:', error);
+                        showStatus('Error al procesar el archivo PDF. Asegúrese de que es un archivo válido.', 'error');
+                        loadingElement.style.display = 'none';
+                    });
+                };
+                
+                fileReader.onerror = function() {
+                    showStatus('Error al leer el archivo', 'error');
+                    loadingElement.style.display = 'none';
+                };
+                
+                fileReader.readAsArrayBuffer(file);
+            }
+            
+            // Procesar datos de una página del PDF
+            function processPageData(pageText, pageNum, allStudentData) {
+                let items = pageText.items;
+                let startProcessing = false;
+                let currentLine = '';
+                let studentLines = [];
+                
+                // Primero, reconstruir las líneas completas
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    const text = item.str;
+                    
+                    // Detectar si estamos en la sección de datos después de "Usuario"
+                    if (!startProcessing && text.toLowerCase().includes('usuario')) {
+                        startProcessing = true;
+                        continue;
+                    }
+                    
+                    if (startProcessing) {
+                        // Si el texto está en una nueva posición Y (nueva línea)
+                        if (i > 0 && Math.abs(item.transform[5] - items[i-1].transform[5]) > 5) {
+                            if (currentLine.trim().length > 0) {
+                                studentLines.push(currentLine.trim());
+                            }
+                            currentLine = text;
+                        } else {
+                            currentLine += text;
+                        }
+                    }
+                }
+                
+                // Añadir la última línea
+                if (currentLine.trim().length > 0) {
+                    studentLines.push(currentLine.trim());
+                }
+                
+                // Procesar cada línea para extraer datos de estudiantes
+                studentLines.forEach(function(line) {
+                    // Limpiar la línea de "Usuario:" y "Clave:"
+                    const cleanLine = cleanText(line);
+                    
+                    // Dividir la línea por espacios
+                    const parts = cleanLine.split(/\s+/).filter(part => part.length > 0);
+                    
+                    if (parts.length >= 4) {
+                        // Los últimos dos elementos son usuario y contraseña
+                        const usuario = parts[parts.length - 2];
+                        const contraseña = parts[parts.length - 1];
+                        const alumno = parts.slice(0, parts.length - 2).join(' ');
+                        
+                        // Validar que el usuario y contraseña parezcan válidos
+                        if (usuario && contraseña && alumno && 
+                            usuario.length >= 3 && contraseña.length >= 3 &&
+                            !usuario.toLowerCase().includes('usuario') &&
+                            !contraseña.toLowerCase().includes('clave')) {
+                            
+                            const student = {
+                                alumno: alumno,
+                                usuario: usuario,
+                                correo: usuario + '@g.educaand.es',
+                                contraseña: contraseña
+                            };
+                            
+                            allStudentData.push(student);
+                        }
+                    }
+                });
+            }
+            
+            // Mostrar vista previa
+            function displayPreview() {
+                // Limpiar contenedores
+                pagesContainer.innerHTML = '';
+                dataTable.innerHTML = '';
+                
+                // Crear tabla de datos
+                let tableHTML = '<thead><tr><th>ALUMNO</th><th>USUARIO</th><th>CORREO</th><th>CONTRASEÑA</th></tr></thead><tbody>';
+                
+                // Calcular número de páginas
+                totalPages = Math.ceil(studentData.length / 8);
+                currentPage = 1;
+                
+                // Crear páginas A4
+                for (let page = 0; page < totalPages; page++) {
+                    const pageHTML = document.createElement('div');
+                    pageHTML.className = 'a4-container';
+                    pageHTML.id = `page-${page + 1}`;
+                    pageHTML.style.display = page === 0 ? 'block' : 'none';
+                    
+                    const gridContainer = document.createElement('div');
+                    gridContainer.className = 'grid-container';
+                    
+                    // Añadir 8 credenciales por página
+                    for (let i = 0; i < 8; i++) {
+                        const index = page * 8 + i;
+                        
+                        const gridItem = document.createElement('div');
+                        gridItem.className = 'grid-item';
+                        
+                        if (index < studentData.length) {
+                            const student = studentData[index];
+                            
+                            // Añadir fila a la tabla
+                            tableHTML += `<tr>
+                                <td>${student.alumno}</td>
+                                <td>${student.usuario}</td>
+                                <td>${student.correo}</td>
+                                <td>${student.contraseña}</td>
+                            </tr>`;
+                            
+                            // Crear tarjeta de credencial
+                            const credentialCard = document.createElement('div');
+                            credentialCard.className = 'credential-card';
+                            credentialCard.innerHTML = `
+                                <div>
+                                    <div class="student-name">${student.alumno}</div>
+                                    <div class="credential-info"><strong>Usuario:</strong> ${student.usuario}</div>
+                                    <div class="credential-info"><strong>Correo:</strong> ${student.correo}</div>
+                                </div>
+                                <div>
+                                    <div class="credential-info"><strong>Contraseña:</strong></div>
+                                    <div class="password">${student.contraseña}</div>
+                                </div>
+                            `;
+                            
+                            gridItem.appendChild(credentialCard);
+                        } else {
+                            // Sección vacía
+                            gridItem.innerHTML = '<div class="empty-section">Sin datos</div>';
+                        }
+                        
+                        gridContainer.appendChild(gridItem);
+                    }
+                    
+                    pageHTML.appendChild(gridContainer);
+                    pagesContainer.appendChild(pageHTML);
+                }
+                
+                tableHTML += '</tbody>';
+                dataTable.innerHTML = tableHTML;
+                
+                // Actualizar indicadores de página
+                currentPageSpan.textContent = currentPage;
+                totalPagesSpan.textContent = totalPages;
+                
+                // Mostrar sección de vista previa
+                previewSection.style.display = 'block';
+                
+                // Ajustar visibilidad de botones de navegación
+                prevPageBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
+                nextPageBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
+            }
+            
+            // Navegación entre páginas
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    document.getElementById(`page-${currentPage}`).style.display = 'none';
+                    currentPage--;
+                    document.getElementById(`page-${currentPage}`).style.display = 'block';
+                    currentPageSpan.textContent = currentPage;
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    document.getElementById(`page-${currentPage}`).style.display = 'none';
+                    currentPage++;
+                    document.getElementById(`page-${currentPage}`).style.display = 'block';
+                    currentPageSpan.textContent = currentPage;
+                }
+            });
+            
+            // Descargar PDF
+            downloadBtn.addEventListener('click', function() {
+                if (studentData.length === 0) {
+                    showStatus('No hay datos para generar el PDF', 'error');
+                    return;
+                }
+                
+                showStatus('Generando PDF, por favor espere...', 'success');
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Generando...';
+                
+                // Usar html2canvas y jsPDF para generar el PDF
+                const { jsPDF } = window.jspdf;
+                
+                // Crear un nuevo PDF
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Función para capturar y añadir cada página
+                function addPageToPDF(pageNumber) {
+                    return new Promise((resolve, reject) => {
+                        const pageElement = document.getElementById(`page-${pageNumber}`);
+                        
+                        // Asegurarse de que la página sea visible para html2canvas
+                        const originalDisplay = pageElement.style.display;
+                        pageElement.style.display = 'block';
+                        
+                        html2canvas(pageElement, {
+                            scale: 2,
+                            useCORS: true,
+                            logging: false,
+                            backgroundColor: '#ffffff',
+                            scrollX: 0,
+                            scrollY: 0
+                        }).then(canvas => {
+                            // Restaurar la visibilidad original
+                            pageElement.style.display = originalDisplay;
+                            
+                            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                            
+                            // Calcular dimensiones para A4 en mm
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            const pageHeight = doc.internal.pageSize.getHeight();
+                            
+                            // Calcular dimensiones de la imagen manteniendo la relación de aspecto
+                            const imgWidth = pageWidth;
+                            const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                            
+                            // Añadir imagen al PDF
+                            if (pageNumber > 1) {
+                                doc.addPage();
+                            }
+                            
+                            doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                            
+                            resolve();
+                        }).catch(error => {
+                            // Restaurar la visibilidad original en caso de error
+                            pageElement.style.display = originalDisplay;
+                            reject(error);
+                        });
+                    });
+                }
+                
+                // Función para generar el PDF página por página
+                async function generatePDF() {
+                    try {
+                        for (let i = 1; i <= totalPages; i++) {
+                            await addPageToPDF(i);
+                        }
+                        
+                        // Descargar el PDF
+                        doc.save('credenciales_alumnos.pdf');
+                        showStatus('PDF generado y descargado correctamente', 'success');
+                    } catch (error) {
+                        console.error('Error al generar PDF:', error);
+                        showStatus('Error al generar el PDF. Intente nuevamente.', 'error');
+                    } finally {
+                        downloadBtn.disabled = false;
+                        downloadBtn.textContent = 'Descargar PDF';
+                    }
+                }
+                
+                // Iniciar la generación del PDF
+                generatePDF();
+            });
+        });
+    </script>
+</body>
+</html>
