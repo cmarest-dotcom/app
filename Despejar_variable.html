@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despejar variables</title>
+  <style>
+    :root {
+      --bg: #f7f1f8;
+      --config-bg: #f6eefe;
+      --card: #ffffff;
+      --text: #374151;
+      --muted: #6b7280;
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --secondary-pastel: #cde7ff;
+      --secondary-pastel-text: #285680;
+      --success-pastel: #cfeedd;
+      --success-pastel-text: #2d6a4f;
+      --accent-pastel: #ffe6ee;
+      --accent-pastel-text: #9d4d6c;
+      --border: #e9dff2;
+      --ok: #15803d;
+      --ok-soft: #dcfce7;
+      --bad: #b91c1c;
+      --bad-soft: #fee2e2;
+      --warn: #92400e;
+      --warn-soft: #fef3c7;
+      --shadow: 0 12px 30px rgba(91, 74, 116, 0.10);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .35s ease; }
+    .app { max-width:980px; margin:0 auto; padding:24px; }
+    .tabs { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .tab-btn { background:#efe4ff; color:#6d41b3; border:1px solid #dbc8fa; border-radius:999px; padding:10px 16px; font-weight:800; }
+    .tab-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+    .screen { display:none; animation:fadeIn .25s ease; }
+    .screen.active { display:block; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); padding:24px; }
+    .config-card { background:var(--config-bg); }
+    h1,h2,h3 { margin-top:0; }
+    .subtitle { color:var(--muted); margin-top:-6px; margin-bottom:20px; line-height:1.45; }
+    .grid { display:grid; gap:16px; }
+    .grid.two { grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+    .field { display:flex; flex-direction:column; gap:8px; }
+    label { font-weight:700; font-size:.95rem; }
+    select,input,textarea,button { font:inherit; }
+    select,input[type="number"],input[type="text"],textarea { width:100%; border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:white; color:var(--text); }
+    .range-wrap { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+    input[type="range"] { width:100%; }
+    .pill { background:#f4e8ff; color:#6b46c1; border-radius:999px; padding:8px 12px; font-weight:700; min-width:92px; text-align:center; }
+    .toggle-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .toggle-row input[type=checkbox] { width:18px; height:18px; }
+    .btn-row { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+    button { border:none; border-radius:14px; padding:12px 18px; cursor:pointer; font-weight:700; transition:transform .12s ease, opacity .12s ease, background .2s ease; }
+    button:hover { transform:translateY(-1px); }
+    button:active { transform:translateY(0); }
+    button:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+    .btn-primary { background:#d9c2ff; color:#4b2b82; }
+    .btn-primary:hover { background:#c9a5ff; }
+    .btn-secondary { background:var(--secondary-pastel); color:var(--secondary-pastel-text); }
+    .btn-success { background:var(--success-pastel); color:var(--success-pastel-text); }
+    .topbar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; align-items:center; margin-bottom:18px; }
+    .stats { display:flex; flex-wrap:wrap; gap:10px; }
+    .stat { background:#f8fafc; border:1px solid var(--border); border-radius:14px; padding:10px 14px; min-width:132px; }
+    .stat .label { font-size:.8rem; color:var(--muted); margin-bottom:4px; }
+    .stat .value { font-size:1.05rem; font-weight:800; }
+    .exercise-box { text-align:center; padding:28px 16px; background:#f8fbff; border:1px dashed #bcd1f5; border-radius:18px; margin-bottom:18px; }
+    .equation { font-size:clamp(1.7rem,4vw,2.7rem); font-weight:900; letter-spacing:.02em; line-height:1.25; }
+    .target { display:inline-block; margin-top:14px; background:#fff0f5; color:#9d4d6c; border:1px solid #ffd0df; border-radius:999px; padding:9px 14px; font-weight:900; }
+    .helper { font-size:.95rem; color:var(--muted); margin-top:10px; line-height:1.4; }
+    .answer-line { display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:start; }
+    .lhs { font-size:1.4rem; font-weight:900; padding-top:11px; white-space:nowrap; }
+    textarea { min-height:82px; resize:vertical; font-size:1.15rem; }
+    .visual-expression { display:inline-flex; align-items:center; justify-content:center; gap:.28em; flex-wrap:wrap; vertical-align:middle; }
+    .math-frac {
+      display:inline-grid !important;
+      grid-template-rows:auto auto !important;
+      align-items:center !important;
+      justify-items:center !important;
+      vertical-align:middle !important;
+      text-align:center !important;
+      margin:0 .22em !important;
+      line-height:1.05 !important;
+      min-width:1.8em;
+    }
+    .math-frac .num {
+      display:block !important;
+      width:100% !important;
+      border-bottom:3px solid currentColor !important;
+      padding:0 .45em .16em .45em !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+    }
+    .math-frac .den {
+      display:block !important;
+      width:100% !important;
+      padding:.16em .45em 0 .45em !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+    }
+    .math-frac .bar { display:none !important; }
+    .math-group { display:inline-flex; align-items:center; gap:.12em; vertical-align:middle; }
+    .math-paren { font-size:1.35em; line-height:.9; font-weight:700; }
+    .math-pow { display:inline-flex; align-items:flex-start; gap:.03em; }
+    .math-pow sup { font-size:.55em; line-height:1; margin-left:.03em; transform:translateY(-.22em); }
+    .answer-editor { width:100%; border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:white; }
+    .fraction-answer { display:none; align-items:center; justify-content:flex-start; gap:10px; flex-wrap:wrap; }
+    .fraction-answer.active { display:flex; }
+    .fraction-input { display:inline-grid; grid-template-rows:auto 2px auto; align-items:center; min-width:min(420px,100%); }
+    .fraction-input textarea { min-height:56px; border-radius:12px; text-align:center; padding:10px 12px; }
+    .fraction-input .bar { height:2px; background:#111827; margin:7px 6px; border-radius:999px; }
+    .plain-answer.hidden-editor { display:none; }
+    .input-tools { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
+    .tool-btn { background:#ffe8ef; color:var(--accent-pastel-text); padding:10px 14px; min-width:48px; }
+    .tool-btn.blue { background:#e0f2fe; color:#075985; }
+    .feedback { margin-top:14px; padding:14px 16px; border-radius:14px; display:none; line-height:1.45; font-weight:700; }
+    .feedback.show { display:block; }
+    .feedback.ok { background:var(--ok-soft); color:var(--ok); }
+    .feedback.bad { background:var(--bad-soft); color:var(--bad); }
+    .feedback.warn { background:var(--warn-soft); color:var(--warn); }
+    .results-banner { text-align:center; padding:18px; border-radius:18px; margin-bottom:20px; font-weight:800; font-size:1.15rem; }
+    .score-big { font-size:clamp(2.2rem,8vw,4rem); font-weight:900; margin:12px 0 6px; text-align:center; }
+    .center { text-align:center; }
+    .tiny { color:var(--muted); font-size:.92rem; line-height:1.4; }
+    .results-grid { display:grid; gap:12px; margin-top:18px; }
+    .result-item { border:1px solid var(--border); border-left:8px solid #cbd5e1; background:#fff; border-radius:14px; padding:14px; }
+    .result-item.ok { border-left-color:var(--ok); }
+    .result-item.bad { border-left-color:var(--bad); }
+    .result-ex { font-size:1.08rem; font-weight:900; margin-bottom:8px; }
+    .modal { position:fixed; inset:0; background:rgba(15,23,42,.48); display:none; align-items:center; justify-content:center; padding:20px; z-index:999; }
+    .modal.show { display:flex; }
+    .modal-card { width:min(560px,100%); background:white; border-radius:20px; padding:24px; box-shadow:var(--shadow); }
+    .hidden { display:none !important; }
+    @media (max-width:640px){ .app{padding:14px;} .card{padding:18px;} .stat{min-width:100%;} .btn-row button{width:100%;} .answer-line{grid-template-columns:1fr;} .lhs{padding-top:0;} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tabs">
+      <button id="tabConfig" class="tab-btn active" type="button">Configuración</button>
+      <button id="tabActivity" class="tab-btn" type="button">Actividad</button>
+    </div>
+
+    <section id="configScreen" class="screen active">
+      <div class="card config-card">
+        <h1>Práctica de despeje de variables</h1>
+        <p class="subtitle">Configura una serie de ejercicios para aislar una variable en fórmulas de matemáticas, física y química.</p>
+        <div class="grid two">
+          <div class="field">
+            <label for="difficulty">Nivel de dificultad</label>
+            <select id="difficulty">
+              <option value="easy">Fácil</option>
+              <option value="medium">Medio</option>
+              <option value="hard">Difícil</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="activityCount">Número de ejercicios</label>
+            <div class="range-wrap">
+              <input type="range" id="activityCount" min="3" max="20" step="1" value="8">
+              <div class="pill" id="activityCountValue">8</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="timeLimit">Tiempo total</label>
+            <div class="range-wrap">
+              <input type="range" id="timeLimit" min="30" max="300" step="30" value="180">
+              <div class="pill" id="timeLimitValue">3:00</div>
+            </div>
+            <label class="toggle-row"><input type="checkbox" id="noTime"> Sin límite de tiempo</label>
+          </div>
+          <div class="field">
+            <label for="feedbackMode">Corrección</label>
+            <select id="feedbackMode">
+              <option value="instant">En el momento</option>
+              <option value="final">Al final de la práctica</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button id="startBtn" class="btn-primary" type="button">Iniciar práctica</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="activityScreen" class="screen">
+      <div class="card">
+        <div class="topbar">
+          <div>
+            <h2 style="margin-bottom:6px;">Actividad en marcha</h2>
+            <div class="tiny">Despeja la variable indicada. Usa los botones de operación y la herramienta de fracción para escribir el despeje.</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="label">Ejercicio</div><div class="value" id="progressStat">1 / 8</div></div>
+            <div class="stat"><div class="label">Aciertos</div><div class="value" id="scoreStat">0</div></div>
+            <div class="stat"><div class="label">Tiempo</div><div class="value" id="timerStat">3:00</div></div>
+          </div>
+        </div>
+
+        <div class="exercise-box">
+          <div class="equation" id="exerciseDisplay"></div>
+          <div class="target" id="targetDisplay"></div>
+          <div class="helper">Las fórmulas se muestran con notación matemática: fracción vertical y punto medio para multiplicar. Pulsa <strong>Fracción</strong> para escribir numerador y denominador.</div>
+        </div>
+
+        <div class="field">
+          <label for="answerInput">Resultado del despeje</label>
+          <div class="answer-line">
+            <div class="lhs" id="answerPrefix">x =</div>
+            <div class="answer-editor">
+              <textarea id="answerInput" class="plain-answer" placeholder="Escribe aquí la expresión final..."></textarea>
+              <div id="fractionAnswer" class="fraction-answer">
+                <div class="fraction-input">
+                  <textarea id="fractionNumerator" placeholder="Numerador"></textarea>
+                  <div class="bar"></div>
+                  <textarea id="fractionDenominator" placeholder="Denominador"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-tools" id="variableTools"></div>
+        <div class="input-tools">
+          <button class="tool-btn" type="button" data-insert="+">+</button>
+          <button class="tool-btn" type="button" data-insert="-">−</button>
+          <button class="tool-btn" type="button" data-insert="*">×</button>
+          <button class="tool-btn" type="button" data-insert="(">(</button>
+          <button class="tool-btn" type="button" data-insert=")">)</button>
+          <button class="tool-btn" type="button" data-insert="^2">x²</button>
+          <button class="tool-btn blue" type="button" id="fractionBtn">Fracción</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="checkNextBtn" class="btn-primary" type="button">Comprobar</button>
+          <button id="continueBtn" class="btn-success hidden" type="button">Continuar</button>
+          <button id="finishNowBtn" class="btn-secondary" type="button">Finalizar</button>
+        </div>
+        <div id="feedbackBox" class="feedback"></div>
+      </div>
+    </section>
+
+    <section id="resultsScreen" class="screen">
+      <div class="card">
+        <h2 class="center">Resultado final</h2>
+        <div id="resultsBanner" class="results-banner"></div>
+        <div id="scoreBig" class="score-big">0%</div>
+        <div class="center tiny" id="summaryLine"></div>
+        <div class="results-grid" id="resultsList"></div>
+        <div class="btn-row">
+          <button id="backToConfigBtn" class="btn-secondary" type="button">Finalizar</button>
+          <button id="openReportBtn" class="btn-success" type="button">Informe</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="reportModal" class="modal">
+    <div class="modal-card">
+      <h3>Generar informe PDF</h3>
+      <p class="subtitle">Escribe los datos del alumno o alumna para incluirlos en el informe descargable.</p>
+      <div class="grid two">
+        <div class="field" style="grid-column:1 / -1;">
+          <label for="studentName">Nombre completo</label>
+          <input id="studentName" type="text" placeholder="Nombre y apellidos">
+        </div>
+        <div class="field">
+          <label for="studentCourse">Curso</label>
+          <input id="studentCourse" type="text" placeholder="Ejemplo: 3º ESO A">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="downloadPdfBtn" class="btn-primary" type="button">Descargar PDF</button>
+        <button id="closeModalBtn" class="btn-secondary" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const state = { config:null, exercises:[], currentIndex:0, correctCount:0, timerId:null, timeRemaining:0, startedAt:null, endedAt:null };
+    const screens = { config:document.getElementById('configScreen'), activity:document.getElementById('activityScreen'), results:document.getElementById('resultsScreen') };
+    const els = {
+      tabConfig:document.getElementById('tabConfig'), tabActivity:document.getElementById('tabActivity'), difficulty:document.getElementById('difficulty'),
+      activityCount:document.getElementById('activityCount'), activityCountValue:document.getElementById('activityCountValue'), timeLimit:document.getElementById('timeLimit'),
+      timeLimitValue:document.getElementById('timeLimitValue'), noTime:document.getElementById('noTime'), feedbackMode:document.getElementById('feedbackMode'),
+      startBtn:document.getElementById('startBtn'), progressStat:document.getElementById('progressStat'), scoreStat:document.getElementById('scoreStat'),
+      timerStat:document.getElementById('timerStat'), exerciseDisplay:document.getElementById('exerciseDisplay'), targetDisplay:document.getElementById('targetDisplay'),
+      answerPrefix:document.getElementById('answerPrefix'), answerInput:document.getElementById('answerInput'), fractionAnswer:document.getElementById('fractionAnswer'), fractionNumerator:document.getElementById('fractionNumerator'), fractionDenominator:document.getElementById('fractionDenominator'), variableTools:document.getElementById('variableTools'),
+      fractionBtn:document.getElementById('fractionBtn'), checkNextBtn:document.getElementById('checkNextBtn'), continueBtn:document.getElementById('continueBtn'),
+      finishNowBtn:document.getElementById('finishNowBtn'), feedbackBox:document.getElementById('feedbackBox'), resultsBanner:document.getElementById('resultsBanner'),
+      scoreBig:document.getElementById('scoreBig'), summaryLine:document.getElementById('summaryLine'), resultsList:document.getElementById('resultsList'),
+      backToConfigBtn:document.getElementById('backToConfigBtn'), openReportBtn:document.getElementById('openReportBtn'), reportModal:document.getElementById('reportModal'),
+      studentName:document.getElementById('studentName'), studentCourse:document.getElementById('studentCourse'), downloadPdfBtn:document.getElementById('downloadPdfBtn'),
+      closeModalBtn:document.getElementById('closeModalBtn')
+    };
+
+    function showScreen(name){ Object.values(screens).forEach(s=>s.classList.remove('active')); screens[name].classList.add('active'); els.tabConfig.classList.toggle('active', name==='config'); els.tabActivity.classList.toggle('active', name==='activity'); }
+    function formatTime(total){ const m=Math.floor(total/60); const s=total%60; return `${m}:${String(s).padStart(2,'0')}`; }
+    function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    function escapeHtml(text){ return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function pretty(expr){ return String(expr).replace(/\*/g,'·').replace(/\^2/g,'²').replace(/\^3/g,'³').replace(/\//g,' ÷ '); }
+    function wrapGroup(html){ return `<span class="math-group"><span class="math-paren">(</span>${html}<span class="math-paren">)</span></span>`; }
+    function astToHtml(node, parentOp=''){
+      if(node.type==='num') return escapeHtml(node.value);
+      if(node.type==='var') return escapeHtml(node.name);
+      if(node.type==='neg') return `<span class="visual-expression">−${astToHtml(node.child, 'neg')}</span>`;
+      if(node.type==='^') return `<span class="math-pow"><span>${astToHtml(node.left, '^')}</span><sup>${astToHtml(node.right, '^')}</sup></span>`;
+      if(node.type==='/') return `<span class="math-frac" aria-label="fracción"><span class="num">${astToHtml(node.left, '/')}</span><span class="bar"></span><span class="den">${astToHtml(node.right, '/')}</span></span>`;
+      const op = node.type==='*' ? '·' : node.type==='+' ? '+' : '−';
+      const needsParens = (child, side) => {
+        if(!child) return false;
+        if(node.type==='*') return child.type==='+' || child.type==='-';
+        if(node.type==='-') return side==='right' && (child.type==='+' || child.type==='-');
+        if(node.type==='^') return child.type==='+' || child.type==='-' || child.type==='*' || child.type==='/';
+        return false;
+      };
+      const leftRaw = astToHtml(node.left, node.type);
+      const rightRaw = astToHtml(node.right, node.type);
+      const left = needsParens(node.left, 'left') ? wrapGroup(leftRaw) : leftRaw;
+      const right = needsParens(node.right, 'right') ? wrapGroup(rightRaw) : rightRaw;
+      return `<span class="visual-expression">${left}<span>${op}</span>${right}</span>`;
+    }
+    function expressionToHtml(expr){
+      try { return astToHtml(parseExpression(expr)); }
+      catch {
+        // Último recurso: nunca mostramos / ni : como división. Si aparece una división
+        // en texto, la convertimos también a una fracción visual sencilla.
+        return simpleFractionFallback(String(expr));
+      }
+    }
+
+    function simpleFractionFallback(expr){
+      const clean = String(expr).trim();
+      let depth = 0;
+      for(let i=0;i<clean.length;i++){
+        const ch = clean[i];
+        if(ch==='(') depth++;
+        else if(ch===')') depth--;
+        else if((ch==='/' || ch===':') && depth===0){
+          const left = clean.slice(0,i);
+          const right = clean.slice(i+1);
+          return `<span class="math-frac" aria-label="fracción"><span class="num">${simpleMathText(left)}</span><span class="bar"></span><span class="den">${simpleMathText(right)}</span></span>`;
+        }
+      }
+      return simpleMathText(clean);
+    }
+
+    function simpleMathText(text){
+      return escapeHtml(String(text))
+        .replace(/\*/g,'·')
+        .replace(/\^2/g,'²')
+        .replace(/\^3/g,'³')
+        .replace(/[/:]/g,'');
+    }
+    function equationToHtml(eq){
+      const raw = String(eq);
+      const eqPos = raw.indexOf('=');
+      if(eqPos < 0) return expressionToHtml(raw);
+      const left = raw.slice(0, eqPos);
+      const right = raw.slice(eqPos + 1);
+      return `<span class="visual-expression math-equation">${expressionToHtml(left)}<span>=</span>${expressionToHtml(right)}</span>`;
+    }
+    function answerToHtml(target, expr){ return `<span class="visual-expression">${escapeHtml(target)}<span>=</span>${expressionToHtml(expr)}</span>`; }
+
+    els.activityCount.addEventListener('input',()=> els.activityCountValue.textContent=els.activityCount.value);
+    els.timeLimit.addEventListener('input',()=> els.timeLimitValue.textContent = els.noTime.checked ? 'Sin límite' : formatTime(Number(els.timeLimit.value)));
+    els.noTime.addEventListener('change',()=>{ els.timeLimit.disabled=els.noTime.checked; els.timeLimit.style.opacity=els.noTime.checked?'.5':'1'; els.timeLimitValue.textContent=els.noTime.checked?'Sin límite':formatTime(Number(els.timeLimit.value)); });
+
+    const pools = {
+      3:['A','B','C'],
+      4:['A','B','C','D'],
+      5:['A','B','C','D','E']
+    };
+
+    const templates = {
+      easy: [
+        {n:3, eq:'A = B*C', target:'B', ans:'A/C'},
+        {n:3, eq:'B*C = A', target:'C', ans:'A/B'},
+        {n:3, eq:'A = B/C', target:'B', ans:'A*C'},
+        {n:3, eq:'B/C = A', target:'C', ans:'B/A'},
+        {n:3, eq:'A = C/B', target:'B', ans:'C/A'},
+        {n:3, eq:'A = B+C', target:'B', ans:'A-C'},
+        {n:3, eq:'B+C = A', target:'C', ans:'A-B'},
+        {n:3, eq:'A = B-C', target:'B', ans:'A+C'},
+        {n:3, eq:'A = C-B', target:'B', ans:'C-A'}
+      ],
+      medium: [
+        {n:4, eq:'A = B*C + D', target:'B', ans:'(A-D)/C'},
+        {n:4, eq:'B*C + D = A', target:'C', ans:'(A-D)/B'},
+        {n:4, eq:'A = B*C/D', target:'B', ans:'A*D/C'},
+        {n:4, eq:'B*C/D = A', target:'D', ans:'B*C/A'},
+        {n:4, eq:'A = B/(C+D)', target:'B', ans:'A*(C+D)'},
+        {n:4, eq:'B/(C+D) = A', target:'C', ans:'B/A-D'},
+        {n:4, eq:'A = (B+C)/D', target:'B', ans:'A*D-C'},
+        {n:4, eq:'(B+C)/D = A', target:'D', ans:'(B+C)/A'},
+        {n:4, eq:'A = C/(B+D)', target:'B', ans:'C/A-D'},
+        {n:4, eq:'C/(B+D) = A', target:'D', ans:'C/A-B'},
+        {n:4, eq:'A = B*C^2', target:'B', ans:'A/(C^2)'},
+        {n:4, eq:'B*C^2 = A', target:'B', ans:'A/(C^2)'},
+        {n:4, eq:'A = B^2/C', target:'C', ans:'B^2/A'}
+      ],
+      hard: [
+        {n:5, eq:'A = (B*C+D)/E', target:'B', ans:'(A*E-D)/C'},
+        {n:5, eq:'(B*C+D)/E = A', target:'E', ans:'(B*C+D)/A'},
+        {n:5, eq:'A = D/(B*C+E)', target:'B', ans:'(D/A-E)/C'},
+        {n:5, eq:'D/(B*C+E) = A', target:'C', ans:'(D/A-E)/B'},
+        {n:5, eq:'A = (C+D)/(B-E)', target:'B', ans:'(C+D)/A+E'},
+        {n:5, eq:'(C+D)/(B-E) = A', target:'E', ans:'B-(C+D)/A'},
+        {n:5, eq:'A = B*C/(D+E)', target:'B', ans:'A*(D+E)/C'},
+        {n:5, eq:'B*C/(D+E) = A', target:'D', ans:'B*C/A-E'},
+        {n:5, eq:'A = (B+C*D)/E', target:'B', ans:'A*E-C*D'},
+        {n:5, eq:'E/(D-B*C) = A', target:'B', ans:'(D-E/A)/C'},
+        {n:5, eq:'A = (B-C)/(D*E)', target:'B', ans:'A*D*E+C'},
+        {n:5, eq:'A = B*C^2/(D+E)', target:'B', ans:'A*(D+E)/(C^2)'},
+        {n:5, eq:'B*C^2/(D+E) = A', target:'D', ans:'B*C^2/A-E'},
+        {n:5, eq:'A = (B^2+C)/D', target:'C', ans:'A*D-B^2'}
+      ]
+    };
+
+    function hasKeyboardDivisionInRenderedHtml(html){
+      const text = String(html).replace(/<[^>]+>/g, '');
+      return /[:\/]/.test(text);
+    }
+
+    function remapTemplate(t){
+      const letters = pools[t.n];
+      const replacement = shuffle(letters);
+      const map = {};
+      letters.forEach((l,i)=> map[l]=replacement[i]);
+      const rep = s => s.replace(/[A-E]/g, ch => map[ch] || ch);
+      return { equation: rep(t.eq), target: rep(t.target), expected: rep(t.ans), variables: replacement.sort(), difficulty:t.n };
+    }
+
+    function buildExerciseSet(config){
+      const bank = templates[config.difficulty];
+      const result=[];
+      let previous='';
+      for(let i=0;i<config.activityCount;i++){
+        let ex, guard=0;
+        do { ex = remapTemplate(randomChoice(bank)); guard++; } while(ex.equation===previous && guard<25);
+        previous=ex.equation;
+        result.push({ ...ex, answer:'', checked:false, isCorrect:false, feedbackMessage:'' });
+      }
+      return result;
+    }
+
+    let activeAnswerField = els.answerInput;
+    function setActiveAnswerField(field){ activeAnswerField = field || els.answerInput; }
+    [els.answerInput, els.fractionNumerator, els.fractionDenominator].forEach(field=>field.addEventListener('focus',()=>setActiveAnswerField(field)));
+    function isFractionMode(){ return els.fractionAnswer.classList.contains('active'); }
+    function getCurrentAnswer(){
+      if(isFractionMode()){
+        const num=els.fractionNumerator.value.trim();
+        const den=els.fractionDenominator.value.trim();
+        if(!num && !den) return '';
+        return `(${num || '0'})/(${den || '1'})`;
+      }
+      return els.answerInput.value.trim();
+    }
+    function setPlainAnswer(value){
+      els.answerInput.classList.remove('hidden-editor');
+      els.fractionAnswer.classList.remove('active');
+      els.answerInput.value=value || '';
+      setActiveAnswerField(els.answerInput);
+    }
+    function setFractionAnswer(num='', den=''){
+      els.answerInput.classList.add('hidden-editor');
+      els.fractionAnswer.classList.add('active');
+      els.fractionNumerator.value=num;
+      els.fractionDenominator.value=den;
+      setActiveAnswerField(els.fractionNumerator);
+      els.fractionNumerator.focus();
+    }
+    function insertAtCursor(textarea, text){
+      const start=textarea.selectionStart, end=textarea.selectionEnd, current=textarea.value;
+      textarea.value=current.slice(0,start)+text+current.slice(end);
+      textarea.focus(); const pos=start+text.length; textarea.setSelectionRange(pos,pos);
+    }
+    document.querySelectorAll('[data-insert]').forEach(btn=>btn.addEventListener('click',()=>insertAtCursor(activeAnswerField,btn.dataset.insert)));
+    els.fractionBtn.addEventListener('click',()=>{
+      if(isFractionMode()){ els.fractionNumerator.focus(); return; }
+      const start=els.answerInput.selectionStart, end=els.answerInput.selectionEnd;
+      const selected=els.answerInput.value.slice(start,end);
+      setFractionAnswer(selected, '');
+    });
+
+    function resetFeedback(){ els.feedbackBox.className='feedback'; els.feedbackBox.textContent=''; }
+    function showFeedback(msg,type){ els.feedbackBox.className=`feedback show ${type}`; els.feedbackBox.innerHTML=msg; }
+
+    function tokenize(input){
+      const s = String(input).replace(/\s+/g,'').replace(/−/g,'-').replace(/×|·/g,'*').replace(/÷/g,'/').replace(/²/g,'^2').replace(/³/g,'^3');
+      const tokens=[]; let i=0;
+      while(i<s.length){
+        const ch=s[i];
+        if(/[A-Za-z]/.test(ch)){ tokens.push({type:'var', value:ch.toUpperCase()}); i++; }
+        else if(/\d/.test(ch) || ch==='.'){
+          let num='';
+          while(i<s.length && /[\d.]/.test(s[i])){ num+=s[i++]; }
+          if((num.match(/\./g)||[]).length>1) throw new Error('Número no válido');
+          tokens.push({type:'num', value:Number(num)});
+        } else if('+-*/^()'.includes(ch)){ tokens.push({type:ch, value:ch}); i++; }
+        else throw new Error('Símbolo no reconocido');
+      }
+      return tokens;
+    }
+
+    function parseExpression(input){
+      const tokens=tokenize(input); let pos=0;
+      function peek(){ return tokens[pos]; }
+      function consume(type){ if(peek() && peek().type===type) return tokens[pos++]; throw new Error('Expresión incompleta'); }
+      function primary(){
+        const t=peek(); if(!t) throw new Error('Expresión incompleta');
+        if(t.type==='num'){ pos++; return {type:'num', value:t.value}; }
+        if(t.type==='var'){ pos++; return {type:'var', name:t.value}; }
+        if(t.type==='('){ consume('('); const node=expr(); consume(')'); return node; }
+        if(t.type==='+'){ consume('+'); return primary(); }
+        if(t.type==='-'){ consume('-'); return {type:'neg', child:primary()}; }
+        throw new Error('Expresión no válida');
+      }
+      function power(){
+        let node=primary();
+        while(peek() && peek().type==='^'){
+          pos++;
+          const right=primary();
+          node={type:'^', left:node, right};
+        }
+        return node;
+      }
+      function term(){
+        let node=power();
+        while(peek() && (peek().type==='*' || peek().type==='/')){
+          const op=peek().type; pos++; const right=power(); node={type:op, left:node, right};
+        }
+        return node;
+      }
+      function expr(){
+        let node=term();
+        while(peek() && (peek().type==='+' || peek().type==='-')){
+          const op=peek().type; pos++; const right=term(); node={type:op, left:node, right};
+        }
+        return node;
+      }
+      const node=expr();
+      if(pos!==tokens.length) throw new Error('Expresión no válida');
+      return node;
+    }
+
+    function evalAst(node, values){
+      if(node.type==='num') return node.value;
+      if(node.type==='var') { if(!(node.name in values)) throw new Error('Variable no permitida'); return values[node.name]; }
+      if(node.type==='neg') return -evalAst(node.child, values);
+      const a=evalAst(node.left, values), b=evalAst(node.right, values);
+      if(node.type==='+') return a+b;
+      if(node.type==='-') return a-b;
+      if(node.type==='*') return a*b;
+      if(node.type==='^') return Math.pow(a,b);
+      if(node.type==='/') { if(Math.abs(b)<1e-9) throw new Error('División por cero'); return a/b; }
+      throw new Error('Nodo no válido');
+    }
+
+    function compareEquivalent(userInput, expected, variables, target){
+      if(!String(userInput).trim()) return {ok:false, error:'No se ha escrito ninguna respuesta.'};
+      let userAst, expectedAst;
+      try { userAst=parseExpression(userInput); expectedAst=parseExpression(expected); }
+      catch(e){ return {ok:false, error:'La respuesta no se ha podido interpretar. Usa letras, paréntesis, productos, sumas, restas y fracciones.'}; }
+      const allowed = new Set(variables.filter(v=>v!==target));
+      try {
+        for(let test=0; test<45; test++){
+          const values={};
+          variables.forEach(v=>{ if(v!==target) values[v] = randomChoice([-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9]); });
+          const u=evalAst(userAst, values), e=evalAst(expectedAst, values);
+          if(!Number.isFinite(u) || !Number.isFinite(e)) { test--; continue; }
+          if(Math.abs(u-e) > 1e-7 * Math.max(1, Math.abs(e))) return {ok:false};
+        }
+      } catch(e){
+        if(String(e.message).includes('Variable no permitida')) return {ok:false, error:`El resultado no debe contener la variable despejada (${target}).`};
+        return {ok:false, error:'Hay alguna operación que no se puede evaluar. Revisa paréntesis y denominadores.'};
+      }
+      return {ok:true};
+    }
+
+    function updateActivityUI(){
+      const ex=state.exercises[state.currentIndex];
+      els.progressStat.textContent=`${state.currentIndex+1} / ${state.exercises.length}`;
+      els.scoreStat.textContent = state.config.feedbackMode === 'instant' ? String(state.correctCount) : '—';
+      els.timerStat.textContent=state.config.noTime?'Sin límite':formatTime(state.timeRemaining);
+      els.exerciseDisplay.innerHTML=equationToHtml(ex.equation);
+      if(hasKeyboardDivisionInRenderedHtml(els.exerciseDisplay.innerHTML)){ console.warn('Revisar renderizado visual de fracción:', ex.equation); }
+      els.targetDisplay.textContent=`Despeja: ${ex.target}`;
+      els.answerPrefix.textContent=`${ex.target} =`;
+      setPlainAnswer(ex.answer||'');
+      els.variableTools.innerHTML = ex.variables.filter(v=>v!==ex.target).map(v=>`<button class="tool-btn blue" type="button" data-var="${v}">${v}</button>`).join('');
+      els.variableTools.querySelectorAll('[data-var]').forEach(btn=>btn.addEventListener('click',()=>insertAtCursor(activeAnswerField,btn.dataset.var))); 
+      resetFeedback();
+      els.continueBtn.classList.add('hidden');
+      els.checkNextBtn.disabled=false;
+      els.answerInput.disabled=false; els.fractionNumerator.disabled=false; els.fractionDenominator.disabled=false;
+      els.answerInput.focus();
+    }
+
+    function startTimer(){
+      clearInterval(state.timerId);
+      if(state.config.noTime){ els.timerStat.textContent='Sin límite'; return; }
+      state.timerId=setInterval(()=>{
+        state.timeRemaining -= 1;
+        els.timerStat.textContent = formatTime(Math.max(0,state.timeRemaining));
+        if(state.timeRemaining <= 0){ clearInterval(state.timerId); finishActivity(true); }
+      },1000);
+    }
+
+    function startActivity(){
+      state.config={ difficulty:els.difficulty.value, activityCount:Number(els.activityCount.value), timeLimit:Number(els.timeLimit.value), noTime:els.noTime.checked, feedbackMode:els.feedbackMode.value };
+      state.exercises=buildExerciseSet(state.config);
+      state.currentIndex=0; state.correctCount=0; state.timeRemaining=state.config.noTime?0:state.config.timeLimit; state.startedAt=new Date(); state.endedAt=null;
+      document.body.style.background='var(--bg)'; showScreen('activity'); updateActivityUI(); startTimer();
+    }
+
+    function saveCurrentAnswer(){ state.exercises[state.currentIndex].answer = getCurrentAnswer(); }
+    function evaluateExercise(index){
+      const ex=state.exercises[index];
+      const result=compareEquivalent(ex.answer, ex.expected, ex.variables, ex.target);
+      ex.checked=true; ex.isCorrect=result.ok;
+      ex.feedbackMessage = result.ok
+        ? `Correcta. Una forma equivalente es <strong>${answerToHtml(ex.target, ex.expected)}</strong>.`
+        : `${result.error || 'La expresión no es equivalente al despeje correcto.'}<br>Una forma correcta es: <strong>${answerToHtml(ex.target, ex.expected)}</strong>.`;
+      return ex.isCorrect;
+    }
+
+    function nextStep(){
+      saveCurrentAnswer();
+      const ex=state.exercises[state.currentIndex];
+      const wasChecked=ex.checked, wasCorrect=ex.isCorrect;
+      const nowCorrect=evaluateExercise(state.currentIndex);
+      if(!wasChecked && nowCorrect) state.correctCount++;
+      if(wasChecked && !wasCorrect && nowCorrect) state.correctCount++;
+      if(wasChecked && wasCorrect && !nowCorrect) state.correctCount--;
+      els.scoreStat.textContent = state.config.feedbackMode === 'instant' ? String(state.correctCount) : '—';
+      if(state.config.feedbackMode==='instant'){
+        showFeedback(ex.feedbackMessage, ex.isCorrect?'ok':'bad');
+        els.continueBtn.classList.remove('hidden'); els.checkNextBtn.disabled=true; els.answerInput.disabled=true; els.fractionNumerator.disabled=true; els.fractionDenominator.disabled=true; return;
+      }
+      if(state.currentIndex < state.exercises.length-1){ state.currentIndex++; updateActivityUI(); } else finishActivity(false);
+    }
+    function continueAfterFeedback(){ if(state.currentIndex < state.exercises.length-1){ state.currentIndex++; updateActivityUI(); } else finishActivity(false); }
+
+    function finishActivity(byTimeout=false){
+      clearInterval(state.timerId);
+      if(state.exercises.length) saveCurrentAnswer();
+      state.endedAt=new Date(); let totalCorrect=0;
+      state.exercises.forEach((ex,index)=>{ if(!ex.checked){ if(index===state.currentIndex) ex.answer=getCurrentAnswer(); evaluateExercise(index); } if(ex.isCorrect) totalCorrect++; });
+      state.correctCount=totalCorrect; renderResults(byTimeout); showScreen('results');
+    }
+
+    function renderResults(byTimeout){
+      const total=state.exercises.length; const score=total?Math.round((state.correctCount/total)*100):0; const pass=score>=50;
+      document.body.style.background = pass ? 'linear-gradient(180deg,#dcfce7 0%,#f0fdf4 100%)' : 'linear-gradient(180deg,#fee2e2 0%,#fff1f2 100%)';
+      els.resultsBanner.textContent = pass ? 'Buen trabajo. Has alcanzado al menos el 50%.' : 'Necesitas seguir practicando. Has quedado por debajo del 50%.';
+      els.resultsBanner.style.background = pass ? 'var(--ok-soft)' : 'var(--bad-soft)';
+      els.resultsBanner.style.color = pass ? 'var(--ok)' : 'var(--bad)';
+      els.scoreBig.textContent=`${score}%`;
+      els.summaryLine.textContent=`${state.correctCount} de ${total} correctas${byTimeout?' · Tiempo agotado':''}`;
+      els.resultsList.innerHTML = state.exercises.map((ex,i)=>`
+        <div class="result-item ${ex.isCorrect?'ok':'bad'}">
+          <div class="result-ex">${i+1}. ${equationToHtml(ex.equation)} · Despeja ${escapeHtml(ex.target)}</div>
+          <div><strong>Tu respuesta:</strong> ${ex.answer ? answerToHtml(ex.target, ex.answer) : 'Sin respuesta'}</div>
+          <div><strong>Respuesta correcta equivalente:</strong> ${answerToHtml(ex.target, ex.expected)}</div>
+          <div class="tiny" style="margin-top:6px;"><strong>${ex.isCorrect?'Correcta':'Incorrecta'}</strong></div>
+        </div>`).join('');
+    }
+
+    function configLabel(v){ return ({easy:'Fácil', medium:'Medio', hard:'Difícil', instant:'En el momento', final:'Al final de la práctica'}[v] || v); }
+
+    async function generatePdf(){
+      if(!window.jspdf){ alert('No se ha podido cargar la librería del PDF.'); return; }
+      const studentName=els.studentName.value.trim() || 'Sin nombre';
+      const studentCourse=els.studentCourse.value.trim() || 'Sin curso';
+      const { jsPDF }=window.jspdf; const doc=new jsPDF();
+      const margin=14, pageWidth=doc.internal.pageSize.getWidth(), pageHeight=doc.internal.pageSize.getHeight();
+      const total=state.exercises.length, score=total?Math.round((state.correctCount/total)*100):0, pass=score>=50; let y=16;
+      const ensureSpace=(needed=10)=>{ if(y+needed > pageHeight-16){ doc.addPage(); y=16; } };
+      doc.setFillColor(247,238,254); doc.roundedRect(margin,y,pageWidth-margin*2,38,4,4,'F'); doc.setDrawColor(221,204,245); doc.roundedRect(margin,y,pageWidth-margin*2,38,4,4,'S');
+      doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('Informe de práctica: despeje de variables', margin+4, y+9);
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.text(`Alumno o alumna: ${studentName}`, margin+4, y+17); doc.text(`Curso: ${studentCourse}`, margin+4, y+24); doc.text(`Fecha: ${new Date().toLocaleString('es-ES')}`, margin+4, y+31);
+      doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(pass?21:185, pass?128:28, pass?61:28); doc.text(`${score}%`, pageWidth-margin-22, y+16, {align:'center'}); doc.setFontSize(10); doc.text(pass?'Resultado positivo':'Resultado a mejorar', pageWidth-margin-22, y+25, {align:'center'}); doc.setTextColor(55,65,81); y+=48;
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Configuración inicial', margin, y); y+=6;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+      [`Nivel: ${configLabel(state.config.difficulty)}`, `Número de ejercicios: ${state.config.activityCount}`, `Tiempo configurado: ${state.config.noTime?'Sin límite':formatTime(state.config.timeLimit)}`, `Corrección: ${configLabel(state.config.feedbackMode)}`, `Aciertos: ${state.correctCount} de ${total}`].forEach(line=>{ ensureSpace(6); doc.text(line, margin, y); y+=5.5; });
+      y+=4; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Resultados detallados', margin, y); y+=6;
+      const drawHeader=()=>{ ensureSpace(14); doc.setFillColor(230,243,255); doc.rect(margin,y,pageWidth-margin*2,10,'F'); doc.setDrawColor(200,218,240); doc.rect(margin,y,pageWidth-margin*2,10); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.text('Nº',margin+3,y+6.5); doc.text('Ejercicio',margin+15,y+6.5); doc.text('Tu respuesta',margin+72,y+6.5); doc.text('Correcta',margin+130,y+6.5); doc.text('Estado',pageWidth-margin-18,y+6.5,{align:'center'}); y+=10; };
+      drawHeader();
+      const colX=[margin, margin+10, margin+67, margin+125, pageWidth-margin-28]; const colW=[10,57,58,42,28];
+      state.exercises.forEach((ex,index)=>{
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.8);
+        const exLines=doc.splitTextToSize(`${pretty(ex.equation)}; ${ex.target}= ?`, colW[1]-3);
+        const ansLines=doc.splitTextToSize(`${ex.target}=${ex.answer || 'Sin respuesta'}`, colW[2]-3);
+        const corrLines=doc.splitTextToSize(`${ex.target}=${pretty(ex.expected)}`, colW[3]-3);
+        const statusLines=doc.splitTextToSize(ex.isCorrect?'Correcta':'Incorrecta', colW[4]-4);
+        const maxLines=Math.max(exLines.length,ansLines.length,corrLines.length,statusLines.length,1); const rowH=Math.max(10,maxLines*5+4);
+        if(y+rowH > pageHeight-16){ doc.addPage(); y=16; drawHeader(); }
+        doc.setDrawColor(220,220,220); doc.rect(colX[0],y,pageWidth-margin*2,rowH); for(let i=1;i<colX.length;i++) doc.line(colX[i],y,colX[i],y+rowH);
+        doc.text(String(index+1), colX[0]+3, y+6); doc.text(exLines, colX[1]+2, y+6); doc.text(ansLines, colX[2]+2, y+6); doc.text(corrLines, colX[3]+2, y+6);
+        doc.setTextColor(ex.isCorrect?21:185, ex.isCorrect?128:28, ex.isCorrect?61:28); doc.text(statusLines, colX[4]+colW[4]/2, y+6, {align:'center'}); doc.setTextColor(55,65,81); y+=rowH;
+      });
+      const safeName=studentName.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'alumno';
+      doc.save(`informe_despejes_${safeName}.pdf`); els.reportModal.classList.remove('show');
+    }
+
+    els.startBtn.addEventListener('click', e=>{ e.preventDefault(); startActivity(); });
+    els.tabConfig.addEventListener('click',()=>showScreen('config'));
+    els.tabActivity.addEventListener('click',()=>{ if(state.exercises.length) showScreen('activity'); });
+    els.checkNextBtn.addEventListener('click', nextStep);
+    els.continueBtn.addEventListener('click', continueAfterFeedback);
+    els.finishNowBtn.addEventListener('click',()=>finishActivity(false));
+    els.backToConfigBtn.addEventListener('click',()=>{ document.body.style.background='var(--bg)'; showScreen('config'); });
+    els.openReportBtn.addEventListener('click',()=>els.reportModal.classList.add('show'));
+    els.closeModalBtn.addEventListener('click',()=>els.reportModal.classList.remove('show'));
+    els.downloadPdfBtn.addEventListener('click', generatePdf);
+    [els.answerInput, els.fractionNumerator, els.fractionDenominator].forEach(field=>field.addEventListener('keydown', event=>{ if((event.ctrlKey||event.metaKey) && event.key==='Enter') nextStep(); }));
+  </script>
+</body>
+</html>
