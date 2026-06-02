@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Práctica de operaciones matemáticas</title>
+  <style>
+    :root{
+      --bg:#f7f1f8; --config-bg:#f6eefe; --card:#fff; --text:#374151; --muted:#6b7280;
+      --primary:#8b5cf6; --primary-soft:#d9c2ff; --primary-dark:#4b2b82;
+      --blue:#cde7ff; --blue-text:#285680; --green:#cfeedd; --green-text:#2d6a4f;
+      --pink:#ffe6ee; --pink-text:#9d4d6c; --border:#e9dff2;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fee2e2;
+      --warn:#92400e; --warn-soft:#fef3c7; --shadow:0 12px 30px rgba(91,74,116,.10); --radius:20px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s ease}.app{max-width:980px;margin:0 auto;padding:24px}.tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}.tab-btn{background:#efe4ff;color:#6d41b3;border:1px solid #dbc8fa;border-radius:999px;padding:10px 16px;font-weight:800}.tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}.screen{display:none;animation:fadeIn .25s ease}.screen.active{display:block}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:24px}.config-card{background:var(--config-bg)}h1,h2,h3{margin-top:0}.subtitle{color:var(--muted);margin-top:-6px;margin-bottom:20px;line-height:1.45}.grid{display:grid;gap:16px}.grid.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.field{display:flex;flex-direction:column;gap:8px}label{font-weight:700;font-size:.95rem}select,input,textarea,button{font:inherit}select,input[type=number],input[type=text],textarea{width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:white;color:var(--text)}.range-wrap{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}input[type=range]{width:100%}.pill{background:#f4e8ff;color:#6b46c1;border-radius:999px;padding:8px 12px;font-weight:700;min-width:92px;text-align:center}.check-group{display:grid;gap:10px}.check-option{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;font-weight:700}.check-option input{width:18px;height:18px}.toggle-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}.toggle-row input{width:18px;height:18px}.btn-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}button{border:none;border-radius:14px;padding:12px 18px;cursor:pointer;font-weight:800;transition:transform .12s ease,opacity .12s ease,background .2s ease}button:hover{transform:translateY(-1px)}button:disabled{opacity:.55;cursor:not-allowed;transform:none}.btn-primary{background:var(--primary-soft);color:var(--primary-dark)}.btn-primary:hover{background:#c9a5ff}.btn-secondary{background:var(--blue);color:var(--blue-text)}.btn-success{background:var(--green);color:var(--green-text)}.btn-accent{background:var(--pink);color:var(--pink-text)}.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.stats{display:flex;flex-wrap:wrap;gap:10px}.stat{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:10px 14px;min-width:132px}.stat .label{font-size:.8rem;color:var(--muted);margin-bottom:4px}.stat .value{font-size:1.05rem;font-weight:900}.exercise-box{text-align:center;padding:30px 16px;background:#f8fbff;border:1px dashed #bcd1f5;border-radius:18px;margin-bottom:18px}.exercise-text{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;letter-spacing:.02em}.helper{font-size:.95rem;color:var(--muted);margin-top:10px;line-height:1.4}.answer-line{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}.answer-line input{max-width:240px;text-align:center;font-size:1.25rem;font-weight:800}.feedback{margin-top:14px;padding:14px 16px;border-radius:14px;display:none;line-height:1.45;font-weight:800}.feedback.show{display:block}.feedback.ok{background:var(--ok-soft);color:var(--ok)}.feedback.bad{background:var(--bad-soft);color:var(--bad)}.feedback.warn{background:var(--warn-soft);color:var(--warn)}.results-banner{text-align:center;padding:18px;border-radius:18px;margin-bottom:20px;font-weight:900;font-size:1.15rem}.score-big{font-size:clamp(2.2rem,8vw,4rem);font-weight:900;margin:12px 0 6px;text-align:center}.center{text-align:center}.tiny{color:var(--muted);font-size:.92rem;line-height:1.4}.results-grid{display:grid;gap:12px;margin-top:18px}.result-item{border:1px solid var(--border);border-left:8px solid #cbd5e1;background:#fff;border-radius:14px;padding:14px}.result-item.ok{border-left-color:var(--ok)}.result-item.bad{border-left-color:var(--bad)}.result-ex{font-size:1.1rem;font-weight:900;margin-bottom:8px}.modal{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:999}.modal.show{display:flex}.modal-card{width:min(560px,100%);background:white;border-radius:20px;padding:24px;box-shadow:var(--shadow)}.hidden{display:none!important}.op-symbol{display:inline-block;min-width:34px;color:#6d41b3}.fraction{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .12em}.fraction .num{border-bottom:3px solid currentColor;padding:0 .28em .08em}.fraction .den{padding:.08em .28em 0}.paren{font-size:1.1em}.math-dot{padding:0 .1em}@media(max-width:640px){.app{padding:14px}.card{padding:18px}.stat{min-width:100%}.btn-row button{width:100%}.answer-line input{max-width:100%}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs">
+    <button id="tabConfig" class="tab-btn active" type="button">Configuración</button>
+    <button id="tabActivity" class="tab-btn" type="button">Actividad</button>
+  </div>
+
+  <section id="configScreen" class="screen active">
+    <div class="card config-card">
+      <h1>Práctica de operaciones matemáticas</h1>
+      <p class="subtitle">Configura una práctica de cálculo con operaciones individuales, encadenadas o combinadas.</p>
+      <div class="grid two">
+        <div class="field">
+          <label>Operaciones matemáticas</label>
+          <div class="check-group">
+            <label class="check-option"><input type="checkbox" class="op-checkbox" value="add" checked> Suma</label>
+            <label class="check-option"><input type="checkbox" class="op-checkbox" value="sub" checked> Resta</label>
+            <label class="check-option"><input type="checkbox" class="op-checkbox" value="mul" checked> Multiplicación</label>
+            <label class="check-option"><input type="checkbox" class="op-checkbox" value="div" checked> División</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tipo de números</label>
+          <div class="check-group">
+            <label class="check-option"><input type="checkbox" class="sign-checkbox" value="positive" checked> Positivos</label>
+            <label class="check-option"><input type="checkbox" class="sign-checkbox" value="negative"> Negativos</label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="difficulty">Nivel de dificultad</label>
+          <select id="difficulty">
+            <option value="easy">Fácil</option>
+            <option value="medium">Medio</option>
+            <option value="hard">Difícil</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="activityCount">Número de ejercicios</label>
+          <div class="range-wrap">
+            <input type="range" id="activityCount" min="5" max="20" step="1" value="10">
+            <div class="pill" id="activityCountValue">10</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="timeMode">Modo de tiempo</label>
+          <select id="timeMode">
+            <option value="timer">Temporizador</option>
+            <option value="none">Sin límite de tiempo</option>
+            <option value="stopwatch">Cronómetro</option>
+          </select>
+        </div>
+        <div class="field" id="timeLimitField">
+          <label for="timeLimit">Tiempo del ejercicio</label>
+          <div class="range-wrap">
+            <input type="range" id="timeLimit" min="30" max="300" step="30" value="120">
+            <div class="pill" id="timeLimitValue">2:00</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scoreMode">Visualizador de puntuación</label>
+          <select id="scoreMode">
+            <option value="during">Durante el ejercicio</option>
+            <option value="final">Al final</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="feedbackMode">Corrección del ejercicio</label>
+          <select id="feedbackMode">
+            <option value="instant">En el momento</option>
+            <option value="final">Al final de la práctica</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row"><button id="startBtn" class="btn-primary" type="button">Iniciar actividad</button></div>
+    </div>
+  </section>
+
+  <section id="activityScreen" class="screen">
+    <div class="card">
+      <div class="topbar">
+        <div><h2 style="margin-bottom:6px;">Actividad en marcha</h2><div class="tiny">Resuelve la operación y escribe el resultado final.</div></div>
+        <div class="stats">
+          <div class="stat"><div class="label">Ejercicio</div><div class="value" id="progressStat">1 / 10</div></div>
+          <div class="stat" id="scoreStatBox"><div class="label">Aciertos</div><div class="value" id="scoreStat">0</div></div>
+          <div class="stat"><div class="label">Tiempo</div><div class="value" id="timerStat">2:00</div></div>
+        </div>
+      </div>
+      <div class="exercise-box"><div class="exercise-text" id="exerciseDisplay"></div><div class="helper">En divisiones escribe el cociente exacto cuando sea entero o decimal con coma/punto si procede.</div></div>
+      <div class="field answer-line"><label for="answerInput">Resultado</label><input id="answerInput" type="text" inputmode="decimal" autocomplete="off" placeholder="Respuesta"></div>
+      <div class="btn-row">
+        <button id="checkNextBtn" class="btn-primary" type="button">Comprobar</button>
+        <button id="continueBtn" class="btn-success hidden" type="button">Continuar</button>
+        <button id="finishNowBtn" class="btn-secondary" type="button">Terminar ahora</button>
+      </div>
+      <div id="feedbackBox" class="feedback"></div>
+    </div>
+  </section>
+
+  <section id="resultsScreen" class="screen">
+    <div class="card">
+      <h2 class="center">Resultado final</h2>
+      <div id="resultsBanner" class="results-banner"></div>
+      <div id="scoreBig" class="score-big">0%</div>
+      <div class="center tiny" id="summaryLine"></div>
+      <div class="results-grid" id="resultsList"></div>
+      <div class="btn-row"><button id="backToConfigBtn" class="btn-secondary" type="button">Finalizar</button><button id="openReportBtn" class="btn-success" type="button">Informe</button></div>
+    </div>
+  </section>
+</div>
+
+<div id="reportModal" class="modal">
+  <div class="modal-card">
+    <h3>Generar informe PDF</h3>
+    <p class="subtitle">Escribe los datos del alumno o alumna para incluirlos en el informe descargable.</p>
+    <div class="grid two">
+      <div class="field" style="grid-column:1/-1"><label for="studentName">Nombre completo</label><input id="studentName" type="text" placeholder="Nombre y apellidos"></div>
+      <div class="field"><label for="studentCourse">Curso</label><input id="studentCourse" type="text" placeholder="Ejemplo: 2º ESO A"></div>
+    </div>
+    <div class="btn-row"><button id="downloadPdfBtn" class="btn-primary" type="button">Descargar PDF</button><button id="closeModalBtn" class="btn-secondary" type="button">Cancelar</button></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const state={config:null,exercises:[],currentIndex:0,correctCount:0,timerId:null,timeRemaining:0,elapsed:0,startedAt:null,endedAt:null};
+const $=id=>document.getElementById(id);
+const screens={config:$('configScreen'),activity:$('activityScreen'),results:$('resultsScreen')};
+const opCheckboxes=Array.from(document.querySelectorAll('.op-checkbox'));
+const signCheckboxes=Array.from(document.querySelectorAll('.sign-checkbox'));
+const difficultyEl=$('difficulty'), activityCountEl=$('activityCount'), activityCountValueEl=$('activityCountValue'), timeModeEl=$('timeMode'), timeLimitEl=$('timeLimit'), timeLimitField=$('timeLimitField'), timeLimitValueEl=$('timeLimitValue'), scoreModeEl=$('scoreMode'), feedbackModeEl=$('feedbackMode');
+const startBtn=$('startBtn'), progressStatEl=$('progressStat'), scoreStatEl=$('scoreStat'), scoreStatBox=$('scoreStatBox'), timerStatEl=$('timerStat'), exerciseDisplayEl=$('exerciseDisplay'), answerInputEl=$('answerInput'), feedbackBoxEl=$('feedbackBox'), checkNextBtn=$('checkNextBtn'), continueBtn=$('continueBtn'), finishNowBtn=$('finishNowBtn');
+const resultsBannerEl=$('resultsBanner'), scoreBigEl=$('scoreBig'), summaryLineEl=$('summaryLine'), resultsListEl=$('resultsList'), backToConfigBtn=$('backToConfigBtn'), openReportBtn=$('openReportBtn'), reportModalEl=$('reportModal'), studentNameEl=$('studentName'), studentCourseEl=$('studentCourse'), downloadPdfBtn=$('downloadPdfBtn'), closeModalBtn=$('closeModalBtn'), tabConfigBtn=$('tabConfig'), tabActivityBtn=$('tabActivity');
+function showScreen(name){Object.values(screens).forEach(el=>el.classList.remove('active'));screens[name].classList.add('active');tabConfigBtn.classList.toggle('active',name==='config');tabActivityBtn.classList.toggle('active',name==='activity')}
+function formatTime(s){s=Math.max(0,Math.floor(s));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+activityCountEl.addEventListener('input',()=>activityCountValueEl.textContent=activityCountEl.value);timeLimitEl.addEventListener('input',()=>timeLimitValueEl.textContent=formatTime(Number(timeLimitEl.value)));timeModeEl.addEventListener('change',()=>{const timer=timeModeEl.value==='timer';timeLimitField.style.opacity=timer?'1':'.45';timeLimitEl.disabled=!timer;timeLimitValueEl.textContent=timer?formatTime(Number(timeLimitEl.value)):(timeModeEl.value==='none'?'Sin límite':'Cronómetro')});
+function selectedOps(){return opCheckboxes.filter(c=>c.checked).map(c=>c.value)}
+function selectedSigns(){return signCheckboxes.filter(c=>c.checked).map(c=>c.value)}
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function choice(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function opSymbol(op){return {add:'+',sub:'−',mul:'·',div:'÷'}[op]||op}
+function opLabel(op){return {add:'Suma',sub:'Resta',mul:'Multiplicación',div:'División'}[op]||op}
+function diffLabel(d){return {easy:'Fácil',medium:'Medio',hard:'Difícil'}[d]||d}
+function signsLabel(signs){if(signs.includes('positive')&&signs.includes('negative'))return 'Positivos y negativos'; if(signs.includes('negative'))return 'Negativos'; return 'Positivos'}
+function applyOp(a,op,b){if(op==='add')return a+b;if(op==='sub')return a-b;if(op==='mul')return a*b;if(op==='div')return a/b;return a}
+function isInteger(n){return Math.abs(n-Math.round(n))<1e-9}
+function signedAbs(n, signs){
+  n=Math.abs(Math.round(n));
+  if(signs.includes('positive') && signs.includes('negative')) return Math.random()<0.5 ? n : -n;
+  if(signs.includes('negative')) return -n;
+  return n;
+}
+function fmtNum(n, wrap=false){
+  const txt=String(Math.round(n)).replace('-', '−');
+  return wrap && n<0 ? `<span class="paren">(</span>${txt}<span class="paren">)</span>` : txt;
+}
+function makeEasy(ops, signs){
+  const op=choice(ops); let a,b,res;
+  if(op==='add'){a=signedAbs(rnd(1,99),signs);b=signedAbs(rnd(1,99),signs);res=a+b}
+  else if(op==='sub'){a=signedAbs(rnd(10,99),signs);b=signedAbs(rnd(1,99),signs);res=a-b}
+  else if(op==='mul'){a=signedAbs(rnd(2,12),signs);b=signedAbs(rnd(2,12),signs);res=a*b}
+  else{b=signedAbs(rnd(2,12),signs);res=signedAbs(rnd(2,12),signs);a=b*res}
+  return buildExerciseFromParts(a,[op],[b],res,'easy')
+}
+function makeMedium(ops, signs){
+  let use=shuffle(ops).slice(0,Math.min(ops.length,rnd(2,Math.min(3,ops.length))));
+  if(use.length<2) return makeEasy(ops,signs);
+  let nums=[signedAbs(rnd(2,99),signs)], value=nums[0];
+  for(const op of use){
+    let b;
+    if(op==='add') b=signedAbs(rnd(1,99),signs);
+    else if(op==='sub') b=signedAbs(rnd(1,99),signs);
+    else if(op==='mul') b=signedAbs(rnd(2,12),signs);
+    else {
+      const absDivs=[]; for(let d=2;d<=12;d++) if(isInteger(value/d)) absDivs.push(d);
+      if(absDivs.length) b=signedAbs(choice(absDivs),signs);
+      else { b=signedAbs(rnd(2,9),signs); value=value*b; nums[nums.length-1]=value; }
+    }
+    nums.push(b); value=applyOp(value,op,b)
+  }
+  return buildExerciseFromParts(nums[0],use,nums.slice(1),value,'medium')
+}
+function makeHard(ops, signs){
+  let use=shuffle(ops).slice(0,Math.min(ops.length,rnd(3,Math.min(4,ops.length))));
+  if(use.length<3) return makeMedium(ops,signs);
+  const hasMulDiv=use.some(o=>o==='mul'||o==='div');
+  if(!hasMulDiv) return makeMedium(ops,signs);
+  let a=signedAbs(rnd(10,999),signs), b=signedAbs(rnd(10,999),signs), c=signedAbs(rnd(2,20),signs);
+  let groupVal=a+b, expr='', plain='', value;
+  const op2=use.includes('div')?'div':'mul';
+  if(op2==='div'){
+    const res=signedAbs(rnd(2,30),signs), denom=signedAbs(rnd(2,20),signs);
+    a=signedAbs(rnd(10,99),signs); b=res*denom-a; c=denom; groupVal=a+b; value=groupVal/c;
+    expr=`<span class="paren">(</span>${fmtNum(a)} + ${fmtNum(b,true)}<span class="paren">)</span> ÷ ${fmtNum(c,true)}`;
+    plain=`(${a}+${b}) ÷ ${c}`;
+  } else {
+    value=groupVal*c;
+    expr=`<span class="paren">(</span>${fmtNum(a)} + ${fmtNum(b,true)}<span class="paren">)</span> · ${fmtNum(c,true)}`;
+    plain=`(${a}+${b}) · ${c}`;
+  }
+  if(use.includes('sub')){const d=signedAbs(rnd(10,999),signs); expr+=` − ${fmtNum(d,true)}`; plain+=` − ${d}`; value-=d}
+  else if(use.includes('add')){const d=signedAbs(rnd(10,999),signs); expr+=` + ${fmtNum(d,true)}`; plain+=` + ${d}`; value+=d}
+  return {html:expr,plain,answer:value,difficulty:'hard',answerText:numToText(value),userAnswer:'',checked:false,isCorrect:false,feedbackMessage:''}
+}
+function buildExerciseFromParts(firstNum, ops, restNums, answer, difficulty){
+  let html=fmtNum(firstNum), plain=String(firstNum);
+  ops.forEach((op,i)=>{html+=` <span class="op-symbol">${opSymbol(op)}</span> ${fmtNum(restNums[i],true)}`; plain+=` ${opSymbol(op)} ${restNums[i]}`});
+  return {html,plain,answer,difficulty,answerText:numToText(answer),userAnswer:'',checked:false,isCorrect:false,feedbackMessage:''}
+}
+function buildSet(config){const list=[];for(let i=0;i<config.activityCount;i++){if(config.difficulty==='easy') list.push(makeEasy(config.ops,config.signs)); else if(config.difficulty==='medium') list.push(makeMedium(config.ops,config.signs)); else list.push(makeHard(config.ops,config.signs));}return list}
+function numToText(n){const raw=isInteger(n)?String(Math.round(n)):String(Math.round(n*100)/100).replace('.',','); return raw.replace('-', '−')}
+function parseAnswer(s){const cleaned=String(s).trim().replace('−','-').replace(',','.'); if(!/^[-+]?\d+(\.\d+)?$/.test(cleaned)) return NaN; return Number(cleaned)}
+function compareAnswer(input,expected){const val=parseAnswer(input); return Number.isFinite(val)&&Math.abs(val-expected)<0.01}
+function resetFeedback(){feedbackBoxEl.className='feedback';feedbackBoxEl.textContent=''} function showFeedback(msg,type){feedbackBoxEl.className=`feedback show ${type}`;feedbackBoxEl.innerHTML=msg}
+function updateActivityUI(){const ex=state.exercises[state.currentIndex];progressStatEl.textContent=`${state.currentIndex+1} / ${state.exercises.length}`;scoreStatBox.classList.toggle('hidden',state.config.scoreMode==='final');scoreStatEl.textContent=String(state.correctCount);timerStatEl.textContent=timeLabel();exerciseDisplayEl.innerHTML=ex.html;answerInputEl.value=ex.userAnswer||'';answerInputEl.disabled=false;checkNextBtn.disabled=false;continueBtn.classList.add('hidden');resetFeedback();setTimeout(()=>answerInputEl.focus(),50)}
+function timeLabel(){if(!state.config)return ''; if(state.config.timeMode==='none')return 'Sin límite'; if(state.config.timeMode==='stopwatch')return formatTime(state.elapsed); return formatTime(state.timeRemaining)}
+function startClock(){clearInterval(state.timerId); if(state.config.timeMode==='none'){timerStatEl.textContent='Sin límite';return} state.timerId=setInterval(()=>{if(state.config.timeMode==='timer'){state.timeRemaining--; if(state.timeRemaining<=0){timerStatEl.textContent='0:00';finishActivity(true);return}} else state.elapsed++; timerStatEl.textContent=timeLabel()},1000)}
+function startActivity(){const ops=selectedOps(); const signs=selectedSigns(); if(!ops.length){alert('Selecciona al menos una operación.');return} if(!signs.length){alert('Selecciona al menos un tipo de números: positivos o negativos.');return} state.config={ops,signs,difficulty:difficultyEl.value,activityCount:Number(activityCountEl.value),timeMode:timeModeEl.value,timeLimit:Number(timeLimitEl.value),scoreMode:scoreModeEl.value,feedbackMode:feedbackModeEl.value}; state.exercises=buildSet(state.config); state.currentIndex=0;state.correctCount=0;state.timeRemaining=state.config.timeLimit;state.elapsed=0;state.startedAt=new Date();state.endedAt=null;document.body.style.background='var(--bg)';showScreen('activity');updateActivityUI();startClock()}
+function saveAnswer(){state.exercises[state.currentIndex].userAnswer=answerInputEl.value.trim()}
+function evaluate(index){const ex=state.exercises[index]; const ok=compareAnswer(ex.userAnswer,ex.answer); ex.checked=true;ex.isCorrect=ok;ex.feedbackMessage=ok?`Correcto. Resultado: <strong>${escapeHtml(ex.answerText)}</strong>.`:`No es correcto. Resultado: <strong>${escapeHtml(ex.answerText)}</strong>.`; return ok}
+function nextStep(){saveAnswer();const ex=state.exercises[state.currentIndex];const wasChecked=ex.checked,wasCorrect=ex.isCorrect,nowCorrect=evaluate(state.currentIndex); if(!wasChecked&&nowCorrect)state.correctCount++; if(wasChecked&&!wasCorrect&&nowCorrect)state.correctCount++; if(wasChecked&&wasCorrect&&!nowCorrect)state.correctCount--; scoreStatEl.textContent=String(state.correctCount); if(state.config.feedbackMode==='instant'){showFeedback(ex.feedbackMessage,ex.isCorrect?'ok':'bad');continueBtn.classList.remove('hidden');checkNextBtn.disabled=true;answerInputEl.disabled=true;return} continueAfterFeedback()}
+function continueAfterFeedback(){if(state.currentIndex<state.exercises.length-1){state.currentIndex++;updateActivityUI()}else finishActivity(false)}
+function finishActivity(byTimeout=false){clearInterval(state.timerId); if(state.exercises.length && screens.activity.classList.contains('active')) saveAnswer(); state.endedAt=new Date(); let total=0; state.exercises.forEach(ex=>{if(!ex.checked)evaluate(state.exercises.indexOf(ex)); if(ex.isCorrect)total++}); state.correctCount=total; renderResults(byTimeout);showScreen('results')}
+function renderResults(byTimeout){const total=state.exercises.length, score=total?Math.round(state.correctCount/total*100):0, pass=score>=50; document.body.style.background=pass?'linear-gradient(180deg,#dcfce7 0%,#f0fdf4 100%)':'linear-gradient(180deg,#fee2e2 0%,#fff1f2 100%)'; resultsBannerEl.textContent=pass?'Buen trabajo. Has alcanzado al menos el 50%.':'Necesitas seguir practicando. Has quedado por debajo del 50%.'; resultsBannerEl.style.background=pass?'var(--ok-soft)':'var(--bad-soft)'; resultsBannerEl.style.color=pass?'var(--ok)':'var(--bad)'; scoreBigEl.textContent=`${score}%`; summaryLineEl.textContent=`${state.correctCount} de ${total} correctas${byTimeout?' · Tiempo agotado':''} · Tiempo empleado: ${formatTime(Math.round((state.endedAt-state.startedAt)/1000))}`; resultsListEl.innerHTML=state.exercises.map((ex,i)=>`<div class="result-item ${ex.isCorrect?'ok':'bad'}"><div class="result-ex">${i+1}. ${ex.html}</div><div><strong>Tu respuesta:</strong> ${escapeHtml(ex.userAnswer||'Sin respuesta')}</div><div><strong>Resultado correcto:</strong> ${escapeHtml(ex.answerText)}</div><div class="tiny" style="margin-top:6px"><strong>${ex.isCorrect?'Correcta':'Incorrecta'}</strong></div></div>`).join('')}
+function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function stripHtml(html){const div=document.createElement('div');div.innerHTML=html;return div.textContent||div.innerText||''}
+function configLabel(){return `Operaciones: ${state.config.ops.map(opLabel).join(', ')} · Números: ${signsLabel(state.config.signs)} · Nivel: ${diffLabel(state.config.difficulty)} · Ejercicios: ${state.config.activityCount} · Tiempo: ${state.config.timeMode==='timer'?formatTime(state.config.timeLimit):state.config.timeMode==='none'?'Sin límite':'Cronómetro'} · Puntuación: ${state.config.scoreMode==='during'?'Durante el ejercicio':'Al final'} · Corrección: ${state.config.feedbackMode==='instant'?'En el momento':'Al final'}`}
+async function generatePdf(){if(!window.jspdf){alert('No se ha podido cargar la librería del PDF.');return}const {jsPDF}=window.jspdf;const doc=new jsPDF();const margin=14,pageW=doc.internal.pageSize.getWidth(),pageH=doc.internal.pageSize.getHeight();const total=state.exercises.length,score=total?Math.round(state.correctCount/total*100):0,pass=score>=50;let y=16;const ensure=h=>{if(y+h>pageH-16){doc.addPage();y=16}};const name=studentNameEl.value.trim()||'Sin nombre',course=studentCourseEl.value.trim()||'Sin curso';doc.setFillColor(247,238,254);doc.roundedRect(margin,y,pageW-margin*2,38,4,4,'F');doc.setDrawColor(221,204,245);doc.roundedRect(margin,y,pageW-margin*2,38,4,4,'S');doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('Informe de práctica: operaciones matemáticas',margin+4,y+9);doc.setFont('helvetica','normal');doc.setFontSize(10);doc.text(`Alumno o alumna: ${name}`,margin+4,y+17);doc.text(`Curso: ${course}`,margin+4,y+23);doc.text(`Fecha: ${new Date().toLocaleString('es-ES')}`,margin+4,y+29);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(pass?21:185,pass?128:28,pass?61:28);doc.text(`${score}%`,pageW-margin-22,y+16,{align:'center'});doc.setTextColor(55,65,81);y+=48;doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('Configuración inicial',margin,y);y+=6;doc.setFont('helvetica','normal');doc.setFontSize(10);doc.splitTextToSize(configLabel(),pageW-margin*2).forEach(line=>{ensure(6);doc.text(line,margin,y);y+=5});y+=5;doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('Resultados detallados',margin,y);y+=8;state.exercises.forEach((ex,i)=>{ensure(24);doc.setDrawColor(225,225,225);doc.roundedRect(margin,y,pageW-margin*2,20,3,3,'S');doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(`${i+1}. ${stripHtml(ex.html)}`,margin+3,y+6);doc.setFont('helvetica','normal');doc.text(`Respuesta: ${ex.userAnswer||'Sin respuesta'} · Correcta: ${ex.answerText}`,margin+3,y+12);doc.setTextColor(ex.isCorrect?21:185,ex.isCorrect?128:28,ex.isCorrect?61:28);doc.text(ex.isCorrect?'Correcta':'Incorrecta',pageW-margin-4,y+12,{align:'right'});doc.setTextColor(55,65,81);y+=24});const safe=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'alumno';doc.save(`informe_operaciones_${safe}.pdf`);reportModalEl.classList.remove('show')}
+startBtn.addEventListener('click',startActivity);tabConfigBtn.addEventListener('click',()=>showScreen('config'));tabActivityBtn.addEventListener('click',()=>{if(state.exercises.length)showScreen('activity')});checkNextBtn.addEventListener('click',nextStep);continueBtn.addEventListener('click',continueAfterFeedback);finishNowBtn.addEventListener('click',()=>finishActivity(false));backToConfigBtn.addEventListener('click',()=>{document.body.style.background='var(--bg)';showScreen('config')});openReportBtn.addEventListener('click',()=>reportModalEl.classList.add('show'));closeModalBtn.addEventListener('click',()=>reportModalEl.classList.remove('show'));downloadPdfBtn.addEventListener('click',generatePdf);answerInputEl.addEventListener('keydown',e=>{if(e.key==='Enter')nextStep()});
+</script>
+</body>
+</html>
