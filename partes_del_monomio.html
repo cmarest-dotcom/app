@@ -301,6 +301,25 @@
       gap: 12px;
     }
 
+    .input-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 4px 0 2px;
+    }
+
+    .tool-btn {
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 10px 13px;
+      background: #eff6ff;
+      color: var(--primary-dark);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tool-btn:hover { background: #dbeafe; }
+
     .feedback {
       min-height: 54px;
       padding: 14px 16px;
@@ -447,18 +466,26 @@
               </div>
             </div>
 
-            <label class="checkline" for="timed">
-              <input id="timed" type="checkbox" /> Activar tiempo
-            </label>
-
-            <label for="timeLimit">Tiempo total</label>
-            <select id="timeLimit" disabled>
-              <option value="30">30 segundos</option>
-              <option value="45">45 segundos</option>
-              <option value="60" selected>1 minuto</option>
-              <option value="90">1 minuto 30 segundos</option>
-              <option value="120">2 minutos</option>
-            </select>
+            <div class="option-row">
+              <div>
+                <label for="timeMode">Tipo de tiempo</label>
+                <select id="timeMode">
+                  <option value="timer" selected>Temporizador</option>
+                  <option value="stopwatch">Cronómetro</option>
+                  <option value="none">Sin tiempo</option>
+                </select>
+              </div>
+              <div>
+                <label for="timeLimit">Tiempo total</label>
+                <select id="timeLimit">
+                  <option value="60" selected>1 minuto</option>
+                  <option value="120">2 minutos</option>
+                  <option value="180">3 minutos</option>
+                  <option value="240">4 minutos</option>
+                  <option value="300">5 minutos</option>
+                </select>
+              </div>
+            </div>
 
             <div class="actions">
               <button class="primary" type="submit">Iniciar</button>
@@ -503,6 +530,12 @@
               <label for="answerDegree">Grado</label>
               <input id="answerDegree" type="text" placeholder="Ej.: 3" autocomplete="off" />
             </div>
+          </div>
+
+          <div class="input-tools" aria-label="Herramientas matemáticas">
+            <button class="tool-btn" type="button" data-tool="exponent">Exponente</button>
+            <button class="tool-btn" type="button" data-tool="negative">Signo negativo</button>
+            <button class="tool-btn" type="button" data-tool="fraction">Fracción</button>
           </div>
 
           <div class="feedback" id="feedback">Completa los tres campos.</div>
@@ -570,8 +603,9 @@
       difficulty: document.getElementById('difficulty'),
       count: document.getElementById('count'),
       checkMode: document.getElementById('checkMode'),
-      timed: document.getElementById('timed'),
+      timeMode: document.getElementById('timeMode'),
       timeLimit: document.getElementById('timeLimit'),
+      toolButtons: Array.from(document.querySelectorAll('.tool-btn')),
       demoBtn: document.getElementById('demoBtn'),
       timerPill: document.getElementById('timerPill'),
       activityTitle: document.getElementById('activityTitle'),
@@ -607,6 +641,7 @@
       answers: [],
       checkedCurrent: false,
       remaining: 0,
+      elapsed: 0,
       timerId: null,
       finished: false
     };
@@ -750,7 +785,8 @@
         index: 0,
         answers: Array.from({ length: count }, () => ({ coef: '', literal: '', degree: '' })),
         checkedCurrent: false,
-        remaining: settings.timed ? Number(settings.timeLimit) : 0,
+        remaining: settings.timeMode === 'timer' ? Number(settings.timeLimit) : 0,
+        elapsed: 0,
         timerId: null,
         finished: false
       };
@@ -764,11 +800,24 @@
     }
 
     function setupTimer() {
+      clearInterval(state.timerId);
       els.timerPill.className = 'pill timer';
-      if (!state.settings.timed) {
+
+      if (state.settings.timeMode === 'none') {
         els.timerPill.textContent = 'Sin tiempo';
         return;
       }
+
+      if (state.settings.timeMode === 'stopwatch') {
+        state.elapsed = 0;
+        updateStopwatchLabel();
+        state.timerId = setInterval(() => {
+          state.elapsed++;
+          updateStopwatchLabel();
+        }, 1000);
+        return;
+      }
+
       updateTimerLabel();
       state.timerId = setInterval(() => {
         state.remaining--;
@@ -780,11 +829,18 @@
     }
 
     function updateTimerLabel() {
-      const min = Math.floor(state.remaining / 60);
-      const sec = state.remaining % 60;
-      els.timerPill.textContent = `Tiempo: ${min}:${String(sec).padStart(2, '0')}`;
+      const min = Math.floor(Math.max(0, state.remaining) / 60);
+      const sec = Math.max(0, state.remaining) % 60;
+      els.timerPill.textContent = `Temporizador: ${min}:${String(sec).padStart(2, '0')}`;
       els.timerPill.classList.toggle('warning', state.remaining <= 30 && state.remaining > 10);
       els.timerPill.classList.toggle('danger', state.remaining <= 10);
+    }
+
+    function updateStopwatchLabel() {
+      const min = Math.floor(state.elapsed / 60);
+      const sec = state.elapsed % 60;
+      els.timerPill.textContent = `Cronómetro: ${min}:${String(sec).padStart(2, '0')}`;
+      els.timerPill.classList.remove('warning', 'danger');
     }
 
     function renderQuestion() {
@@ -891,8 +947,8 @@
         .replace(/'/g, '&#039;');
     }
 
-    els.timed.addEventListener('change', () => {
-      els.timeLimit.disabled = !els.timed.checked;
+    els.timeMode.addEventListener('change', () => {
+      els.timeLimit.disabled = els.timeMode.value !== 'timer';
     });
 
     els.settingsForm.addEventListener('submit', (event) => {
@@ -901,7 +957,7 @@
         difficulty: els.difficulty.value,
         count: els.count.value,
         checkMode: els.checkMode.value,
-        timed: els.timed.checked,
+        timeMode: els.timeMode.value,
         timeLimit: els.timeLimit.value
       });
     });
@@ -910,7 +966,7 @@
       els.difficulty.value = 'medio';
       els.count.value = 5;
       els.checkMode.value = 'instant';
-      els.timed.checked = false;
+      els.timeMode.value = 'none';
       els.timeLimit.disabled = true;
     });
 
@@ -928,6 +984,32 @@
           event.preventDefault();
           state.settings?.checkMode === 'instant' ? checkCurrent() : nextQuestion();
         }
+      });
+    });
+
+    let activeAnswerInput = els.answerCoef;
+    [els.answerCoef, els.answerLiteral, els.answerDegree].forEach(input => {
+      input.addEventListener('focus', () => { activeAnswerInput = input; });
+    });
+
+    function insertAtCursor(input, text, selectBack = 0) {
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? input.value.length;
+      input.value = input.value.slice(0, start) + text + input.value.slice(end);
+      input.focus();
+      const pos = start + text.length - selectBack;
+      input.setSelectionRange(pos, pos);
+      state.checkedCurrent = false;
+      saveCurrentAnswer();
+    }
+
+    els.toolButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tool = btn.dataset.tool;
+        const input = activeAnswerInput || els.answerCoef;
+        if (tool === 'exponent') insertAtCursor(input, '^');
+        if (tool === 'negative') insertAtCursor(input, '−');
+        if (tool === 'fraction') insertAtCursor(input, '/', 0);
       });
     });
 
@@ -959,6 +1041,12 @@
 
     function checkModeLabel(value) {
       return value === 'instant' ? 'Corrección inmediata' : 'Corrección al final';
+    }
+
+    function timeLabel(settings) {
+      if (settings.timeMode === 'none') return 'Sin tiempo';
+      if (settings.timeMode === 'stopwatch') return 'Cronómetro';
+      return `Temporizador: ${settings.timeLimit} segundos`;
     }
 
     function openPrintableReport(studentName, studentClass) {
@@ -1026,7 +1114,7 @@
   <div class="meta">
     <div><strong>Nivel:</strong> ${difficultyLabel(state.settings.difficulty)}</div>
     <div><strong>Actividades:</strong> ${state.settings.count}</div>
-    <div><strong>Tiempo:</strong> ${state.settings.timed ? state.settings.timeLimit + ' segundos' : 'Sin tiempo'}</div>
+    <div><strong>Tiempo:</strong> ${timeLabel(state.settings)}</div>
     <div><strong>Corrección:</strong> ${checkModeLabel(state.settings.checkMode)}</div>
   </div>
 
