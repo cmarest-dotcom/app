@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media de puntuaciones por equipos</title>
+  <style>
+    :root{
+      --bg:#f7f1f8; --config-bg:#f6eefe; --card:#ffffff; --text:#374151; --muted:#6b7280;
+      --primary:#8b5cf6; --primary-dark:#7c3aed; --secondary:#cde7ff; --secondary-text:#285680;
+      --success:#cfeedd; --success-text:#2d6a4f; --accent:#ffe6ee; --accent-text:#9d4d6c;
+      --border:#e9dff2; --ok:#15803d; --bad:#b91c1c; --warn:#92400e; --shadow:0 12px 30px rgba(91,74,116,.10); --radius:20px;
+      --gold:#facc15; --silver:#cbd5e1; --bronze:#d97706;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .app{max-width:1180px;margin:0 auto;padding:24px}.tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}.tab-btn{background:#efe4ff;color:#6d41b3;border:1px solid #dbc8fa;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer}.tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}.tab-btn:disabled{opacity:.45;cursor:not-allowed}
+    .screen{display:none;animation:fadeIn .25s ease}.screen.active{display:block}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:24px}.config-card{background:var(--config-bg)}h1,h2,h3{margin-top:0}.subtitle{color:var(--muted);margin-top:-6px;margin-bottom:20px;line-height:1.45}.grid{display:grid;gap:16px}.grid.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.field{display:flex;flex-direction:column;gap:8px}label{font-weight:700;font-size:.95rem}input,select,button{font:inherit}input[type="number"],input[type="text"],select{width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;color:var(--text)}
+    .btn-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}button{border:0;border-radius:14px;padding:12px 18px;cursor:pointer;font-weight:700;transition:transform .12s ease,opacity .12s ease,background .2s ease}button:hover{transform:translateY(-1px)}button:disabled{opacity:.5;cursor:not-allowed;transform:none}.btn-primary{background:#d9c2ff;color:#4b2b82}.btn-primary:hover{background:#c9a5ff}.btn-secondary{background:var(--secondary);color:var(--secondary-text)}.btn-success{background:var(--success);color:var(--success-text)}.btn-danger{background:#fee2e2;color:#991b1b}
+    .check-group{display:grid;gap:10px}.check-option{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;font-weight:700}.check-option input{width:18px;height:18px;margin:0}.range-wrap{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.pill{background:#f4e8ff;color:#6b46c1;border-radius:999px;padding:8px 12px;font-weight:800;min-width:70px;text-align:center}.tiny{color:var(--muted);font-size:.92rem;line-height:1.4}
+    .team-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px}.team-head{display:grid;grid-template-columns:1fr 150px 210px;gap:12px;align-items:end}.players-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}.divider{height:1px;background:var(--border);margin:18px 0}.color-select{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.color-dot{width:30px;height:30px;border-radius:999px;border:2px solid #fff;box-shadow:0 0 0 1px rgba(55,65,81,.18);cursor:pointer}.color-dot.active{box-shadow:0 0 0 3px #7c3aed}.color-preview{height:14px;border-radius:999px;border:1px solid rgba(55,65,81,.15)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:10px 14px;min-width:132px}.stat .label{font-size:.8rem;color:var(--muted);margin-bottom:4px}.stat .value{font-size:1.05rem;font-weight:900}
+    .team-page-head{border-radius:20px;border:1px solid rgba(55,65,81,.15);padding:18px;margin-bottom:16px}.team-page-head h2{margin-bottom:6px}.team-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}.team-tabs{display:flex;gap:8px;flex-wrap:wrap}.mini-tab{padding:9px 12px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--text)}.mini-tab.active{outline:3px solid rgba(124,58,237,.25)}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:18px;background:#fff}table{width:100%;border-collapse:collapse;min-width:820px}th,td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:10px;text-align:center;vertical-align:middle}th{background:#f1f5f9;color:#475569;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1}th:first-child{background:#f1f5f9;z-index:2}.score-input{max-width:95px;text-align:center;padding:8px 9px!important;border-radius:10px!important}.player-label{font-weight:800}.avg-cell,.total-cell{font-weight:900;background:#faf5ff}.total-cell{background:#ecfeff}.small-input-note{font-size:.78rem;color:var(--muted);margin-top:4px}.summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0}.summary-box{padding:12px;border:1px solid rgba(55,65,81,.15);border-radius:16px;background:rgba(255,255,255,.72)}.summary-box strong{display:block;font-size:1.25rem;color:var(--primary-dark)}
+    .results-banner{text-align:center;padding:18px;border-radius:18px;margin-bottom:20px;font-weight:900;font-size:1.15rem;background:#eef4ff;color:#285680}.podium-area{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.podium{display:flex;align-items:end;justify-content:center;gap:12px;min-height:260px;padding:18px;border-radius:20px;background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid var(--border)}.podium-step{width:31%;border-radius:18px 18px 10px 10px;text-align:center;padding:14px 8px 12px;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;box-shadow:0 10px 24px rgba(15,23,42,.08);min-height:130px}.podium-step.first{height:210px;background:#fef9c3;border:2px solid var(--gold);order:2}.podium-step.second{height:170px;background:#f8fafc;border:2px solid var(--silver);order:1}.podium-step.third{height:145px;background:#fff7ed;border:2px solid #fdba74;order:3}.medal{font-size:2rem}.podium-name{font-weight:900;word-break:break-word}.podium-score{font-weight:800;color:var(--primary-dark)}.rank-list{display:grid;gap:10px;margin-top:14px}.rank-item{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff}.hidden{display:none!important}
+    @media(max-width:700px){.app{padding:14px}.card{padding:18px}.team-head{grid-template-columns:1fr}.btn-row button{width:100%}.podium{gap:6px;padding:10px}.podium-step{width:33%;padding:10px 5px}.stats .stat{min-width:100%}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs">
+    <button id="tabConfig" class="tab-btn active" type="button">Configuración</button>
+    <button id="tabScores" class="tab-btn" type="button" disabled>Puntuaciones</button>
+    <button id="tabResults" class="tab-btn" type="button" disabled>Resultados</button>
+  </div>
+
+  <section id="configScreen" class="screen active">
+    <div class="card config-card">
+      <h1>Media de puntuaciones por pruebas</h1>
+      <p class="subtitle">Configura pruebas, equipos, jugadores y colores. Después introduce las puntuaciones equipo por equipo para calcular medias individuales, medias de equipo y pódiums finales.</p>
+      <div class="grid two">
+        <div class="field"><label for="testCount">Número de pruebas</label><div class="range-wrap"><input id="testCount" type="range" min="1" max="20" step="1" value="5"><div id="testCountValue" class="pill">5</div></div></div>
+        <div class="field"><label for="teamCount">Número de equipos</label><div class="range-wrap"><input id="teamCount" type="range" min="1" max="12" step="1" value="4"><div id="teamCountValue" class="pill">4</div></div></div>
+        <div class="field"><label>Qué se contabiliza</label><div class="check-group"><label class="check-option"><input id="usePoints" type="checkbox" checked> Puntos</label><label class="check-option"><input id="useTime" type="checkbox"> Tiempo</label></div><div class="tiny">Si se contabiliza tiempo, menor media de tiempo obtiene mejor posición. Si se usan puntos y tiempo, se calcula una clasificación combinada.</div></div>
+        <div class="field"><label for="timeUnit">Unidad de tiempo</label><select id="timeUnit"><option value="segundos">Segundos</option><option value="minutos">Minutos</option></select></div>
+      </div>
+      <div class="divider"></div>
+      <h2>Equipos y jugadores</h2>
+      <p class="subtitle">Cada equipo puede tener un número distinto de jugadores y un color pastel propio para sombrear su página de puntuaciones.</p>
+      <div id="teamsConfig" class="grid"></div>
+      <div class="btn-row"><button id="buildTableBtn" class="btn-primary" type="button">Crear páginas de puntuaciones</button><button id="demoBtn" class="btn-secondary" type="button">Cargar ejemplo</button></div>
+    </div>
+  </section>
+
+  <section id="scoresScreen" class="screen">
+    <div class="card">
+      <div class="topbar">
+        <div><h2 style="margin-bottom:6px;">Puntuaciones por equipo</h2><div class="tiny">Introduce los resultados del equipo mostrado. Usa anterior/siguiente para cambiar de página.</div></div>
+        <div class="stats"><div class="stat"><div class="label">Pruebas</div><div id="testsStat" class="value">0</div></div><div class="stat"><div class="label">Equipos</div><div id="teamsStat" class="value">0</div></div><div class="stat"><div class="label">Jugadores</div><div id="playersStat" class="value">0</div></div></div>
+      </div>
+      <div class="team-nav"><button id="prevTeamBtn" class="btn-secondary" type="button">← Equipo anterior</button><div id="teamTabs" class="team-tabs"></div><button id="nextTeamBtn" class="btn-secondary" type="button">Equipo siguiente →</button></div>
+      <div id="teamPageHead" class="team-page-head"></div>
+      <div id="scoreTableWrap" class="table-wrap"></div>
+      <div class="btn-row"><button id="finishBtn" class="btn-success" type="button">Finalizar</button><button id="downloadReportScoresBtn" class="btn-primary" type="button">Descargar informe</button><button id="backConfigBtn" class="btn-secondary" type="button">Volver a configuración</button><button id="clearScoresBtn" class="btn-danger" type="button">Borrar puntuaciones</button></div>
+    </div>
+  </section>
+
+  <section id="resultsScreen" class="screen">
+    <div class="card">
+      <h2 style="text-align:center;">Resultados finales</h2><div id="resultsBanner" class="results-banner"></div>
+      <div class="podium-area"><div><h3>🏆 Pódium de equipos</h3><div id="teamPodium" class="podium"></div><div id="teamRanking" class="rank-list"></div></div><div><h3>⭐ Pódium de jugadores</h3><div id="playerPodium" class="podium"></div><div id="playerRanking" class="rank-list"></div></div></div>
+      <div class="btn-row"><button id="downloadReportResultsBtn" class="btn-success" type="button">Descargar informe</button><button id="editScoresBtn" class="btn-secondary" type="button">Editar puntuaciones</button><button id="newConfigBtn" class="btn-primary" type="button">Nueva configuración</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const pastelColors=['#fde2e4','#fad2e1','#e2ece9','#bee1e6','#dfe7fd','#eae4e9','#fff1c1','#d8f3dc','#cde7ff','#f6e6ff','#ffd6a5','#caffbf'];
+const state={config:null,currentTeam:0};
+const els={
+ tabConfig:document.getElementById('tabConfig'),tabScores:document.getElementById('tabScores'),tabResults:document.getElementById('tabResults'),configScreen:document.getElementById('configScreen'),scoresScreen:document.getElementById('scoresScreen'),resultsScreen:document.getElementById('resultsScreen'),testCount:document.getElementById('testCount'),testCountValue:document.getElementById('testCountValue'),teamCount:document.getElementById('teamCount'),teamCountValue:document.getElementById('teamCountValue'),usePoints:document.getElementById('usePoints'),useTime:document.getElementById('useTime'),timeUnit:document.getElementById('timeUnit'),teamsConfig:document.getElementById('teamsConfig'),buildTableBtn:document.getElementById('buildTableBtn'),demoBtn:document.getElementById('demoBtn'),scoreTableWrap:document.getElementById('scoreTableWrap'),teamPageHead:document.getElementById('teamPageHead'),teamTabs:document.getElementById('teamTabs'),prevTeamBtn:document.getElementById('prevTeamBtn'),nextTeamBtn:document.getElementById('nextTeamBtn'),testsStat:document.getElementById('testsStat'),teamsStat:document.getElementById('teamsStat'),playersStat:document.getElementById('playersStat'),finishBtn:document.getElementById('finishBtn'),backConfigBtn:document.getElementById('backConfigBtn'),clearScoresBtn:document.getElementById('clearScoresBtn'),resultsBanner:document.getElementById('resultsBanner'),teamPodium:document.getElementById('teamPodium'),playerPodium:document.getElementById('playerPodium'),teamRanking:document.getElementById('teamRanking'),playerRanking:document.getElementById('playerRanking'),downloadReportScoresBtn:document.getElementById('downloadReportScoresBtn'),downloadReportResultsBtn:document.getElementById('downloadReportResultsBtn'),editScoresBtn:document.getElementById('editScoresBtn'),newConfigBtn:document.getElementById('newConfigBtn')
+};
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function showScreen(name){['config','scores','results'].forEach(k=>{els[k+'Screen'].classList.toggle('active',k===name);els['tab'+cap(k)].classList.toggle('active',k===name);});}
+function clamp(n,min,max){return Math.min(max,Math.max(min,Number(n)||min))}
+function escapeHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function fmt(n,dec=2){return Number.isFinite(n)?Number(n).toFixed(dec).replace(/\.00$/,''):'—'}
+function nums(arr){return arr.map(v=>Number(String(v).replace(',','.'))).filter(v=>Number.isFinite(v))}
+function average(arr){const a=nums(arr);return a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN}
+function sum(arr){const a=nums(arr);return a.length?a.reduce((s,x)=>s+x,0):0}
+function contrastColor(hex){return '#374151'}
+function currentMetricLabel(){if(state.config?.usePoints&&state.config?.useTime)return 'Índice combinado';if(state.config?.usePoints)return 'Media de puntos';return `Media de tiempo (${state.config?.timeUnit||'segundos'})`;}
+function updateTeamConfig(){
+ const count=clamp(els.teamCount.value,1,12);els.teamCount.value=count;els.teamCountValue.textContent=count;
+ const previous=Array.from(document.querySelectorAll('.team-card')).map((card,i)=>({name:card.querySelector('.team-name')?.value||`Equipo ${i+1}`,players:clamp(card.querySelector('.player-count')?.value,1,12),color:card.dataset.color||pastelColors[i%pastelColors.length],playerNames:Array.from(card.querySelectorAll('.player-name')).map(x=>x.value)}));
+ els.teamsConfig.innerHTML='';
+ for(let i=0;i<count;i++){
+  const old=previous[i]||{name:`Equipo ${i+1}`,players:4,color:pastelColors[i%pastelColors.length],playerNames:[]};
+  const card=document.createElement('div');card.className='team-card';card.dataset.color=old.color;card.style.background=`linear-gradient(180deg, ${old.color}, #fff)`;
+  card.innerHTML=`<div class="team-head"><div class="field"><label>Nombre del equipo ${i+1}</label><input class="team-name" type="text" value="${escapeHtml(old.name)}"></div><div class="field"><label>Jugadores</label><input class="player-count" type="number" min="1" max="12" value="${old.players}"></div><div class="field"><label>Color pastel</label><div class="color-select"></div><div class="color-preview" style="background:${old.color}"></div></div></div><div class="players-grid"></div>`;
+  els.teamsConfig.appendChild(card);renderColorDots(card,old.color);renderPlayerInputs(card,old.playerNames);card.querySelector('.player-count').addEventListener('input',()=>renderPlayerInputs(card));
+ }
+}
+function renderColorDots(card,selected){const wrap=card.querySelector('.color-select');wrap.innerHTML='';pastelColors.forEach(color=>{const dot=document.createElement('button');dot.type='button';dot.className='color-dot'+(color===selected?' active':'');dot.style.background=color;dot.title=color;dot.addEventListener('click',()=>{card.dataset.color=color;card.style.background=`linear-gradient(180deg, ${color}, #fff)`;card.querySelector('.color-preview').style.background=color;renderColorDots(card,color);});wrap.appendChild(dot);});}
+function renderPlayerInputs(card,oldNames=[]){const n=clamp(card.querySelector('.player-count').value,1,12);card.querySelector('.player-count').value=n;const grid=card.querySelector('.players-grid');const prev=oldNames.length?oldNames:Array.from(grid.querySelectorAll('.player-name')).map(x=>x.value);grid.innerHTML='';for(let j=0;j<n;j++){const wrap=document.createElement('div');wrap.className='field';wrap.innerHTML=`<label>Jugador ${j+1}</label><input class="player-name" type="text" value="${escapeHtml(prev[j]||`Jugador ${j+1}`)}">`;grid.appendChild(wrap);}}
+function readConfig(){const usePoints=els.usePoints.checked,useTime=els.useTime.checked;if(!usePoints&&!useTime){alert('Selecciona al menos “Puntos” o “Tiempo”.');return null;}const tests=clamp(els.testCount.value,1,20);const teams=[];document.querySelectorAll('.team-card').forEach((card,i)=>{const teamName=card.querySelector('.team-name').value.trim()||`Equipo ${i+1}`;const color=card.dataset.color||pastelColors[i%pastelColors.length];const players=Array.from(card.querySelectorAll('.player-name')).map((inp,j)=>({name:inp.value.trim()||`Jugador ${j+1}`,points:Array(tests).fill(''),times:Array(tests).fill('')}));teams.push({name:teamName,color,players});});return{tests,teams,usePoints,useTime,timeUnit:els.timeUnit.value};}
+function buildScorePages(){const config=readConfig();if(!config)return;state.config=config;state.currentTeam=0;els.tabScores.disabled=false;els.tabResults.disabled=true;renderScorePage();showScreen('scores');}
+function renderTeamTabs(){els.teamTabs.innerHTML='';state.config.teams.forEach((team,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='mini-tab'+(i===state.currentTeam?' active':'');btn.style.background=team.color;btn.textContent=team.name;btn.addEventListener('click',()=>{state.currentTeam=i;renderScorePage();});els.teamTabs.appendChild(btn);});}
+function renderScorePage(){const c=state.config;const team=c.teams[state.currentTeam];const totalPlayers=c.teams.reduce((s,t)=>s+t.players.length,0);els.testsStat.textContent=c.tests;els.teamsStat.textContent=c.teams.length;els.playersStat.textContent=totalPlayers;renderTeamTabs();els.prevTeamBtn.disabled=state.currentTeam===0;els.nextTeamBtn.disabled=state.currentTeam===c.teams.length-1;
+ const teamCalcs=team.players.map(p=>calcPlayer(p,c));const teamTotal=sum(team.players.flatMap(p=>p.points));const teamAvgPoints=average(team.players.map((p,idx)=>teamCalcs[idx].avgPoints));const teamAvgTime=average(team.players.map((p,idx)=>teamCalcs[idx].avgTime));
+ els.teamPageHead.style.background=`linear-gradient(135deg, ${team.color}, #ffffff)`;els.teamPageHead.innerHTML=`<h2>${escapeHtml(team.name)}</h2><div class="tiny">Página ${state.currentTeam+1} de ${c.teams.length}</div><div class="summary-strip"><div class="summary-box"><span>Total puntos equipo</span><strong>${c.usePoints?fmt(teamTotal):'—'}</strong></div><div class="summary-box"><span>Media puntos</span><strong>${c.usePoints?fmt(teamAvgPoints):'—'}</strong></div><div class="summary-box"><span>Media tiempo</span><strong>${c.useTime?fmt(teamAvgTime):'—'}</strong></div><div class="summary-box"><span>Jugadores</span><strong>${team.players.length}</strong></div></div>`;
+ let head='<tr><th>Jugador</th>';for(let i=0;i<c.tests;i++){if(c.usePoints)head+=`<th>P${i+1}<div class="small-input-note">puntos</div></th>`;if(c.useTime)head+=`<th>T${i+1}<div class="small-input-note">${c.timeUnit}</div></th>`;}head+='<th>Suma total puntos</th><th>Media puntos</th><th>Media tiempo</th><th>Valor clasificación</th></tr>';
+ let body='';team.players.forEach((p,pi)=>{const calc=calcPlayer(p,c);body+=`<tr><td class="player-label">${escapeHtml(p.name)}</td>`;for(let i=0;i<c.tests;i++){if(c.usePoints)body+=`<td><input class="score-input" type="number" step="0.01" data-player="${pi}" data-kind="points" data-test="${i}" value="${escapeHtml(p.points[i])}"></td>`;if(c.useTime)body+=`<td><input class="score-input" type="number" step="0.01" min="0" data-player="${pi}" data-kind="times" data-test="${i}" value="${escapeHtml(p.times[i])}"></td>`;}body+=`<td class="total-cell">${c.usePoints?fmt(sum(p.points)):'—'}</td><td class="avg-cell">${c.usePoints?fmt(calc.avgPoints):'—'}</td><td class="avg-cell">${c.useTime?fmt(calc.avgTime):'—'}</td><td class="avg-cell">${fmt(calc.score)}</td></tr>`;});
+ els.scoreTableWrap.innerHTML=`<table><thead>${head}</thead><tbody>${body}</tbody></table>`;els.scoreTableWrap.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{const{player,kind,test}=e.target.dataset;team.players[player][kind][test]=e.target.value;renderScorePage();}));
+}
+function allPlayers(){return state.config.teams.flatMap((t,ti)=>t.players.map((p,pi)=>({...p,team:t.name,teamIndex:ti,playerIndex:pi,color:t.color})));}
+function calcPlayer(player,c){const avgPoints=average(player.points),avgTime=average(player.times);let score=NaN;if(c.usePoints&&!c.useTime)score=avgPoints;else if(!c.usePoints&&c.useTime)score=Number.isFinite(avgTime)?-avgTime:NaN;else{const players=allPlayers();const pointVals=players.map(p=>average(p.points)).filter(Number.isFinite);const timeVals=players.map(p=>average(p.times)).filter(Number.isFinite);const minP=Math.min(...pointVals),maxP=Math.max(...pointVals),minT=Math.min(...timeVals),maxT=Math.max(...timeVals);const pNorm=Number.isFinite(avgPoints)?(maxP===minP?100:((avgPoints-minP)/(maxP-minP))*100):NaN;const tNorm=Number.isFinite(avgTime)?(maxT===minT?100:((maxT-avgTime)/(maxT-minT))*100):NaN;if(Number.isFinite(pNorm)&&Number.isFinite(tNorm))score=(pNorm+tNorm)/2;else if(Number.isFinite(pNorm))score=pNorm;else if(Number.isFinite(tNorm))score=tNorm;}return{avgPoints,avgTime,totalPoints:sum(player.points),score};}
+function rankings(){const c=state.config;const players=allPlayers().map(p=>({...p,...calcPlayer(p,c)})).filter(x=>Number.isFinite(x.score)).sort((a,b)=>b.score-a.score);const teams=c.teams.map(team=>{const ps=team.players.map(p=>calcPlayer(p,c)).filter(x=>Number.isFinite(x.score));return{name:team.name,color:team.color,players:team.players.length,totalPoints:sum(team.players.flatMap(p=>p.points)),avgPoints:average(ps.map(p=>p.avgPoints)),avgTime:average(ps.map(p=>p.avgTime)),score:ps.length?ps.reduce((s,p)=>s+p.score,0)/ps.length:NaN};}).filter(t=>Number.isFinite(t.score)).sort((a,b)=>b.score-a.score);return{players,teams};}
+function renderPodium(container,list,type){const medals=['🥇','🥈','🥉'];const classes=['first','second','third'];container.innerHTML=[0,1,2].map(i=>{const item=list[i];const name=item?escapeHtml(type==='team'?item.name:item.name):'—';const sub=item&&type==='player'?escapeHtml(item.team):'';return`<div class="podium-step ${classes[i]}" style="${item?.color?`background:linear-gradient(180deg, ${item.color}, #fff);`:''}"><div class="medal">${medals[i]}</div><div class="podium-name">${name}</div><div class="tiny">${sub}</div><div class="podium-score">${item?fmt(item.score):'—'}</div></div>`;}).join('');}
+function renderRankList(container,list,type){container.innerHTML=list.slice(0,10).map((item,i)=>`<div class="rank-item" style="background:linear-gradient(90deg, ${item.color || '#fff'}, #fff)"><div><strong>${i+1}. ${escapeHtml(type==='team'?item.name:item.name)}</strong><div class="tiny">${type==='team'?`${item.players} jugador/es · Total puntos: ${fmt(item.totalPoints)}`:escapeHtml(item.team)}</div></div><div><strong>${fmt(item.score)}</strong></div></div>`).join('')||'<div class="tiny">No hay datos suficientes.</div>';}
+function finish(){const r=rankings();els.tabResults.disabled=false;els.resultsBanner.textContent=`Criterio de clasificación: ${currentMetricLabel()}. ${state.config.useTime&&!state.config.usePoints?'Gana la media de tiempo más baja.':'Gana la puntuación más alta.'}`;renderPodium(els.teamPodium,r.teams,'team');renderPodium(els.playerPodium,r.players,'player');renderRankList(els.teamRanking,r.teams,'team');renderRankList(els.playerRanking,r.players,'player');showScreen('results');}
+function clearScores(){if(!confirm('¿Borrar todas las puntuaciones introducidas?'))return;state.config.teams.forEach(t=>t.players.forEach(p=>{p.points.fill('');p.times.fill('')}));renderScorePage();}
+
+function metricDescription(){
+  if(!state.config) return '';
+  if(state.config.usePoints && state.config.useTime) return 'Clasificación combinada: puntos altos y menor tiempo.';
+  if(state.config.usePoints) return 'Clasificación por media de puntos.';
+  return 'Clasificación por menor media de tiempo.';
+}
+function reportRowsForPlayers(){
+  if(!state.config) return '';
+  return state.config.teams.map(team=>{
+    const rows=team.players.map(p=>{
+      const calc=calcPlayer(p,state.config);
+      const points=state.config.usePoints ? p.points.map(v=>escapeHtml(v||'—')).join(' · ') : '—';
+      const times=state.config.useTime ? p.times.map(v=>escapeHtml(v||'—')).join(' · ') : '—';
+      return `<tr>
+        <td>${escapeHtml(team.name)}</td>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${points}</td>
+        <td>${times}</td>
+        <td>${state.config.usePoints?fmt(calc.totalPoints):'—'}</td>
+        <td>${state.config.usePoints?fmt(calc.avgPoints):'—'}</td>
+        <td>${state.config.useTime?fmt(calc.avgTime):'—'}</td>
+        <td>${fmt(calc.score)}</td>
+      </tr>`;
+    }).join('');
+    return `<tr class="team-row" style="background:${team.color}"><td colspan="8"><strong>${escapeHtml(team.name)}</strong></td></tr>${rows}`;
+  }).join('');
+}
+function podiumHtml(list,type){
+  const medals=['1.º','2.º','3.º'];
+  return list.slice(0,3).map((item,i)=>`<div class="podium-card" style="background:linear-gradient(180deg, ${item.color||'#f8fafc'}, #fff)"><strong>${medals[i]}</strong><span>${escapeHtml(item.name)}</span><small>${type==='player'?escapeHtml(item.team):fmt(item.score)}</small><b>${fmt(item.score)}</b></div>`).join('') || '<p>No hay datos suficientes.</p>';
+}
+function openPrintableReport(){
+  if(!state.config){alert('Primero crea la tabla de puntuaciones.');return;}
+  const r=rankings();
+  const totalPlayers=state.config.teams.reduce((s,t)=>s+t.players.length,0);
+  const reportWindow=window.open('', '_blank');
+  const date=new Date().toLocaleString('es-ES');
+  reportWindow.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe de puntuaciones</title><style>
+    @page{size:A4;margin:10mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111827;font-size:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}h1{font-size:20px;margin:0 0 4px}h2{font-size:13px;margin:12px 0 6px;border-bottom:1px solid #9ca3af;padding-bottom:3px}.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.badge{border:1px solid #9ca3af;border-radius:10px;background:#f9fafb;padding:8px 10px;text-align:center;min-width:145px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.meta div{border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;padding:6px}.podiums{display:grid;grid-template-columns:1fr 1fr;gap:8px}.podium-wrap{border:1px solid #cbd5e1;border-radius:10px;padding:8px;background:#f8fafc}.podium-line{display:flex;gap:6px;align-items:stretch}.podium-card{flex:1;border:1px solid #cbd5e1;border-radius:9px;padding:6px;text-align:center;min-height:58px}.podium-card strong,.podium-card span,.podium-card small,.podium-card b{display:block}.podium-card span{font-weight:700}.podium-card small{color:#64748b}.podium-card b{font-size:13px;color:#4b2b82}table{width:100%;border-collapse:collapse;margin-top:6px;font-size:8px}th,td{border:1px solid #cbd5e1;padding:3px 4px;vertical-align:top;text-align:left}th{background:#e5e7eb;text-transform:uppercase;font-size:7.5px}.team-row td{font-size:9px}.actions{margin:8px 0}.actions button{background:#8b5cf6;color:white;border:0;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}@media print{.actions{display:none}}
+  </style></head><body>
+    <div class="top"><div><h1>Informe de puntuaciones por pruebas</h1><p>${date}</p><p>${escapeHtml(metricDescription())}</p></div><div class="badge"><strong>${state.config.teams.length}</strong> equipos<br><strong>${totalPlayers}</strong> jugadores<br><strong>${state.config.tests}</strong> pruebas</div></div>
+    <div class="actions"><button onclick="window.print()">Guardar / imprimir en PDF</button></div>
+    <h2>Configuración</h2><div class="meta"><div><strong>Pruebas:</strong> ${state.config.tests}</div><div><strong>Equipos:</strong> ${state.config.teams.length}</div><div><strong>Jugadores:</strong> ${totalPlayers}</div><div><strong>Contabiliza:</strong> ${state.config.usePoints?'Puntos ':''}${state.config.useTime?'Tiempo':''}</div></div>
+    <h2>Pódiums</h2><div class="podiums"><div class="podium-wrap"><strong>Equipos</strong><div class="podium-line">${podiumHtml(r.teams,'team')}</div></div><div class="podium-wrap"><strong>Jugadores</strong><div class="podium-line">${podiumHtml(r.players,'player')}</div></div></div>
+    <h2>Detalle de puntuaciones</h2><table><thead><tr><th>Equipo</th><th>Jugador</th><th>Puntos por prueba</th><th>Tiempos por prueba</th><th>Total puntos</th><th>Media puntos</th><th>Media tiempo</th><th>Clasificación</th></tr></thead><tbody>${reportRowsForPlayers()}</tbody></table>
+  </body></html>`);
+  reportWindow.document.close();
+  reportWindow.focus();
+  setTimeout(()=>reportWindow.print(),300);
+}
+function loadDemo(){els.testCount.value=5;els.testCountValue.textContent='5';els.teamCount.value=3;updateTeamConfig();const names=[['Equipo Alfa',['Ana','Luis','Marta'],'#d8f3dc'],['Equipo Beta',['Carmen','Pablo','Irene','Rafa'],'#cde7ff'],['Equipo Gamma',['Nora','Diego','Leo'],'#fff1c1']];document.querySelectorAll('.team-card').forEach((card,i)=>{card.querySelector('.team-name').value=names[i][0];card.querySelector('.player-count').value=names[i][1].length;card.dataset.color=names[i][2];card.style.background=`linear-gradient(180deg, ${names[i][2]}, #fff)`;renderColorDots(card,names[i][2]);card.querySelector('.color-preview').style.background=names[i][2];renderPlayerInputs(card,names[i][1]);});els.usePoints.checked=true;els.useTime.checked=true;els.timeUnit.value='segundos';}
+els.testCount.addEventListener('input',()=>els.testCountValue.textContent=els.testCount.value);els.teamCount.addEventListener('input',updateTeamConfig);els.buildTableBtn.addEventListener('click',buildScorePages);els.demoBtn.addEventListener('click',loadDemo);els.prevTeamBtn.addEventListener('click',()=>{if(state.currentTeam>0){state.currentTeam--;renderScorePage();}});els.nextTeamBtn.addEventListener('click',()=>{if(state.currentTeam<state.config.teams.length-1){state.currentTeam++;renderScorePage();}});els.finishBtn.addEventListener('click',finish);els.backConfigBtn.addEventListener('click',()=>showScreen('config'));els.clearScoresBtn.addEventListener('click',clearScores);els.editScoresBtn.addEventListener('click',()=>showScreen('scores'));els.newConfigBtn.addEventListener('click',()=>showScreen('config'));els.downloadReportScoresBtn.addEventListener('click',openPrintableReport);els.downloadReportResultsBtn.addEventListener('click',openPrintableReport);els.tabConfig.addEventListener('click',()=>showScreen('config'));els.tabScores.addEventListener('click',()=>{if(!els.tabScores.disabled)showScreen('scores')});els.tabResults.addEventListener('click',()=>{if(!els.tabResults.disabled)showScreen('results')});updateTeamConfig();
+</script>
+</body>
+</html>
