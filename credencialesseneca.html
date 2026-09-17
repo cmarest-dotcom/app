@@ -103,7 +103,7 @@
         
         .grid-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             grid-template-rows: 1fr 1fr 1fr 1fr;
             width: 100%;
             height: 100%;
@@ -132,7 +132,15 @@
             background-color: #f8f9fa;
         }
         
+        .student-name:empty {
+            min-height: 1.6em;
+        }
+
         .student-name {
+            white-space: nowrap;
+            min-width: 0;
+            height: 29px;
+            line-height: 29px;
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 10px;
@@ -150,6 +158,12 @@
         }
         
         .password {
+            width: 100%;
+            height: 38px;
+            min-height: 38px;
+            max-height: 38px;
+            overflow: hidden;
+            white-space: nowrap;
             font-family: monospace;
             font-size: 16px;
             font-weight: bold;
@@ -309,8 +323,8 @@
             <h3>Instrucciones de uso:</h3>
             <ul>
                 <li>Suba un archivo PDF con los datos de los alumnos</li>
-                <li>El PDF debe contener: Apellidos, Nombre, Usuario y Clave</li>
-                <li>El sistema generará automáticamente el correo (usuario@g.educaand.es)</li>
+                <li>El PDF debe contener las columnas Nº, ALUMNO, USUARIO, CORREO y CONTRASEÑA (o CLAVE).</li>
+                <li>Cada dato se toma de su columna. Los campos vacíos se mantienen en blanco.</li>
                 <li>Cada página A4 contendrá 8 credenciales</li>
                 <li>Revise la vista previa y haga clic en "Descargar PDF" para guardar el resultado</li>
             </ul>
@@ -446,7 +460,7 @@
                         }
                         
                         // Procesar todo el texto extraído
-                        Promise.all(pagePromises).then(function(pagesData) {
+                        return Promise.all(pagePromises).then(function(pagesData) {
                             // Procesar cada página
                             pagesData.forEach(function(pageData) {
                                 processPageData(pageData.textContent, pageData.pageNum, allStudentData);
@@ -466,7 +480,7 @@
                         });
                     }).catch(function(error) {
                         console.error('Error al procesar el PDF:', error);
-                        showStatus('Error al procesar el archivo PDF. Asegúrese de que es un archivo válido.', 'error');
+                        showStatus('Error al procesar el PDF: ' + error.message, 'error');
                         loadingElement.style.display = 'none';
                     });
                 };
@@ -481,72 +495,77 @@
             
             // Procesar datos de una página del PDF
             function processPageData(pageText, pageNum, allStudentData) {
-                let items = pageText.items;
-                let startProcessing = false;
-                let currentLine = '';
-                let studentLines = [];
-                
-                // Primero, reconstruir las líneas completas
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    const text = item.str;
-                    
-                    // Detectar si estamos en la sección de datos después de "Usuario"
-                    if (!startProcessing && text.toLowerCase().includes('usuario')) {
-                        startProcessing = true;
-                        continue;
-                    }
-                    
-                    if (startProcessing) {
-                        // Si el texto está en una nueva posición Y (nueva línea)
-                        if (i > 0 && Math.abs(item.transform[5] - items[i-1].transform[5]) > 5) {
-                            if (currentLine.trim().length > 0) {
-                                studentLines.push(currentLine.trim());
-                            }
-                            currentLine = text;
-                        } else {
-                            currentLine += text;
-                        }
-                    }
+                // Conservar las coordenadas: los espacios no representan celdas vacías.
+                const rows = [];
+                pageText.items.filter(item => item.str.trim()).forEach(item => {
+                    const y = item.transform[5];
+                    let row = rows.find(row => Math.abs(row.y - y) <= 5);
+                    if (!row) { row = { y, items: [] }; rows.push(row); }
+                    row.items.push(item);
+                });
+                rows.sort((a, b) => b.y - a.y);
+                rows.forEach(row => row.items.sort((a, b) => a.transform[4] - b.transform[4]));
+                const normalize = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[:.]/g, '').trim();
+                const fieldFor = text => {
+                    const label = normalize(text);
+                    if (/^(n[º°o]?|numero)$/.test(label)) return 'numero';
+                    if (/^(alumno|alumna|alumnado|apellidos,? nombre|nombre y apellidos)$/.test(label)) return 'alumno';
+                    if (label === 'usuario') return 'usuario';
+                    if (/^(correo|correo electronico|email|e-mail)$/.test(label)) return 'correo';
+                    if (/^(clave|contrasena)$/.test(label)) return 'contraseña';
+                    return null;
+                };
+                const headerIndex = rows.findIndex(row =>
+                    row.items.some(item => fieldFor(item.str) === 'usuario') &&
+                    row.items.some(item => fieldFor(item.str) === 'alumno'));
+                if (headerIndex < 0) {
+                    throw new Error('No se reconocen las columnas ALUMNO y USUARIO en la página ' + pageNum);
                 }
-                
-                // Añadir la última línea
-                if (currentLine.trim().length > 0) {
-                    studentLines.push(currentLine.trim());
-                }
-                
-                // Procesar cada línea para extraer datos de estudiantes
-                studentLines.forEach(function(line) {
-                    // Limpiar la línea de "Usuario:" y "Clave:"
-                    const cleanLine = cleanText(line);
-                    
-                    // Dividir la línea por espacios
-                    const parts = cleanLine.split(/\s+/).filter(part => part.length > 0);
-                    
-                    if (parts.length >= 4) {
-                        // Los últimos dos elementos son usuario y contraseña
-                        const usuario = parts[parts.length - 2];
-                        const contraseña = parts[parts.length - 1];
-                        const alumno = parts.slice(0, parts.length - 2).join(' ');
-                        
-                        // Validar que el usuario y contraseña parezcan válidos
-                        if (usuario && contraseña && alumno && 
-                            usuario.length >= 3 && contraseña.length >= 3 &&
-                            !usuario.toLowerCase().includes('usuario') &&
-                            !contraseña.toLowerCase().includes('clave')) {
-                            
-                            const student = {
-                                alumno: alumno,
-                                usuario: usuario,
-                                correo: usuario + '@g.educaand.es',
-                                contraseña: contraseña
-                            };
-                            
-                            allStudentData.push(student);
-                        }
+                // Cada columna tiene su propio intervalo; nunca se deduce una celda
+                // por el número de palabras ni se desplazan los valores hacia huecos vacíos.
+                const columns = rows[headerIndex].items.map(item => ({
+                    field: fieldFor(item.str), x: item.transform[4] + item.width / 2
+                })).filter(column => column.field).sort((a, b) => a.x - b.x);
+                const hasNumber = columns.some(column => column.field === 'numero');
+                rows.slice(headerIndex + 1).forEach(row => {
+                    if (row.items.some(item => fieldFor(item.str) === 'usuario')) return;
+                    const cells = { numero: [], alumno: [], usuario: [], correo: [], contraseña: [] };
+                    row.items.forEach(item => {
+                        // Comparar los centros del texto y del encabezado: en el PDF
+                        // los títulos están centrados, no marcan el inicio de la celda.
+                        const center = item.transform[4] + item.width / 2;
+                        const column = columns.reduce((closest, candidate) =>
+                            Math.abs(center - candidate.x) < Math.abs(center - closest.x)
+                                ? candidate : closest);
+                        cells[column.field].push(item.str);
+                    });
+                    const student = Object.fromEntries(Object.entries(cells).map(([key, value]) =>
+                        [key, value.join(' ').trim()]));
+                    if (hasNumber && !/^\d+[.)]?$/.test(student.numero)) return;
+                    if (!Object.values(student).some(Boolean)) return;
+                    if (/^(página|fecha|ref[.:]|cód[.:]|consejería|dirección general)/i.test(student.alumno)) return;
+                    allStudentData.push(student);
+                });
+            }
+
+            function escapeHTML(value) {
+                return String(value ?? '').replace(/[&<>"']/g, char =>
+                    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+            }
+
+            function fitNames(root = pagesContainer) {
+                root.querySelectorAll('.student-name').forEach(element => {
+                    if (!element.clientWidth) return;
+                    element.style.fontSize = '18px';
+                    const text = element.querySelector('span');
+                    const width = text.getBoundingClientRect().width;
+                    if (width > element.clientWidth) {
+                        element.style.fontSize = (18 * element.clientWidth / width * 0.98) + 'px';
                     }
                 });
             }
+            window.addEventListener('resize', () => fitNames());
+            window.addEventListener('beforeprint', () => fitNames());
             
             // Mostrar vista previa
             function displayPreview() {
@@ -555,7 +574,7 @@
                 dataTable.innerHTML = '';
                 
                 // Crear tabla de datos
-                let tableHTML = '<thead><tr><th>ALUMNO</th><th>USUARIO</th><th>CORREO</th><th>CONTRASEÑA</th></tr></thead><tbody>';
+                let tableHTML = '<thead><tr><th>Nº</th><th>ALUMNO</th><th>USUARIO</th><th>CORREO</th><th>CONTRASEÑA</th></tr></thead><tbody>';
                 
                 // Calcular número de páginas
                 totalPages = Math.ceil(studentData.length / 8);
@@ -579,10 +598,11 @@
                         gridItem.className = 'grid-item';
                         
                         if (index < studentData.length) {
-                            const student = studentData[index];
+                            const student = Object.fromEntries(Object.entries(studentData[index]).map(([key, value]) => [key, escapeHTML(value)]));
                             
                             // Añadir fila a la tabla
                             tableHTML += `<tr>
+                                <td>${student.numero}</td>
                                 <td>${student.alumno}</td>
                                 <td>${student.usuario}</td>
                                 <td>${student.correo}</td>
@@ -594,7 +614,7 @@
                             credentialCard.className = 'credential-card';
                             credentialCard.innerHTML = `
                                 <div>
-                                    <div class="student-name">${student.alumno}</div>
+                                    <div class="student-name"><span>${[student.numero, student.alumno].filter(Boolean).join(' · ')}</span></div>
                                     <div class="credential-info"><strong>Usuario:</strong> ${student.usuario}</div>
                                     <div class="credential-info"><strong>Correo:</strong> ${student.correo}</div>
                                 </div>
@@ -626,6 +646,8 @@
                 
                 // Mostrar sección de vista previa
                 previewSection.style.display = 'block';
+                fitNames();
+                document.fonts.ready.then(() => fitNames());
                 
                 // Ajustar visibilidad de botones de navegación
                 prevPageBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
@@ -639,6 +661,7 @@
                     currentPage--;
                     document.getElementById(`page-${currentPage}`).style.display = 'block';
                     currentPageSpan.textContent = currentPage;
+                    fitNames();
                 }
             });
             
@@ -648,6 +671,7 @@
                     currentPage++;
                     document.getElementById(`page-${currentPage}`).style.display = 'block';
                     currentPageSpan.textContent = currentPage;
+                    fitNames();
                 }
             });
             
@@ -680,6 +704,7 @@
                         // Asegurarse de que la página sea visible para html2canvas
                         const originalDisplay = pageElement.style.display;
                         pageElement.style.display = 'block';
+                        fitNames(pageElement);
                         
                         html2canvas(pageElement, {
                             scale: 2,
