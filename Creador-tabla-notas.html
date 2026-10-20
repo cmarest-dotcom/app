@@ -12,7 +12,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
             line-height: 1.6;
             color: #333;
             min-height: 100vh;
@@ -26,15 +26,15 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
         h1 {
-            color: #2c3e50;
+            color: var(--ink);
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid var(--main);
             font-size: 2.2em;
         }
         h2 {
-            color: #2c3e50;
+            color: var(--ink);
             text-align: center;
             margin-top: 30px;
         }
@@ -43,13 +43,13 @@
             padding: 20px;
             background-color: #f8f9fa;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--main);
         }
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--ink);
             font-size: 1.1em;
         }
         input {
@@ -63,8 +63,8 @@
         }
         input:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+            border-color: var(--main);
+            box-shadow: 0 0 8px var(--focus);
         }
         button {
             padding: 14px 24px;
@@ -79,7 +79,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         #generateTable {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
+            background: linear-gradient(to right, var(--main), var(--dark));
             color: white;
             width: 100%;
             padding: 16px;
@@ -87,7 +87,7 @@
             font-size: 18px;
         }
         #generateTable:hover {
-            background: linear-gradient(to right, #27ae60, #219653);
+            background: linear-gradient(to right, var(--dark), var(--ink));
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
@@ -131,7 +131,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 25px;
-            border: 2px solid #2c3e50;
+            border: 2px solid var(--ink);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             table-layout: fixed;
         }
@@ -143,7 +143,7 @@
             word-wrap: break-word;
         }
         th {
-            background: linear-gradient(to bottom, #3498db, #2980b9);
+            background: linear-gradient(to bottom, var(--main), var(--dark));
             color: white;
             font-weight: bold;
             position: sticky;
@@ -155,27 +155,16 @@
             transition: background-color 0.2s;
         }
         td:focus {
-            background-color: #ecf0f1;
-            outline: 2px solid #3498db;
+            background-color: var(--light);
+            outline: 2px solid var(--main);
         }
-        /* Primera columna - 10% */
-        th:nth-child(1),
-        td:nth-child(1) {
-            width: 10%;
-            background: linear-gradient(to right, #e6f2ff, #d9e6ff);
-            font-weight: bold;
-        }
-        /* Columnas centrales - se ajustan automáticamente */
-        th:not(:first-child):not(:last-child),
-        td:not(:first-child):not(:last-child) {
-            width: auto;
-        }
-        /* Última columna - 30% */
-        th:last-child,
-        td:last-child {
-            width: 30%;
-            background: linear-gradient(to right, #e6f2ff, #d9e6ff);
-        }
+        th.col-num, td.col-num { width: 11%; }
+        th.col-num { white-space: nowrap; word-break: normal; overflow-wrap: normal; }
+        th.col-name, td.col-name { width: 21%; text-align: left; }
+        th.col-sign, td.col-sign { width: 20%; }
+        th.col-inst, td.col-inst { width: auto; }
+        td.col-num, td.col-sign { background: linear-gradient(to right, var(--light), var(--light2)); }
+        td.col-num { font-weight: bold; }
         .hidden {
             display: none;
         }
@@ -228,9 +217,9 @@
             font-weight: bold;
             margin-bottom: 20px;
             caption-side: top;
-            color: #2c3e50;
+            color: var(--ink);
             padding: 15px;
-            background: linear-gradient(to right, #ecf0f1, #dfe6e9);
+            background: linear-gradient(to right, var(--light), var(--light2));
             border-radius: 8px;
         }
         @media (max-width: 768px) {
@@ -252,20 +241,45 @@
             }
         }
         .instructions {
-            background-color: #e8f4fc;
+            background-color: var(--soft);
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--main);
         }
         .instructions h3 {
             margin-top: 0;
-            color: #2c3e50;
+            color: var(--ink);
         }
         .instructions ul {
             margin-bottom: 0;
             padding-left: 20px;
         }
+    
+        :root { --main:#3498db; --dark:#2980b9; --ink:#2c3e50; --light:#e6f2ff; --light2:#d9e6ff; --soft:#e8f4fc; --bg1:#f5f7fa; --bg2:#c3cfe2; --focus:rgba(52,152,219,.6); }
+        .hint { margin: -4px 0 12px; font-size: .95em; color: #555; }
+        .theme-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        button.swatch { width: 38px; height: 38px; padding: 0; margin: 0; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px #bbb; }
+        button.swatch:hover { transform: scale(1.1); }
+        button.swatch.active { box-shadow: 0 0 0 3px var(--ink); }
+        label.custom-color { display: flex; align-items: center; gap: 8px; margin: 0 0 0 10px; font-size: 1em; }
+        .custom-color input { width: 48px; height: 38px; padding: 2px; cursor: pointer; }
+        .topic-badge { font-weight: bold; color: var(--ink); background: var(--light); padding: 6px 10px; border-radius: 6px; margin-right: 10px; white-space: nowrap; }
+        .summary { padding: 12px 16px; background: var(--soft); border-radius: 8px; border-left: 4px solid var(--main); }
+        .table-tools { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .table-tools button { margin: 0; flex: 1; min-width: 170px; padding: 10px 14px; background: var(--light); color: var(--ink); border: 1px solid var(--main); }
+        .table-tools button:hover { background: var(--light2); }
+            #topicContainer { flex-direction: column; flex-wrap: nowrap; gap: 8px; }
+        #topicContainer .instrument-input { flex: none; width: 100%; box-sizing: border-box; min-width: 0; }
+        #topicContainer .topic-badge { min-width: 64px; text-align: center; }
+            table { min-width: 720px; }
+        .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .fields label { font-size: 1em; font-weight: 600; }
+        label.check { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 1em; cursor: pointer; }
+        .check input { width: 20px; height: 20px; padding: 0; margin: 0; accent-color: var(--main); }
+        #saveConfig { background: linear-gradient(to right, var(--main), var(--dark)); color: white; }
+        #openConfig { background: var(--light); color: var(--ink); border: 1px solid var(--main); }
+        #openConfig:hover { background: var(--light2); }
     </style>
 </head>
 <body>
@@ -273,51 +287,79 @@
         <h1>Creador de Tabla de Notas</h1>
         
         <div class="instructions">
-            <h3>Instrucciones:</h3>
+            <h3>Cómo funciona:</h3>
             <ul>
-                <li>Completa los datos solicitados</li>
-                <li>Añade los instrumentos de evaluación que necesites</li>
-                <li>Haz clic en "Generar Tabla"</li>
-                <li>Puedes editar directamente las celdas de notas</li>
-                <li>Exporta a PDF o Excel cuando termines</li>
+                <li><b>Filas = temas.</b> Cada fila de la tabla es un tema. Puedes añadir tantas como necesites y ponerle nombre a cada una.</li>
+                <li><b>Columnas = actividades (instrumentos de evaluación).</b> Cada columna es un instrumento (Examen, Trabajo…). Añade o quita los que quieras.</li>
+                <li>La tabla siempre incluye tres columnas fijas: <b>Tema</b>, <b>Nombre del tema</b> (justo después de Tema) y <b>Firma</b> (al final).</li>
+                <li>Tras generar la tabla puedes seguir añadiendo o quitando filas y columnas con los botones que hay debajo, y editar las celdas directamente.</li>
+                <li>Asignatura, grupo y alumno son opcionales: en el título solo aparecen los que rellenes.</li>
+                <li>Con <b>Guardar</b> y <b>Abrir</b> conservas o recuperas tu trabajo (datos, colores y tabla con notas) en un archivo.</li>
+                <li>Elige los colores en «Estilo y colores» y exporta a PDF o Excel.</li>
             </ul>
         </div>
-        
+
         <div class="form-group">
-            <label for="subjectName">Nombre de la Asignatura:</label>
-            <input type="text" id="subjectName" placeholder="Ej: Matemáticas">
+            <label>Guardar y abrir:</label>
+            <p class="hint">Guarda en tu equipo los datos, los colores y la tabla con sus notas para seguir más tarde. Con «Abrir» recuperas un archivo guardado antes.</p>
+            <button id="saveConfig">Guardar</button>
+            <button id="openConfig">Abrir</button>
+            <input type="file" id="openFile" accept=".json,application/json" class="hidden">
         </div>
-        
+
         <div class="form-group">
-            <label for="studentName">Nombre del Alumno:</label>
-            <input type="text" id="studentName" placeholder="Tu nombre">
+            <label>Estilo y colores:</label>
+            <div class="theme-picker" id="themePicker">
+                <label class="custom-color">Color personalizado <input type="color" id="customColor" value="#3498db"></label>
+            </div>
         </div>
-        
+
         <div class="form-group">
-            <label for="topicCount">Número de Temas:</label>
-            <input type="number" id="topicCount" min="1" value="5">
+            <label>Datos de la tabla (todos opcionales):</label>
+            <div class="fields">
+                <div><label for="subjectName">Nombre de la asignatura</label><input type="text" id="subjectName" placeholder="Ej: Matemáticas"></div>
+                <div><label for="groupName">Grupo</label><input type="text" id="groupName" placeholder="Ej: 2.º B"></div>
+                <div><label for="studentName">Nombre del alumno</label><input type="text" id="studentName" placeholder="Ej: Ana Pérez"></div>
+            </div>
         </div>
-        
+
         <div class="form-group">
-            <label>Instrumentos de Evaluación:</label>
+            <label>Filas de la tabla: Temas</label>
+            <p class="hint">Cada tema es una fila. El nombre es opcional y aparecerá en la columna «Nombre del tema».</p>
+            <label class="check"><input type="checkbox" id="numberTopics" checked> Mostrar el número en la columna «Tema» (si lo desmarcas, esas celdas quedan vacías)</label>
+            <div class="instrument-inputs" id="topicContainer"></div>
+            <button id="addTopic">+ Añadir tema (fila)</button>
+        </div>
+
+        <div class="form-group">
+            <label>Columnas de la tabla: Instrumentos de Evaluación (actividades)</label>
+            <p class="hint">Cada instrumento es una columna, situada entre «Nombre del tema» y «Firma».</p>
             <div class="instrument-inputs" id="instrumentContainer">
                 <div class="instrument-input">
                     <input type="text" class="instrument" placeholder="Ej: Examen" value="Examen">
-                    <span class="remove-instrument">×</span>
+                    <span class="remove-instrument" title="Quitar columna">×</span>
                 </div>
                 <div class="instrument-input">
                     <input type="text" class="instrument" placeholder="Ej: Trabajo" value="Trabajo">
-                    <span class="remove-instrument">×</span>
+                    <span class="remove-instrument" title="Quitar columna">×</span>
                 </div>
             </div>
-            <button id="addInstrument">Añadir Instrumento</button>
+            <button id="addInstrument">+ Añadir instrumento (columna)</button>
         </div>
-        
+
+        <div class="summary" id="summary"></div>
+
         <button id="generateTable">Generar Tabla</button>
         
         <div id="tablePreview" class="hidden">
             <h2>Vista Previa de la Tabla</h2>
             <div id="tableContainer"></div>
+            <div class="table-tools">
+                <button id="addRow">+ Fila (tema)</button>
+                <button id="delRow">− Última fila</button>
+                <button id="addCol">+ Columna (instrumento)</button>
+                <button id="delCol">− Última columna</button>
+            </div>
             
             <div class="output-buttons">
                 <button id="exportPDFPortrait">Exportar a PDF (Vertical)</button>
@@ -330,289 +372,250 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const { jsPDF } = window.jspdf;
-            
-            // Añadir instrumento
-            document.getElementById('addInstrument').addEventListener('click', function() {
-                const container = document.getElementById('instrumentContainer');
-                const newInstrument = document.createElement('div');
-                newInstrument.className = 'instrument-input';
-                newInstrument.innerHTML = `
-                    <input type="text" class="instrument" placeholder="Ej: Libreta">
-                    <span class="remove-instrument">×</span>
-                `;
-                container.appendChild(newInstrument);
-                
-                // Añadir evento para eliminar
-                newInstrument.querySelector('.remove-instrument').addEventListener('click', function() {
-                    container.removeChild(newInstrument);
-                });
+            const $ = id => document.getElementById(id);
+            const topicBox = $('topicContainer'), instBox = $('instrumentContainer');
+            const getTable = () => document.querySelector('#tableContainer table');
+
+            // ---------- Temas de color ----------
+            const PALETTE = [['Azul','#3498db'],['Verde','#27ae60'],['Violeta','#8e44ad'],['Rojo','#c0392b'],
+                             ['Naranja','#e67e22'],['Turquesa','#16a085'],['Rosa','#d63384'],['Grafito','#4a5568']];
+            let theme = {};
+            const rgb = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
+            const mix = (c, t, k) => c.map(v => Math.round(v + (t - v) * k)); // t=0 oscurece, t=255 aclara
+
+            function applyTheme(hex) {
+                const m = rgb(hex);
+                theme = { main: m, dark: mix(m, 0, .2), ink: mix(m, 0, .6), light: mix(m, 255, .88), light2: mix(m, 255, .78),
+                          soft: mix(m, 255, .93), bg1: mix(m, 255, .95), bg2: mix(m, 255, .75) };
+                const st = document.documentElement.style;
+                Object.entries(theme).forEach(([k, v]) => st.setProperty('--' + k, `rgb(${v.join(',')})`));
+                st.setProperty('--focus', `rgba(${m.join(',')},.6)`);
+                $('customColor').value = hex;
+                document.querySelectorAll('.swatch').forEach(b => b.classList.toggle('active', b.dataset.color === hex));
+                try { localStorage.setItem('notasColor', hex); } catch (e) {}
+            }
+            PALETTE.forEach(([name, hex]) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'swatch'; b.dataset.color = hex;
+                b.title = name; b.setAttribute('aria-label', 'Color ' + name); b.style.background = hex;
+                b.addEventListener('click', () => applyTheme(hex));
+                $('themePicker').insertBefore(b, $('themePicker').lastElementChild);
             });
-            
-            // Eliminar instrumentos existentes
-            document.querySelectorAll('.remove-instrument').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.parentElement.remove();
-                });
+            $('customColor').addEventListener('input', e => applyTheme(e.target.value));
+            let saved = null; try { saved = localStorage.getItem('notasColor'); } catch (e) {}
+            applyTheme(saved || PALETTE[0][1]);
+
+            // ---------- Formulario: filas (temas) y columnas (instrumentos) ----------
+            function updateSummary() {
+                const t = topicBox.children.length, n = instBox.children.length;
+                $('summary').innerHTML = `<b>Vista general:</b> la tabla tendrá <b>${t}</b> fila${t === 1 ? '' : 's'} (temas) y <b>${n + 3}</b> columnas: Tema, Nombre del tema, <b>${n}</b> instrumento${n === 1 ? '' : 's'} y Firma.`;
+            }
+            function renumberTopics() {
+                topicBox.querySelectorAll('.topic-badge').forEach((b, i) => b.textContent = 'Tema ' + (i + 1));
+                updateSummary();
+            }
+            function addTopic() {
+                const d = document.createElement('div');
+                d.className = 'instrument-input';
+                d.innerHTML = '<span class="topic-badge"></span><input type="text" class="topic-name" placeholder="Nombre del tema (opcional)"><span class="remove-instrument" title="Quitar fila">×</span>';
+                topicBox.appendChild(d);
+                renumberTopics();
+            }
+            function addInstrument() {
+                const d = document.createElement('div');
+                d.className = 'instrument-input';
+                d.innerHTML = '<input type="text" class="instrument" placeholder="Ej: Libreta"><span class="remove-instrument" title="Quitar columna">×</span>';
+                instBox.appendChild(d);
+                updateSummary();
+            }
+            [topicBox, instBox].forEach(box => box.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-instrument')) { e.target.parentElement.remove(); renumberTopics(); }
+            }));
+            $('addTopic').addEventListener('click', addTopic);
+            $('addInstrument').addEventListener('click', addInstrument);
+            for (let i = 0; i < 5; i++) addTopic();
+
+            // ---------- Generar tabla ----------
+            const getTitle = () => ['subjectName', 'groupName', 'studentName'].map(id => $(id).value.trim()).filter(Boolean).join(' - ');
+            const fileBase = t => (t || 'Tabla_de_notas').replace(/[\\/:*?"<>|]/g, '').trim().replace(/ +/g, '_');
+
+            $('generateTable').addEventListener('click', function() {
+                const names = [...topicBox.querySelectorAll('.topic-name')].map(i => i.value.trim());
+                const insts = [...instBox.querySelectorAll('.instrument')].map(i => i.value.trim());
+                if (!names.length) return alert('Añade al menos un tema (fila)');
+                if (!insts.length) return alert('Añade al menos un instrumento de evaluación (columna)');
+                if (insts.some(x => !x)) return alert('Todos los instrumentos deben tener un nombre');
+                buildTable(getTitle(), insts, names.map(n => ({ name: n })));
+                $('tablePreview').classList.remove('hidden');
+                $('tablePreview').scrollIntoView({ behavior: 'smooth' });
             });
-            
-            // Generar tabla
-            document.getElementById('generateTable').addEventListener('click', function() {
-                const topicCount = parseInt(document.getElementById('topicCount').value);
-                const subjectName = document.getElementById('subjectName').value;
-                const studentName = document.getElementById('studentName').value;
-                const instruments = Array.from(document.querySelectorAll('.instrument')).map(input => input.value);
-                
-                if (topicCount <= 0) {
-                    alert('El número de temas debe ser mayor que 0');
-                    return;
-                }
-                
-                if (instruments.some(inst => !inst.trim())) {
-                    alert('Todos los instrumentos deben tener un nombre');
-                    return;
-                }
-                
-                if (!subjectName.trim()) {
-                    alert('Por favor, ingresa el nombre de la asignatura');
-                    return;
-                }
-                
-                if (!studentName.trim()) {
-                    alert('Por favor, ingresa el nombre del alumno');
-                    return;
-                }
-                
-                generateTable(topicCount, instruments, subjectName, studentName);
-                document.getElementById('tablePreview').classList.remove('hidden');
-                
-                // Desplazarse suavemente a la tabla generada
-                document.getElementById('tablePreview').scrollIntoView({ behavior: 'smooth' });
-            });
-            
-            // Exportar a PDF vertical
-            document.getElementById('exportPDFPortrait').addEventListener('click', function() {
-                exportToPDF('portrait');
-            });
-            
-            // Exportar a PDF horizontal
-            document.getElementById('exportPDFLandscape').addEventListener('click', function() {
-                exportToPDF('landscape');
-            });
-            
-            // Exportar a Excel
-            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
-            
-            function generateTable(topicCount, instruments, subjectName, studentName) {
-                const tableContainer = document.getElementById('tableContainer');
-                tableContainer.innerHTML = '';
-                
+
+            function cell(tag, text, cls, editable) {
+                const e = document.createElement(tag);
+                e.textContent = text; e.className = cls;
+                if (editable) e.contentEditable = 'true';
+                return e;
+            }
+            function buildTable(title, insts, rows) {
+                const box = $('tableContainer'); box.innerHTML = '';
                 const table = document.createElement('table');
-                
-                // Crear título
-                const caption = document.createElement('caption');
-                caption.textContent = `${subjectName} - ${studentName}`;
-                table.appendChild(caption);
-                
-                // Crear cabecera
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
-                
-                const thTopic = document.createElement('th');
-                thTopic.textContent = 'Tema';
-                headerRow.appendChild(thTopic);
-                
-                instruments.forEach(instrument => {
-                    const th = document.createElement('th');
-                    th.textContent = instrument;
-                    headerRow.appendChild(th);
-                });
-                
-                const thSignature = document.createElement('th');
-                thSignature.textContent = 'Firma';
-                headerRow.appendChild(thSignature);
-                
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-                
-                // Crear cuerpo
-                const tbody = document.createElement('tbody');
-                
-                for (let i = 1; i <= topicCount; i++) {
-                    const row = document.createElement('tr');
-                    
-                    const tdTopic = document.createElement('td');
-                    tdTopic.textContent = `Tema ${i}`;
-                    row.appendChild(tdTopic);
-                    
-                    instruments.forEach(() => {
-                        const td = document.createElement('td');
-                        td.contentEditable = 'true';
-                        row.appendChild(td);
-                    });
-                    
-                    const tdSignature = document.createElement('td');
-                    row.appendChild(tdSignature);
-                    
-                    tbody.appendChild(row);
-                }
-                
-                table.appendChild(tbody);
-                tableContainer.appendChild(table);
+                table.innerHTML = (title ? '<caption></caption>' : '') + '<thead><tr></tr></thead><tbody></tbody>';
+                if (title) table.caption.textContent = title;
+                table.tHead.rows[0].append(cell('th', 'Tema', 'col-num'), cell('th', 'Nombre del tema', 'col-name'));
+                insts.forEach(n => table.tHead.rows[0].append(cell('th', n, 'col-inst', true)));
+                table.tHead.rows[0].append(cell('th', 'Firma', 'col-sign'));
+                box.appendChild(table);
+                rows.forEach(r => addRow(r.name, r.vals, r.num));
             }
-            
+
+            // El título se actualiza solo si se cambian los datos con la tabla ya creada
+            ['subjectName', 'groupName', 'studentName'].forEach(id => $(id).addEventListener('input', () => {
+                const t = getTable(); if (!t) return;
+                const title = getTitle();
+                if (title) t.createCaption().textContent = title; else t.deleteCaption();
+            }));
+
+            // Numerar la columna Tema (o dejarla vacía y editable)
+            $('numberTopics').addEventListener('change', () => {
+                const t = getTable(), on = $('numberTopics').checked;
+                if (!t) return;
+                [...t.tBodies[0].rows].forEach((r, i) => {
+                    r.cells[0].textContent = on ? String(i + 1) : '';
+                    r.cells[0].contentEditable = String(!on);
+                });
+            });
+
+            // ---------- Añadir / quitar filas y columnas en la tabla generada ----------
+            function addRow(name = '', vals = [], num = '') {
+                const t = getTable(), tb = t.tBodies[0], tr = tb.insertRow();
+                const cols = t.tHead.rows[0].cells.length - 3, on = $('numberTopics').checked;
+                tr.append(cell('td', on ? String(tb.rows.length) : (num || ''), 'col-num', !on), cell('td', name, 'col-name', true));
+                for (let i = 0; i < cols; i++) tr.append(cell('td', vals[i] || '', 'col-inst', true));
+                tr.append(cell('td', '', 'col-sign'));
+            }
+            function addColumn() {
+                const t = getTable(), hr = t.tHead.rows[0];
+                hr.insertBefore(cell('th', 'Instrumento ' + (hr.cells.length - 2), 'col-inst', true), hr.lastElementChild);
+                [...t.tBodies[0].rows].forEach(r => r.insertBefore(cell('td', '', 'col-inst', true), r.lastElementChild));
+            }
+            $('addRow').addEventListener('click', () => addRow());
+            $('addCol').addEventListener('click', addColumn);
+            $('delRow').addEventListener('click', () => {
+                const tb = getTable().tBodies[0];
+                if (tb.rows.length <= 1) return alert('La tabla necesita al menos una fila');
+                tb.deleteRow(-1);
+            });
+            $('delCol').addEventListener('click', () => {
+                const t = getTable(), hr = t.tHead.rows[0];
+                if (hr.cells.length <= 4) return alert('La tabla necesita al menos una columna de instrumento');
+                hr.deleteCell(hr.cells.length - 2);
+                [...t.tBodies[0].rows].forEach(r => r.deleteCell(r.cells.length - 2));
+            });
+
+            // ---------- Exportar ----------
+            function getData() {
+                const t = getTable();
+                return {
+                    title: getTitle(),
+                    headers: [...t.tHead.rows[0].cells].map(c => c.textContent.trim()),
+                    data: [...t.tBodies[0].rows].map(r => [...r.cells].map(c => c.textContent.trim()))
+                };
+            }
+            $('exportPDFPortrait').addEventListener('click', () => exportToPDF('portrait'));
+            $('exportPDFLandscape').addEventListener('click', () => exportToPDF('landscape'));
+            $('exportExcel').addEventListener('click', exportToExcel);
+
             function exportToPDF(orientation) {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({
-                    orientation: orientation,
-                    unit: 'mm'
-                });
-                
-                const subjectName = document.getElementById('subjectName').value || 'Asignatura';
-                const studentName = document.getElementById('studentName').value || 'Alumno';
-                const title = `${subjectName} - ${studentName}`;
-                
-                // Obtener datos de la tabla
-                const table = document.querySelector('#tableContainer table');
-                const headers = [];
-                const data = [];
-                
-                // Obtener encabezados
-                table.querySelectorAll('thead th').forEach(th => {
-                    headers.push(th.textContent);
-                });
-                
-                // Obtener datos
-                table.querySelectorAll('tbody tr').forEach(tr => {
-                    const row = [];
-                    tr.querySelectorAll('td').forEach(td => {
-                        row.push(td.textContent);
-                    });
-                    data.push(row);
-                });
-                
-                // Calcular anchos de columna según porcentajes
-                const pageWidth = orientation === 'portrait' ? 180 : 270;
-                const columnCount = headers.length;
-                
-                // Asignar anchos según porcentajes (10% primera, 30% última)
-                const columnWidths = [];
-                columnWidths[0] = pageWidth * 0.10; // Primera columna - 10%
-                
-                // Columnas centrales - se distribuyen el 60% restante
-                const instrumentCount = columnCount - 2;
-                const centralWidth = (pageWidth * 0.60) / instrumentCount;
-                
-                for (let i = 1; i <= instrumentCount; i++) {
-                    columnWidths[i] = centralWidth;
-                }
-                
-                columnWidths[columnCount - 1] = pageWidth * 0.30; // Última columna - 30%
-                
-                // Añadir título
+                const { title, headers, data } = getData();
+                const doc = new jsPDF({ orientation: orientation, unit: 'mm' });
+                const W = orientation === 'portrait' ? 180 : 265;
+                const n = headers.length - 3, last = headers.length - 1;
+                // Anchos: Tema 11%, Nombre 21%, instrumentos 48% (a partes iguales), Firma 20%
+                const widths = [W * 0.11, W * 0.21, ...Array(n).fill(W * 0.48 / n), W * 0.20];
+                const styles = {};
+                widths.forEach((w, i) => styles[i] = { cellWidth: w, fillColor: [255, 255, 255] });
+                styles[0].fillColor = styles[last].fillColor = theme.light;
+                styles[0].fontStyle = 'bold';
+                styles[1].halign = 'left';
+
                 doc.setFontSize(16);
-                doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-                
-                // Crear la tabla con autoTable
+                if (title) doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
                 doc.autoTable({
-                    head: [headers],
-                    body: data,
-                    startY: 25,
-                    theme: 'grid',
-                    styles: {
-                        fontSize: 10,
-                        cellPadding: 3,
-                        overflow: 'linebreak',
-                        halign: 'center',
-                        valign: 'middle',
-                        lineColor: [0, 0, 0],
-                        lineWidth: 0.2
-                    },
-                    headStyles: {
-                        fillColor: [74, 111, 165],
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        lineWidth: 0.2
-                    },
-                    alternateRowStyles: {
-                        fillColor: [255, 255, 255]
-                    },
-                    columnStyles: {
-                        0: {
-                            cellWidth: columnWidths[0],
-                            fillColor: [230, 242, 255],
-                            fontStyle: 'bold'
-                        },
-                        // Aplicar estilos a las columnas de instrumentos
-                        ...(() => {
-                            const styles = {};
-                            for (let i = 1; i <= instrumentCount; i++) {
-                                styles[i] = { 
-                                    cellWidth: columnWidths[i],
-                                    fillColor: [255, 255, 255]
-                                };
-                            }
-                            return styles;
-                        })(),
-                        [columnCount - 1]: {
-                            cellWidth: columnWidths[columnCount - 1],
-                            fillColor: [230, 242, 255]
-                        }
-                    },
-                    margin: { top: 25 },
-                    tableWidth: 'wrap'
+                    head: [headers], body: data, startY: title ? 25 : 15, theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 3, overflow: 'linebreak', halign: 'center', valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+                    headStyles: { fillColor: theme.main, textColor: 255, fontStyle: 'bold', lineWidth: 0.2 },
+                    alternateRowStyles: { fillColor: [255, 255, 255] },
+                    columnStyles: styles, margin: { top: title ? 25 : 15 }, tableWidth: 'wrap'
                 });
-                
-                // Guardar PDF
-                doc.save(`${title.replace(/ /g, '_')}_${orientation}.pdf`);
+                doc.save(`${fileBase(title)}_${orientation}.pdf`);
             }
-            
+
             function exportToExcel() {
-                const subjectName = document.getElementById('subjectName').value || 'Asignatura';
-                const studentName = document.getElementById('studentName').value || 'Alumno';
-                const title = `${subjectName} - ${studentName}`;
-                
-                // Obtener datos de la tabla
-                const table = document.querySelector('#tableContainer table');
-                const headers = [];
-                const data = [];
-                
-                // Obtener encabezados
-                table.querySelectorAll('thead th').forEach(th => {
-                    headers.push(th.textContent);
-                });
-                
-                // Obtener datos
-                table.querySelectorAll('tbody tr').forEach(tr => {
-                    const row = [];
-                    tr.querySelectorAll('td').forEach(td => {
-                        row.push(td.textContent);
-                    });
-                    data.push(row);
-                });
-                
-                // Crear libro de Excel
+                const { title, headers, data } = getData();
+                const n = headers.length - 3;
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
-                
-                // Aplicar estilos (limitado en SheetJS)
-                if (ws['!cols'] === undefined) ws['!cols'] = [];
-                
-                // Ajustar anchos de columna (aproximando los porcentajes)
-                const totalWidth = 100; // Ancho total relativo
-                ws['!cols'][0] = { width: totalWidth * 0.10 }; // Primera columna - 10%
-                
-                // Columnas centrales
-                for (let i = 1; i < headers.length - 1; i++) {
-                    ws['!cols'][i] = { width: (totalWidth * 0.60) / (headers.length - 2) };
+                ws['!cols'] = [{ wch: 10 }, { wch: 30 }, ...Array(n).fill({ wch: Math.max(14, 45 / n) }), { wch: 20 }];
+                XLSX.utils.book_append_sheet(wb, ws, 'Notas');
+                XLSX.writeFile(wb, `${fileBase(title)}.xlsx`);
+            }
+
+            // ---------- Guardar / Abrir ----------
+            function collectConfig() {
+                const t = getTable();
+                const cfg = {
+                    app: 'creador-tabla-notas', version: 2,
+                    color: $('customColor').value,
+                    subject: $('subjectName').value, group: $('groupName').value, student: $('studentName').value,
+                    numberTopics: $('numberTopics').checked,
+                    topics: [...topicBox.querySelectorAll('.topic-name')].map(i => i.value),
+                    instruments: [...instBox.querySelectorAll('.instrument')].map(i => i.value),
+                    table: null
+                };
+                if (t) {
+                    const g = getData();
+                    cfg.table = { instruments: g.headers.slice(2, -1), rows: g.data.map(r => ({ num: r[0], name: r[1], vals: r.slice(2, -1) })) };
                 }
-                
-                ws['!cols'][headers.length - 1] = { width: totalWidth * 0.30 }; // Última columna - 30%
-                
-                // Añadir hoja al libro
-                XLSX.utils.book_append_sheet(wb, ws, "Notas");
-                
-                // Exportar
-                XLSX.writeFile(wb, `${title.replace(/ /g, '_')}.xlsx`);
+                return cfg;
+            }
+            $('saveConfig').addEventListener('click', () => {
+                const blob = new Blob([JSON.stringify(collectConfig(), null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileBase(getTitle()) + '_configuracion.json';
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            });
+            $('openConfig').addEventListener('click', () => $('openFile').click());
+            $('openFile').addEventListener('change', e => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try { loadConfig(JSON.parse(reader.result)); }
+                    catch (err) { alert('No se pudo abrir el archivo: no es una configuración válida de esta aplicación.'); }
+                };
+                reader.readAsText(f);
+                e.target.value = '';
+            });
+            function loadConfig(c) {
+                if (!c || c.app !== 'creador-tabla-notas') throw new Error('formato');
+                applyTheme(/^#[0-9a-f]{6}$/i.test(c.color) ? c.color.toLowerCase() : PALETTE[0][1]);
+                $('subjectName').value = c.subject || '';
+                $('groupName').value = c.group || '';
+                $('studentName').value = c.student || '';
+                $('numberTopics').checked = c.numberTopics !== false;
+                topicBox.innerHTML = ''; instBox.innerHTML = '';
+                (c.topics || []).forEach(n => { addTopic(); topicBox.lastElementChild.querySelector('.topic-name').value = n; });
+                (c.instruments || []).forEach(n => { addInstrument(); instBox.lastElementChild.querySelector('.instrument').value = n; });
+                renumberTopics();
+                if (c.table) {
+                    buildTable(getTitle(), c.table.instruments, c.table.rows);
+                    $('tablePreview').classList.remove('hidden');
+                } else {
+                    $('tableContainer').innerHTML = '';
+                    $('tablePreview').classList.add('hidden');
+                }
             }
         });
     </script>
