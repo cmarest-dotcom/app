@@ -1,627 +1,290 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador de tarde</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .controls {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
-        }
-        .color-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .color-option {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        .color-option.selected {
-            border-color: #000;
-        }
-        .color-option.used {
-            opacity: 0.5;
-            position: relative;
-        }
-        .color-option.used::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: black;
-            font-weight: bold;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .time-column {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .buttons {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        button {
-            padding: 8px 15px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        input {
-            padding: 8px;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        #scheduleTable td {
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .export-buttons {
-            margin-top: 20px;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-        }
-        .delete-mode {
-            background-color: #f44336 !important;
-        }
-        .json-buttons {
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .time-editor {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e9f7e9;
-            border-radius: 5px;
-        }
-        .time-inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .time-input-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi horario de tarde</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f3f1ff;--card:#fff;--ink:#27224a;--muted:#6f6a93;--brand:#6c5ce7;--brand-d:#5444d6;--line:#e4e0fb;--soft:#ece9ff;--danger:#ff5d73;--r:18px}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito','Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4;user-select:none}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+header .logo{font-size:38px;background:var(--card);width:64px;height:64px;border-radius:20px;display:grid;place-items:center;box-shadow:0 6px 0 var(--line)}
+h1{margin:0;font-size:clamp(24px,4vw,34px);font-weight:900;letter-spacing:-.5px}
+header p{margin:2px 0 0;color:var(--muted);font-weight:700}
+.layout{display:grid;grid-template-columns:330px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:0 6px 0 var(--line);margin-bottom:18px}
+.card h2{margin:0 0 12px;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px}
+.step{background:var(--brand);color:#fff;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none}
+label.l{display:block;font-size:13px;font-weight:800;color:var(--muted);margin:12px 0 6px}
+input[type=text],input[type=time]{font:inherit;font-weight:700;color:var(--ink);padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;width:100%;user-select:text}
+input:focus-visible,button:focus-visible,.sw:focus-visible,.emo:focus-visible,.chip:focus-visible{outline:3px solid #a29bfe;outline-offset:2px}
+.swatches,.emojis{display:flex;flex-wrap:wrap;gap:7px}
+.sw{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer;padding:0;transition:transform .12s}
+.sw:hover{transform:scale(1.12)}
+.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.emo{width:36px;height:36px;border-radius:10px;border:2px solid var(--line);background:#fff;font-size:19px;cursor:pointer;padding:0}
+.emo.on{border-color:var(--brand);background:var(--soft)}
+.btn{font:inherit;font-weight:800;border:0;border-radius:14px;padding:11px 16px;cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 4px 0 var(--brand-d);transition:transform .08s,box-shadow .08s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brand-d)}
+.btn.block{width:100%;margin-top:14px}
+.btn.ghost{background:var(--soft);color:var(--brand-d);box-shadow:0 4px 0 #d6d1fa}
+.btn.red{background:var(--danger);box-shadow:0 4px 0 #d63f55}
+.btn.sm{padding:7px 12px;font-size:14px}
+.ideas{display:flex;flex-wrap:wrap;gap:6px}
+.idea{font:inherit;font-weight:700;font-size:13px;background:var(--soft);color:var(--brand-d);border:0;border-radius:99px;padding:5px 11px;cursor:pointer}
+.idea:hover{background:#ddd8ff}
+.palette{display:flex;flex-wrap:wrap;gap:8px;min-height:40px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:7px 8px 7px 13px;font-weight:800;cursor:pointer;border:3px solid transparent;font-size:15px}
+.chip.on{border-color:var(--ink);transform:scale(1.05)}
+.chip .x.c{font-size:11px;background:rgba(255,255,255,.55)}
+.chip .x{background:rgba(0,0,0,.18);color:inherit;border:0;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1;cursor:pointer;padding:0}
+.chip.erase{background:#fff;color:var(--ink);border:3px dashed #c9c4ee;padding:7px 13px}
+.chip.erase.on{border:3px solid var(--danger);color:var(--danger)}
+.empty{color:var(--muted);font-weight:700;font-size:14px}
+.slot{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.slot input{padding:8px}
+.slot button{border:0;background:var(--soft);color:var(--danger);width:34px;height:34px;border-radius:10px;cursor:pointer;font-weight:900;flex:none}
+.hint{display:flex;align-items:center;gap:8px;background:#fff8e1;border-radius:14px;padding:10px 14px;font-weight:700;font-size:14px;margin-bottom:14px;color:#7a5b00}
+.hint.ok{background:#e6fbf3;color:#06795a}
+.sheet{background:#fff;border-radius:var(--r);padding:20px;box-shadow:0 6px 0 var(--line)}
+.sheet-top{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.sheet-top .t{flex:2;min-width:200px}.sheet-top .n{flex:1;min-width:140px}
+.sheet-top input{font-size:20px;font-weight:900;border-color:transparent;background:var(--soft)}
+.sheet-top .n input{font-size:16px}
+.tablewrap{overflow-x:auto;padding-bottom:4px}
+table{border-collapse:separate;border-spacing:5px;width:100%;min-width:560px;table-layout:fixed}
+th{background:var(--brand);color:#fff;border-radius:12px;padding:10px 4px;font-size:15px;font-weight:900}
+th.corner{background:transparent}
+td{height:62px;border-radius:12px;background:#f6f5ff;border:2px dashed #dcd8f7;text-align:center;font-weight:800;font-size:14px;padding:4px;cursor:pointer;word-break:break-word;transition:transform .1s}
+td.time{background:var(--soft);border:0;color:var(--brand-d);cursor:default;font-size:13px;width:92px}
+td.cell:hover{transform:scale(1.04);border-color:var(--brand)}
+td.filled{border:2px solid rgba(0,0,0,.1)}
+td .e{display:block;font-size:20px;line-height:1.1}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.bar .sp{flex:1}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none;transform:none;box-shadow:0 4px 0 #d6d1fa}
+.fl{height:1em;width:1.5em;vertical-align:-.15em;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.emogrp{width:100%;font-size:12px;font-weight:800;color:var(--muted);margin-top:4px}
+.emo .fl{width:1.4em}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px;box-shadow:0 0 0 2px #fff}
+.recolor{margin-top:12px;background:var(--soft);border-radius:14px;padding:12px 14px}
+.recolor:empty{display:none}
+.recolor b{display:block;margin-bottom:8px;font-size:14px}
+.recolor .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;font-weight:800;font-size:13px}
+.recolor input[type=color]{width:42px;height:32px;border:0;padding:0;background:none;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-weight:800;transition:transform .3s;z-index:9;max-width:90vw;text-align:center}
+.toast.show{transform:translate(-50%,0)}
+</style>
 </head>
 <body>
-    <h1>Organizador de tarde</h1>
-    
-    <div class="controls">
-        <input type="text" id="subjectInput" placeholder="Nombre de la actividad">
-        <button onclick="addSubject()">Añadir Actividad</button>
-        
-        <div>
-            <p>Selecciona un color:</p>
-            <div class="color-options" id="colorOptions">
-                <!-- Colores se generarán con JavaScript -->
-            </div>
-        </div>
-        
-        <div class="time-editor">
-            <p><strong>Editor de Franjas Horarias:</strong></p>
-            <div id="timeInputs" class="time-inputs">
-                <!-- Las entradas de tiempo se generarán con JavaScript -->
-            </div>
-            <button onclick="updateTimeSlots()" style="margin-top: 10px;">Actualizar Horarios</button>
-        </div>
-    </div>
-    
-    <table id="scheduleTable">
-        <thead>
-            <tr>
-                <th>Horario</th>
-                <th>Lunes</th>
-                <th>Martes</th>
-                <th>Miércoles</th>
-                <th>Jueves</th>
-                <th>Viernes</th>
-            </tr>
-        </thead>
-        <tbody id="scheduleBody">
-            <!-- Las filas se generarán dinámicamente con JavaScript -->
-        </tbody>
-    </table>
-    
-    <div class="buttons">
-        <button onclick="generatePDF('portrait')">Descargar PDF (Vertical)</button>
-        <button onclick="generatePDF('landscape')">Descargar PDF (Horizontal)</button>
-        <button onclick="exportToExcel()">Descargar Excel</button>
-        <button onclick="toggleDeleteMode()" id="deleteModeBtn">Borrar Celda</button>
-        <button onclick="clearSchedule()" style="background-color: #f44336;">Limpiar Horario</button>
-    </div>
+<div class="wrap">
+<header>
+  <div class="logo">📅</div>
+  <div><h1>Mi horario de tarde</h1><p>Organiza tus tardes en 3 pasos: crea, elige y pinta.</p></div>
+</header>
 
-    <div class="json-buttons">
-        <button onclick="saveToJSON()">Guardar Horario (JSON)</button>
-        <button onclick="loadFromJSON()">Cargar Horario (JSON)</button>
-        <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
-    </div>
+<div class="layout">
+<aside>
+  <section class="card">
+    <h2><span class="step">1</span> Crea una actividad</h2>
+    <input type="text" id="actName" maxlength="24" placeholder="Ej.: Deberes de mates" autocomplete="off">
+    <label class="l">Icono</label><div class="emojis" id="emojis"></div>
+    <label class="l">Color</label><div class="swatches" id="swatches"></div>
+    <button class="btn block" id="addBtn">＋ Añadir actividad</button>
+    <label class="l">¿Sin ideas? Toca una (después podrás cambiar su color):</label><div class="ideas" id="ideas"></div>
+  </section>
+  <section class="card">
+    <h2><span class="step">3</span> Franjas horarias</h2>
+    <div id="slots"></div>
+    <button class="btn ghost sm" id="addSlot">＋ Añadir franja</button>
+  </section>
+</aside>
 
-    <script>
-        // Variables globales
-        let currentSubject = null;
-        let currentColor = null;
-        let deleteMode = false;
-        const colors = [
-            '#c23517', '#c29d17', '#38d943', '#7fbad4', '#d4208c',
-            '#edf261', '#393f96', '#963993', '#5484d1', '#FFB6C1',
-            '#f51417', '#40c2e6', '#f0a1e9', '#27a147', '#b7c9bc'
-        ];
-        
-        // Franjas horarias iniciales
-        let timeSlots = [
-            "16:00 - 17:00",
-            "17:00 - 18:00",
-            "18:00 - 19:00",
-            "19:00 - 20:00",
-            "20:00 - 20:30",
-            "20:30 - 21:00"
-        ];
-        
-        // Inicializar opciones de color
-        function initColorOptions() {
-            const colorOptionsDiv = document.getElementById('colorOptions');
-            colorOptionsDiv.innerHTML = '';
-            
-            colors.forEach((color, index) => {
-                const colorDiv = document.createElement('div');
-                colorDiv.className = 'color-option';
-                colorDiv.style.backgroundColor = color;
-                colorDiv.dataset.color = color;
-                
-                // Ya no verificamos si el color está en uso para permitir reutilización
-                if (color === currentColor) {
-                    colorDiv.classList.add('selected');
-                }
-                
-                colorDiv.onclick = function() {
-                    document.querySelectorAll('.color-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    currentColor = color;
-                };
-                
-                colorOptionsDiv.appendChild(colorDiv);
-            });
-        }
-        
-        // Inicializar editor de franjas horarias
-        function initTimeEditor() {
-            const timeInputsDiv = document.getElementById('timeInputs');
-            timeInputsDiv.innerHTML = '';
-            
-            timeSlots.forEach((slot, index) => {
-                const [startTime, endTime] = slot.split(' - ');
-                
-                const timeGroup = document.createElement('div');
-                timeGroup.className = 'time-input-group';
-                
-                const slotLabel = document.createElement('span');
-                slotLabel.textContent = `Franja ${index + 1}:`;
-                
-                const startInput = document.createElement('input');
-                startInput.type = 'time';
-                startInput.value = startTime;
-                startInput.dataset.index = index;
-                startInput.dataset.type = 'start';
-                
-                const separator = document.createElement('span');
-                separator.textContent = ' - ';
-                
-                const endInput = document.createElement('input');
-                endInput.type = 'time';
-                endInput.value = endTime;
-                endInput.dataset.index = index;
-                endInput.dataset.type = 'end';
-                
-                timeGroup.appendChild(slotLabel);
-                timeGroup.appendChild(startInput);
-                timeGroup.appendChild(separator);
-                timeGroup.appendChild(endInput);
-                
-                timeInputsDiv.appendChild(timeGroup);
-            });
-        }
-        
-        // Actualizar las franjas horarias
-        function updateTimeSlots() {
-            const timeInputs = document.querySelectorAll('#timeInputs input[type="time"]');
-            const newTimeSlots = [];
-            
-            // Agrupar por índice
-            const groupedInputs = {};
-            timeInputs.forEach(input => {
-                const index = input.dataset.index;
-                if (!groupedInputs[index]) {
-                    groupedInputs[index] = {};
-                }
-                groupedInputs[index][input.dataset.type] = input.value;
-            });
-            
-            // Crear nuevos timeSlots
-            Object.keys(groupedInputs).forEach(index => {
-                const { start, end } = groupedInputs[index];
-                if (start && end) {
-                    newTimeSlots.push(`${start} - ${end}`);
-                }
-            });
-            
-            timeSlots = newTimeSlots;
-            renderScheduleTable();
-            alert('Franjas horarias actualizadas correctamente');
-        }
-        
-        // Renderizar la tabla de horarios
-        function renderScheduleTable() {
-            const scheduleBody = document.getElementById('scheduleBody');
-            scheduleBody.innerHTML = '';
-            
-            timeSlots.forEach(slot => {
-                const row = document.createElement('tr');
-                
-                // Celda de tiempo
-                const timeCell = document.createElement('td');
-                timeCell.className = 'time-column';
-                timeCell.textContent = slot;
-                row.appendChild(timeCell);
-                
-                // Celdas para cada día
-                for (let i = 0; i < 5; i++) {
-                    const dayCell = document.createElement('td');
-                    dayCell.addEventListener('click', assignSubject);
-                    row.appendChild(dayCell);
-                }
-                
-                scheduleBody.appendChild(row);
-            });
-        }
-        
-        // Añadir nueva actividad
-        function addSubject() {
-            const subjectName = document.getElementById('subjectInput').value.trim();
-            if (!subjectName) {
-                alert('Por favor, introduce un nombre para la actividad');
-                return;
-            }
-            
-            if (!currentColor) {
-                alert('Por favor, selecciona un color para la actividad');
-                return;
-            }
-            
-            currentSubject = {
-                name: subjectName,
-                color: currentColor
-            };
-            
-            document.getElementById('subjectInput').value = '';
-            
-            alert(`Actividad "${subjectName}" lista para asignar. Haz clic en las celdas del horario para colocarla.`);
-        }
-        
-        // Asignar actividad a celda
-        function assignSubject(event) {
-            if (deleteMode) {
-                // Si estamos en modo borrado, limpiar la celda
-                clearCell(event.target);
-                return;
-            }
-            
-            if (!currentSubject) {
-                alert('Primero añade una actividad y selecciona un color');
-                return;
-            }
-            
-            const cell = event.target;
-            if (cell.classList.contains('time-column')) return;
-            
-            // Si la celda ya tiene una actividad, limpiarla primero
-            if (cell.textContent || cell.style.backgroundColor) {
-                clearCell(cell);
-            }
-            
-            cell.textContent = currentSubject.name;
-            cell.style.backgroundColor = currentSubject.color;
-            
-            // Determinar si el color es oscuro para usar texto blanco
-            if (isDarkColor(currentSubject.color)) {
-                cell.style.color = 'white';
-            } else {
-                cell.style.color = 'black';
-            }
-        }
-        
-        // Limpiar una celda individual
-        function clearCell(cell) {
-            cell.textContent = '';
-            cell.style.backgroundColor = '';
-            cell.style.color = 'black';
-        }
-        
-        // Alternar modo borrado
-        function toggleDeleteMode() {
-            deleteMode = !deleteMode;
-            const deleteBtn = document.getElementById('deleteModeBtn');
-            
-            if (deleteMode) {
-                deleteBtn.classList.add('delete-mode');
-                deleteBtn.textContent = 'Modo Borrado Activado';
-                alert('Modo borrado activado. Haz clic en cualquier celda para borrar su contenido.');
-            } else {
-                deleteBtn.classList.remove('delete-mode');
-                deleteBtn.textContent = 'Borrar Celda';
-            }
-        }
-        
-        // Verificar si un color es oscuro
-        function isDarkColor(color) {
-            // Convertir color hexadecimal a RGB
-            const r = parseInt(color.substr(1, 2), 16);
-            const g = parseInt(color.substr(3, 2), 16);
-            const b = parseInt(color.substr(5, 2), 16);
-            
-            // Calcular brillo según percepción humana
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            return brightness < 128;
-        }
-        
-        // Guardar horario a JSON
-        function saveToJSON() {
-            const scheduleData = {
-                timeSlots: timeSlots,
-                schedule: []
-            };
-            
-            // Recopilar información de las celdas
-            const rows = document.querySelectorAll('#scheduleTable tbody tr');
-            rows.forEach((row, rowIndex) => {
-                const timeSlot = row.querySelector('.time-column').textContent;
-                const dayCells = row.querySelectorAll('td:not(.time-column)');
-                
-                const rowData = {
-                    time: timeSlot,
-                    days: []
-                };
-                
-                dayCells.forEach((cell, dayIndex) => {
-                    rowData.days.push({
-                        subject: cell.textContent,
-                        color: cell.style.backgroundColor || '',
-                        textColor: cell.style.color || 'black'
-                    });
-                });
-                
-                scheduleData.schedule.push(rowData);
-            });
-            
-            // Crear y descargar archivo JSON
-            const dataStr = JSON.stringify(scheduleData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'organizador_tarde.json';
-            link.click();
-        }
-        
-        // Cargar horario desde JSON
-        function loadFromJSON() {
-            const fileInput = document.getElementById('jsonFileInput');
-            fileInput.click();
-            
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    try {
-                        const scheduleData = JSON.parse(event.target.result);
-                        loadScheduleData(scheduleData);
-                        alert('Horario cargado correctamente');
-                    } catch (error) {
-                        alert('Error al cargar el archivo: ' + error.message);
-                    }
-                };
-                reader.readAsText(file);
-                
-                // Limpiar el input para permitir cargar el mismo archivo otra vez
-                fileInput.value = '';
-            };
-        }
-        
-        // Cargar datos del horario desde objeto JSON
-        function loadScheduleData(scheduleData) {
-            // Actualizar franjas horarias si están incluidas en el JSON
-            if (scheduleData.timeSlots) {
-                timeSlots = scheduleData.timeSlots;
-                renderScheduleTable();
-                initTimeEditor();
-            }
-            
-            // Cargar los datos del horario
-            const rows = document.querySelectorAll('#scheduleTable tbody tr');
-            scheduleData.schedule.forEach((rowData, rowIndex) => {
-                if (rowIndex >= rows.length) return;
-                
-                const dayCells = rows[rowIndex].querySelectorAll('td:not(.time-column)');
-                rowData.days.forEach((dayData, dayIndex) => {
-                    if (dayIndex >= dayCells.length) return;
-                    
-                    const cell = dayCells[dayIndex];
-                    if (dayData.subject) {
-                        cell.textContent = dayData.subject;
-                        cell.style.backgroundColor = dayData.color;
-                        cell.style.color = dayData.textColor;
-                    }
-                });
-            });
-        }
-        
-        // Generar PDF con tamaño de letra aumentado y celdas uniformes
-        function generatePDF(orientation) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: orientation,
-                unit: 'mm'
-            });
-            
-            const originalTable = document.getElementById('scheduleTable');
-            
-            // Crear un clon de la tabla para modificar sin afectar la visualización
-            const clone = originalTable.cloneNode(true);
-            
-            // Aplicar estilos para uniformidad en el PDF
-            clone.style.width = '100%';
-            clone.style.fontSize = '22px'; // Tamaño de fuente más grande
-            
-            // Asegurar que todas las celdas tengan el mismo tamaño
-            const allCells = clone.querySelectorAll('td, th');
-            allCells.forEach(cell => {
-                cell.style.width = '16%';
-                cell.style.height = '80px';
-                cell.style.boxSizing = 'border-box';
-                cell.style.padding = '8px';
-                cell.style.wordWrap = 'break-word';
-            });
-            
-            // Especificar anchos de columna para uniformidad
-            const headers = clone.querySelectorAll('th');
-            if (headers.length > 0) {
-                // Calcular porcentajes exactos para que sumen 100%
-                const timeColumnWidth = 15; // 15% para la columna de horario
-                const dayColumnWidth = (100 - timeColumnWidth) / (headers.length - 1); // El resto dividido entre los días
-                
-                headers[0].style.width = timeColumnWidth + '%'; // Columna de horario
-                for (let i = 1; i < headers.length; i++) {
-                    headers[i].style.width = dayColumnWidth + '%'; // Columnas de días (igual ancho)
-                }
-                
-                // Aplicar el mismo ancho a las celdas del cuerpo de la tabla
-                const bodyCells = clone.querySelectorAll('td');
-                bodyCells.forEach((cell, index) => {
-                    if (index % headers.length === 0) {
-                        cell.style.width = timeColumnWidth + '%'; // Primera columna (horario)
-                    } else {
-                        cell.style.width = dayColumnWidth + '%'; // Columnas de días
-                    }
-                });
-            }
-            
-            // Asegurar que todas las filas tengan la misma altura
-            const rows = clone.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.style.height = '40px';
-            });
-            
-            // Ocultar el clon visualmente pero mantenerlo en el DOM para html2canvas
-            clone.style.position = 'absolute';
-            clone.style.left = '-9999px';
-            document.body.appendChild(clone);
-            
-            const scale = orientation === 'portrait' ? 2.5 : 2;
-            
-            html2canvas(clone, { 
-                scale: scale,
-                logging: false,
-                useCORS: true
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = doc.internal.pageSize.getWidth() - 20;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-                doc.save('organizador_tarde.pdf');
-                document.body.removeChild(clone);
-            });
-        }
-        
-        // Exportar a Excel
-        function exportToExcel() {
-            const table = document.getElementById('scheduleTable');
-            const workbook = XLSX.utils.table_to_book(table, {sheet: "Horario"});
-            
-            // Ajustar el ancho de las columnas
-            const ws = workbook.Sheets["Horario"];
-            const colWidths = [
-                {wch: 12}, // Horario
-                {wch: 20}, // Lunes
-                {wch: 20}, // Martes
-                {wch: 20}, // Miércoles
-                {wch: 20}, // Jueves
-                {wch: 20}  // Viernes
-            ];
-            ws['!cols'] = colWidths;
-            
-            XLSX.writeFile(workbook, 'organizador_tarde.xlsx');
-        }
-        
-        // Limpiar horario
-        function clearSchedule() {
-            if (confirm('¿Estás seguro de que quieres limpiar todo el horario?')) {
-                document.querySelectorAll('#scheduleTable td:not(.time-column)').forEach(cell => {
-                    clearCell(cell);
-                });
-                
-                // Resetear variables
-                currentSubject = null;
-                currentColor = null;
-                deleteMode = false;
-                document.getElementById('deleteModeBtn').classList.remove('delete-mode');
-                document.getElementById('deleteModeBtn').textContent = 'Borrar Celda';
-            }
-        }
-        
-        // Inicializar la página
-        window.onload = function() {
-            initColorOptions();
-            initTimeEditor();
-            renderScheduleTable();
-        };
-    </script>
+<main>
+  <section class="card">
+    <h2><span class="step">2</span> Elige una actividad y pinta el horario</h2>
+    <div class="palette" id="palette"></div>
+    <div class="recolor" id="recolor"></div>
+  </section>
+  <div class="hint" id="hint"></div>
+  <section class="sheet" id="sheet">
+    <div class="sheet-top">
+      <div class="t"><input type="text" id="title" maxlength="40" aria-label="Título del horario"></div>
+      <div class="n"><input type="text" id="owner" maxlength="30" placeholder="Tu nombre" aria-label="Tu nombre"></div>
+    </div>
+    <div class="tablewrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  </section>
+  <div class="bar">
+    <button class="btn ghost" id="undoBtn" disabled>↩️ Deshacer</button>
+    <button class="btn" data-pdf="landscape">📄 PDF horizontal</button>
+    <button class="btn" data-pdf="portrait">📄 PDF vertical</button>
+    <button class="btn" id="xlsBtn">📊 Excel</button>
+    <span class="sp"></span>
+    <button class="btn ghost" id="saveBtn">💾 Guardar</button>
+    <button class="btn ghost" id="loadBtn">📂 Abrir</button>
+    <button class="btn red" id="clearBtn">🗑 Vaciar</button>
+  </div>
+  <input type="file" id="file" accept=".json" hidden>
+</main>
+</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const DAYS=['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const COLORS=['#ff6b6b','#ff9f43','#feca57','#1dd1a1','#48dbfb','#54a0ff','#5f27cd','#ff9ff3','#a3cb38','#b8a9ff','#00b894','#e17055'];
+const EMO_GROUPS=[['Estudio',['📚','✏️','📝','🧮','🔬','🌍','UK','🗣️','💻','📖']],
+ ['Deporte',['⚽','🏀','🎾','🏐','🏊','🚴','🏃','🏓','🥋','🏋️','🏈','⚾']],
+ ['Música y baile',['🎵','🎸','🎹','🎻','🥁','🎤','🎧','💃','🕺']],
+ ['Ocio y vida',['📱','🎮','🎨','🎭','🎬','📺','🧩','👥','🍎','🍽️','🧹','🐶','🛌']]];
+const IDEAS=[['Deberes','✏️','#54a0ff'],['Estudiar','📚','#5f27cd'],['Inglés','UK','#ff6b6b'],['Mates','🧮','#feca57'],['Deporte','⚽','#1dd1a1'],['Música','🎵','#ff9ff3'],['Baile','💃','#e17055'],['Merienda','🍎','#ff9f43'],['Descanso','🛌','#b8a9ff'],['Amigos','👥','#48dbfb'],['Lectura','📖','#a3cb38'],['Móvil','📱','#00b894']];
+const UKSVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect width="60" height="30" fill="#012169"/><path d="M0 0L60 30M60 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0L60 30M60 0L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></svg>';
+const UKIMG='<img class="fl" alt="Reino Unido" src="data:image/svg+xml,'+encodeURIComponent(UKSVG)+'">';
+const ic=e=>(e==='UK'||e==='🇬🇧')?UKIMG:e;
+const KEY='horario-tarde-v2';
+let S={title:'Mi horario de tarde',owner:'',
+  slots:[['16:00','17:00'],['17:00','18:00'],['18:00','19:00'],['19:00','20:00'],['20:00','20:30'],['20:30','21:00']],
+  acts:[],grid:[]};
+let tool=null,color=COLORS[5],emoji='📚',painting=false,tt,editId=null,hist=[],stroke=false;
+function snap(){hist.push(JSON.stringify({acts:S.acts,grid:S.grid,slots:S.slots}));if(hist.length>60)hist.shift()}
+function undo(){if(!hist.length){toast('Nada que deshacer');return}
+  Object.assign(S,JSON.parse(hist.pop()));if(tool&&tool!=='erase'&&!act(tool))tool=null;if(editId&&!act(editId))editId=null;
+  renderAll();toast('↩️ Deshecho')}
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function ink(c){const n=parseInt(c.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000<140?'#fff':'#27224a'}
+function fixGrid(){while(S.grid.length<S.slots.length)S.grid.push(Array(5).fill(null));S.grid.length=S.slots.length;S.grid.forEach(r=>{while(r.length<5)r.push(null)})}
+const act=id=>S.acts.find(a=>a.id===id);
+
+function renderPickers(){
+  $('#swatches').innerHTML=COLORS.map(c=>`<button class="sw ${c===color?'on':''}" style="background:${c}" data-c="${c}" aria-label="Color ${c}"></button>`).join('');
+  $('#emojis').innerHTML=EMO_GROUPS.map(g=>`<div class="emogrp">${g[0]}</div>`+g[1].map(e=>`<button class="emo ${e===emoji?'on':''}" data-e="${e}">${ic(e)}</button>`).join('')).join('');
+  $('#ideas').innerHTML=IDEAS.map((x,i)=>`<button class="idea" data-i="${i}"><span class="dot" style="background:${x[2]}"></span>${ic(x[1])} ${x[0]}</button>`).join('');
+}
+function renderPalette(){
+  const p=$('#palette');
+  p.innerHTML=S.acts.map(a=>`<div class="chip ${tool===a.id?'on':''}" tabindex="0" role="button" data-id="${a.id}" style="background:${a.color};color:${ink(a.color)}">${ic(a.emoji)} ${esc(a.name)}<button class="x c" data-col="${a.id}" aria-label="Cambiar color" title="Cambiar color">🎨</button><button class="x" data-del="${a.id}" aria-label="Borrar actividad">✕</button></div>`).join('')
+   +`<div class="chip erase ${tool==='erase'?'on':''}" tabindex="0" role="button" data-id="erase">🧽 Goma</div>`;
+  const ed=editId&&act(editId);
+  $('#recolor').innerHTML=ed?`<b>🎨 Color de ${ic(ed.emoji)} ${esc(ed.name)}</b><div class="swatches">${COLORS.map(c=>`<button class="sw ${c===ed.color?'on':''}" style="background:${c}" data-rc="${c}" aria-label="Color ${c}"></button>`).join('')}</div><div class="row"><label>Otro color: <input type="color" id="cpick" value="${ed.color}"></label><button class="btn sm" data-close>Listo</button></div>`:'';
+  const h=$('#hint');
+  if(!S.acts.length){h.className='hint';h.textContent='👈 Empieza creando tu primera actividad en el paso 1.'}
+  else if(!tool){h.className='hint';h.textContent='👆 Toca una actividad de arriba para usarla como pincel.'}
+  else{h.className='hint ok';h.innerHTML=tool==='erase'?'🧽 Goma activa: toca o arrastra sobre las casillas para borrarlas.':`🖌 Pincel: ${ic(act(tool).emoji)} ${esc(act(tool).name)}. Toca o arrastra por las casillas.`}
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderSlots(){
+  $('#slots').innerHTML=S.slots.map((s,i)=>`<div class="slot"><input type="time" value="${s[0]}" data-i="${i}" data-k="0" aria-label="Inicio franja ${i+1}"><span>–</span><input type="time" value="${s[1]}" data-i="${i}" data-k="1" aria-label="Fin franja ${i+1}"><button data-rm="${i}" aria-label="Quitar franja">✕</button></div>`).join('');
+}
+function renderTable(){
+  $('#tbl thead').innerHTML='<tr><th class="corner"></th>'+DAYS.map(d=>`<th>${d}</th>`).join('')+'</tr>';
+  $('#tbl tbody').innerHTML=S.slots.map((s,r)=>`<tr><td class="time">${s[0]}<br>${s[1]}</td>`+S.grid[r].map((id,d)=>{
+    const a=id&&act(id);
+    return a?`<td class="cell filled" data-r="${r}" data-d="${d}" style="background:${a.color};color:${ink(a.color)}"><span class="e">${ic(a.emoji)}</span>${esc(a.name)}</td>`
+            :`<td class="cell" data-r="${r}" data-d="${d}"></td>`}).join('')+'</tr>').join('');
+}
+function renderAll(){fixGrid();renderPickers();renderPalette();renderSlots();renderTable();$('#title').value=S.title;$('#owner').value=S.owner;$('#undoBtn').disabled=!hist.length;save()}
+
+function addAct(name,e,c){
+  name=name.trim();if(!name){toast('✍️ Escribe el nombre de la actividad');$('#actName').focus();return}
+  snap();const a={id:'a'+Date.now()+Math.floor(Math.random()*99),name,emoji:e,color:c};
+  S.acts.push(a);tool=a.id;renderAll();toast(`✅ “${name}” lista. ¡Pinta en el horario!`);return a;
+}
+function paint(td){
+  if(!td||!td.classList.contains('cell'))return;
+  if(!tool){toast(S.acts.length?'👆 Elige primero una actividad':'👈 Crea primero una actividad');return}
+  const r=+td.dataset.r,d=+td.dataset.d,v=tool==='erase'?null:tool;
+  if(S.grid[r][d]===v)return;if(!stroke){snap();stroke=true}S.grid[r][d]=v;renderTable();save();
+}
+
+/* eventos */
+$('#swatches').onclick=e=>{const b=e.target.closest('.sw');if(b){color=b.dataset.c;renderPickers()}};
+$('#emojis').onclick=e=>{const b=e.target.closest('.emo');if(b){emoji=b.dataset.e;renderPickers()}};
+$('#ideas').onclick=e=>{const b=e.target.closest('.idea');if(!b)return;const i=IDEAS[+b.dataset.i];
+  const a=addAct(i[0],i[1],i[2]);if(a){editId=a.id;renderPalette()}};
+$('#addBtn').onclick=()=>{addAct($('#actName').value,emoji,color);$('#actName').value=''};
+$('#actName').onkeydown=e=>{if(e.key==='Enter')$('#addBtn').click()};
+$('#palette').onclick=e=>{
+  const k=e.target.closest('[data-col]');
+  if(k){editId=editId===k.dataset.col?null:k.dataset.col;renderPalette();return}
+  const x=e.target.closest('[data-del]');
+  if(x){const id=x.dataset.del;snap();if(editId===id)editId=null;S.acts=S.acts.filter(a=>a.id!==id);S.grid.forEach(r=>r.forEach((v,i)=>{if(v===id)r[i]=null}));if(tool===id)tool=null;renderAll();return}
+  const c=e.target.closest('.chip');if(c){tool=c.dataset.id;renderPalette()}};
+$('#palette').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('chip')){e.preventDefault();tool=e.target.dataset.id;renderPalette()}};
+$('#tbl').onmousedown=e=>{painting=true;stroke=false;paint(e.target.closest('td'))};
+$('#tbl').onmouseover=e=>{if(painting)paint(e.target.closest('td'))};
+addEventListener('mouseup',()=>painting=false);
+$('#tbl').addEventListener('touchstart',e=>{const t=e.target.closest('td');if(t&&tool){e.preventDefault();stroke=false;paint(t)}},{passive:false});
+$('#slots').onchange=e=>{const i=e.target.dataset.i;if(i==null)return;snap();S.slots[+i][+e.target.dataset.k]=e.target.value;renderTable();save()};
+$('#slots').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;
+  if(S.slots.length<2){toast('Necesitas al menos una franja');return}
+  snap();S.slots.splice(+b.dataset.rm,1);S.grid.splice(+b.dataset.rm,1);renderAll()};
+$('#addSlot').onclick=()=>{const l=S.slots[S.slots.length-1];const h=l?l[1]:'16:00';
+  const [H,M]=h.split(':').map(Number);const end=String(Math.min(H+1,23)).padStart(2,'0')+':'+String(M).padStart(2,'0');
+  snap();S.slots.push([h,end]);renderAll()};
+$('#title').oninput=e=>{S.title=e.target.value;save()};
+$('#owner').oninput=e=>{S.owner=e.target.value;save()};
+$('#undoBtn').onclick=undo;
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!e.shiftKey&&!/INPUT/.test(e.target.tagName)){e.preventDefault();undo()}});
+function recolor(c){const a=act(editId);if(!a||a.color===c)return;snap();a.color=c;renderAll()}
+$('#recolor').onclick=e=>{const b=e.target.closest('[data-rc]');if(b)recolor(b.dataset.rc);
+  if(e.target.closest('[data-close]')){editId=null;renderPalette()}};
+$('#recolor').onchange=e=>{if(e.target.id==='cpick')recolor(e.target.value)};
+$('#clearBtn').onclick=()=>{if(confirm('¿Seguro que quieres vaciar todo el horario? Las actividades se mantienen.')){snap();S.grid=[];renderAll();toast('🗑 Horario vaciado')}};
+
+/* guardar / abrir */
+$('#saveBtn').onclick=()=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download='organizador_tarde.json';a.click();toast('💾 Horario guardado')};
+$('#loadBtn').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=ev=>{try{loadData(JSON.parse(ev.target.result));toast('📂 Horario cargado')}catch(err){toast('⚠️ No se pudo abrir ese archivo')}};
+  rd.readAsText(f);e.target.value=''};
+function loadData(d){
+  snap();
+  if(d.acts){S.slots=d.slots;S.acts=d.acts;S.grid=d.grid;S.title=d.title||S.title;S.owner=d.owner||''}
+  else{ // formato antiguo
+    S.slots=d.timeSlots.map(s=>s.split(' - '));S.acts=[];S.grid=[];
+    d.schedule.forEach((row,r)=>{S.grid[r]=row.days.map(c=>{
+      if(!c.subject)return null;
+      let a=S.acts.find(x=>x.name===c.subject);
+      if(!a){let col=c.color;const m=/rgb\((\d+),\s*(\d+),\s*(\d+)/.exec(col||'');
+        col=m?'#'+[m[1],m[2],m[3]].map(n=>(+n).toString(16).padStart(2,'0')).join(''):(col||COLORS[0]);
+        a={id:'a'+S.acts.length+Date.now(),name:c.subject,emoji:'📌',color:col};S.acts.push(a)}
+      return a.id})});
+  }
+  tool=null;renderAll();
+}
+
+/* exportar */
+$('#xlsBtn').onclick=()=>{
+  const rows=[['Horario',...DAYS],...S.slots.map((s,r)=>[s[0]+' - '+s[1],...S.grid[r].map(id=>{const a=id&&act(id);return a?a.name:''})])];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:14},...DAYS.map(()=>({wch:20}))];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Horario');
+  XLSX.writeFile(wb,'organizador_tarde.xlsx');toast('📊 Excel descargado')};
+document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{
+  const o=b.dataset.pdf;toast('⏳ Creando PDF…');
+  html2canvas($('#sheet'),{scale:2.5,backgroundColor:'#ffffff'}).then(cv=>{
+    const doc=new window.jspdf.jsPDF({orientation:o,unit:'mm'});
+    const W=doc.internal.pageSize.getWidth()-20,H=doc.internal.pageSize.getHeight()-20;
+    let w=W,h=cv.height*w/cv.width;if(h>H){h=H;w=cv.width*h/cv.height}
+    doc.addImage(cv.toDataURL('image/png'),'PNG',(doc.internal.pageSize.getWidth()-w)/2,10,w,h);
+    doc.save('organizador_tarde.pdf');toast('📄 PDF descargado')
+  }).catch(()=>toast('⚠️ No se pudo crear el PDF'))});
+
+/* inicio */
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.acts)S=s}catch(e){}
+renderAll();
+</script>
 </body>
 </html>
