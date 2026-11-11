@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Evaluación de Alumnos - Prenotas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        :root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif; color: #25384a; }
+        body { margin: 0; padding: clamp(.5rem, 2vw, 1.5rem); background: #eef3f7; }
+        .container { max-width: 1120px; margin: auto; }
+        h1 { font-size: clamp(1.4rem, 4vw, 2.1rem); margin: .4rem 0 1.1rem; }
+        h2 { font-size: 1.35rem; }
+        h3 { margin-top: 1.6rem; }
+        p { line-height: 1.5; }
+        .section, dialog { background: white; border: 1px solid #d5e0ea; border-radius: 14px; padding: clamp(.85rem, 3vw, 1.8rem); }
+        .section-title { color: #23547b; border-bottom: 2px solid #d8e9f5; padding-bottom: .6rem; margin-top: 0; }
+        .hidden, [hidden] { display: none !important; }
+        button, input, select, textarea { font: inherit; }
+        button { color: white; background: #23618d; padding: .55rem .9rem; border: 0; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #18476a; }
+        button:disabled { background: #657483; cursor: not-allowed; }
+        .back-btn { background: #4e6375; }
+        .copy-btn { background: #236953; }
+        .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .9rem; margin: .8rem 0; }
+        input[type="file"] { width: 100%; display: block; padding: .75rem; border: 1px dashed #5683a4; margin: .9rem 0; }
+        select, input[type="number"], input[type="text"], textarea { padding: .42rem; border: 1px solid #8299ab; border-radius: 5px; color: inherit; background: white; }
+        input[type="number"] { width: 6rem; }
+        input[type="text"], textarea { width: 100%; }
+        textarea { display: block; min-height: 6rem; resize: vertical; }
+        input[type="checkbox"], input[type="radio"] { accent-color: #23618d; }
+        label { overflow-wrap: anywhere; }
+        fieldset { min-width: 0; border: 1px solid #d5e0ea; border-radius: 8px; margin: .8rem 0; padding: .8rem; }
+        legend { font-weight: 650; padding: 0 .35rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr)); gap: .55rem; }
+        .weight-field { display: grid; justify-items: start; align-content: space-between; gap: .45rem; padding: .65rem; border-radius: 6px; }
+        .weight-field input { background: transparent; }
+        .weight-field { background: var(--activity-color); color: var(--activity-ink); }
+        .color-setting { border: 1px solid #d5e0ea; display: flex; align-items: center; gap: .45rem; border-radius: 6px; padding: .35rem .55rem; }
+        .color-circle { appearance: none; width: 1.8rem; height: 1.8rem; padding: 0; border: 1px solid #526779; border-radius: 50%; background: transparent; overflow: hidden; cursor: pointer; flex: 0 0 auto; }
+        .color-circle::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-circle::-webkit-color-swatch { border: 0; border-radius: 50%; }
+        .color-circle::-moz-color-swatch { border: 0; border-radius: 50%; }
+        .color-circle:focus-visible, .behavior-dot:focus-visible { outline: 2px solid #23618d; outline-offset: 3px; }
+        #activity-groups { margin-top: .65rem; }
+        .activity-category { display: grid; gap: .35rem; align-content: space-between; border: 1px solid #d5e0ea; border-radius: 6px; padding: .55rem; }
+        .range-row { display: flex; gap: .45rem 1rem; flex-wrap: wrap; align-items: center; margin: .45rem 0; }
+        .range-number { min-width: 4.75rem; font-weight: 600; }
+        .stacked-field { display: grid; gap: .35rem; align-items: start; margin: .6rem 0; }
+        .behavior-option { display: flex; gap: .55rem; align-items: center; margin: .5rem 0; }
+        .behavior-option label { flex: 1; }
+        .behavior-dot, .behavior-dot:hover { width: 1.8rem; height: 1.8rem; padding: 0; border: 1px solid #526779; border-radius: 50%; background: var(--dot-color); color: var(--dot-ink); }
+        .behavior-key { display: inline-grid; place-items: center; cursor: default; flex: 0 0 auto; }
+        .behavior-dot[aria-pressed="true"] { outline: 2px solid #233b51; outline-offset: 2px; font-weight: 700; }
+        .behavior-status { margin: 0; font-size: .9rem; }
+        .total { background: #fae6e7; color: #8a2631; padding: .35rem .6rem; border-radius: 6px; }
+        .total.ok { background: #e1f1e8; color: #255940; }
+        .check-list { display: grid; gap: .35rem; }
+        .template-field { display: block; margin-bottom: .65rem; }
+        .template-field textarea { margin-top: .2rem; }
+        details { border: 1px solid #d5e0ea; border-radius: 8px; padding: .65rem; margin: .7rem 0; }
+        summary { font-weight: 650; cursor: pointer; }
+        .student-comment { border: 1px solid #d5e0ea; border-radius: 8px; padding: .75rem 1rem; margin: .75rem 0; }
+        .student-name { font-weight: 700; overflow-wrap: anywhere; }
+        .review-average { font-weight: 500; color: #395c77; white-space: nowrap; }
+        .comment-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+        dialog { width: min(720px, calc(100% - 2rem)); max-height: 85vh; overflow: auto; color: inherit; }
+        dialog::backdrop { background: #182b3f90; }
+        .status-message { position: fixed; z-index: 1; bottom: .75rem; right: .75rem; max-width: min(480px, calc(100% - 1.5rem)); padding: .65rem .85rem; border-radius: 6px; background: #e1f1e8; color: #255940; box-shadow: 0 3px 10px #0002; }
+        .status-message.error, #sheet-error { color: #8a2631; }
+        .status-message.error { background: #fae6e7; }
+        @media screen { #print-output { display: none; } }
+        @page { size: A4; margin: 17mm; }
+        @media print {
+            body { padding: 0; background: white; color: black; }
+            body.printing > :not(#print-output) { display: none !important; }
+            #print-output .student-comment { break-inside: avoid; border: 0; border-bottom: 1px solid #b9c3cc; border-radius: 0; padding: .5rem 0; }
+            #print-output h2 { break-after: avoid; }
+            #print-output p { margin: .3rem 0; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Sistema de Evaluación de Alumnos - Prenotas</h1>
+        <section id="upload-section" class="section">
+            <h2 class="section-title">1. Cargar archivo Excel</h2>
+            <p>Usa una pestaña por clase. Identifica las columnas de alumnado con «Nombre» y «Apellidos» y coloca las actividades a continuación.</p>
+            <input type="file" id="file-input" aria-label="Archivo Excel" accept=".xlsx,.xls">
+            <div class="toolbar">
+                <button id="process-btn" disabled>Procesar archivo</button>
+                <button class="load-configuration back-btn">Cargar configuración</button>
+            </div>
+            <p id="pending-configuration" hidden></p>
+        </section>
+
+        <section id="config-section" class="section hidden">
+            <h2 class="section-title">2. Configurar evaluación</h2>
+            <div class="toolbar">
+                <button id="save-configuration">Guardar configuración</button>
+                <button class="load-configuration back-btn">Cargar configuración</button>
+            </div>
+            <p>Guarda los parámetros en un archivo para reutilizarlos con otro Excel.</p>
+            <h3>Colores de las actividades</h3>
+            <p>Pulsa un círculo para cambiar el color de su categoría.</p>
+            <div id="palette" class="toolbar"></div>
+            <details id="activity-grouping" open>
+                <summary>Agrupar las columnas del Excel</summary>
+                <div id="activity-groups" class="grid"></div>
+            </details>
+
+            <h3>Porcentajes de evaluación</h3>
+            <p>Cada clase debe sumar el 100 %. En el modo compartido, las columnas con el mismo encabezado tienen el mismo peso.</p>
+            <div id="weight-mode" class="toolbar" hidden>
+                <label><input type="radio" name="weight-mode" id="same-weights" checked> Mismos porcentajes para todas las clases</label>
+                <label><input type="radio" name="weight-mode" id="different-weights"> Porcentajes por clase</label>
+            </div>
+            <div id="weight-fields"></div>
+            <button id="edit-weights" type="button" hidden>Configurar porcentajes por clase</button>
+            <div id="weight-summary" class="toolbar" aria-live="polite"></div>
+
+            <h3>Rangos de calificación y comentarios de promedio</h3>
+            <p>Indica cuántos rangos quieres y escribe sus límites. Si dos rangos comparten un límite, se aplica el texto del rango superior. Las notas que queden fuera de los rangos no generan texto por rango. El promedio reajusta los pesos cuando faltan notas.</p>
+            <div id="range-mode" class="toolbar">
+                <label><input id="same-ranges" type="checkbox" checked> Mismos rangos para todas las clases</label>
+                <label><input id="same-templates" type="checkbox" checked> Mismos textos de promedio para todas las clases</label>
+            </div>
+            <div id="range-fields"></div>
+            <div id="template-fields"></div>
+
+            <h3>Contenido del comentario por clase</h3>
+            <p>Elige las actividades que se mostrarán y los apartados que se añadirán al comentario.</p>
+            <div id="behavior-sharing" class="toolbar" hidden>
+                <label><input id="same-behavior" type="checkbox"> Usar los mismos comentarios de comportamiento para todas las clases</label>
+            </div>
+            <div id="shared-behavior-settings"></div>
+            <div id="class-settings"></div>
+            <button id="generate-btn">Generar comentarios</button>
+        </section>
+
+        <section id="review-section" class="section hidden">
+            <h2 class="section-title">3. Revisar y validar comentarios</h2>
+            <div class="toolbar">
+                <button class="back-btn back-to-config">Volver a la configuración</button>
+                <label>Clase <select id="review-filter"></select></label>
+            </div>
+            <div id="review-list"></div>
+            <button id="validate-btn">Validar y ver comentarios</button>
+        </section>
+
+        <section id="results-section" class="section hidden">
+            <h2 class="section-title">4. Comentarios validados</h2>
+            <div class="toolbar">
+                <button class="back-btn back-to-config">Volver a la configuración</button>
+                <label>Clase <select id="result-filter"></select></label>
+                <button id="select-visible">Seleccionar alumnado mostrado</button>
+                <button id="clear-visible">Quitar selección mostrada</button>
+            </div>
+            <p id="selection-count" aria-live="polite"></p>
+            <div id="result-list"></div>
+            <div class="toolbar">
+                <button id="export-pdf">Exportar PDF</button>
+                <button id="export-excel">Exportar Excel</button>
+            </div>
+            <p>Para guardar el PDF del alumnado seleccionado, elige «Guardar como PDF» en la ventana de impresión. El Excel conserva el libro original y añade una columna de comentarios en las clases cargadas. Las filas del alumnado sin seleccionar quedan sin comentario.</p>
+        </section>
+        <div id="status-message" class="status-message hidden" role="status"></div>
+    </main>
+
+    <input id="configuration-file" type="file" accept=".json,application/json" hidden>
+
+    <dialog id="sheet-dialog" aria-labelledby="sheet-heading">
+        <h2 id="sheet-heading">Seleccionar pestañas del Excel</h2>
+        <p>Marca las pestañas que quieres cargar como clases.</p>
+        <div id="sheet-list" class="check-list"></div>
+        <div class="toolbar">
+            <button id="all-sheets">Marcar todas</button>
+            <button id="no-sheets">Desmarcar todas</button>
+        </div>
+        <p id="sheet-error" role="status"></p>
+        <div class="toolbar">
+            <button id="load-sheets">Cargar pestañas seleccionadas</button>
+            <button id="cancel-sheets" class="back-btn">Cancelar</button>
+        </div>
+    </dialog>
+
+    <dialog id="weight-dialog" aria-labelledby="weight-heading">
+        <h2 id="weight-heading">Porcentajes por clase</h2>
+        <label>Clase <select id="weight-class"></select></label>
+        <div id="individual-fields"></div>
+        <div id="individual-summary" class="toolbar" aria-live="polite"></div>
+        <div class="toolbar">
+            <button id="save-weights">Aplicar porcentajes</button>
+            <button id="cancel-weights" class="back-btn">Cancelar</button>
+        </div>
+    </dialog>
+    <div id="print-output" hidden></div>
+    <script>
+        const defaultTemplates = {
+                    "0-3": "El alumno presenta serias dificultades en la asimilación de contenidos y requiere atención inmediata y refuerzo educativo. Es fundamental que establezca un plan de estudio estructurado y busque ayuda para superar estas carencias.",
+                    "3-6": "El alumno muestra dificultades significativas en varias áreas que requieren atención prioritaria. Necesita consolidar los aprendizajes básicos y mejorar su metodología de estudio. Es imprescindible un mayor esfuerzo y dedicación para alcanzar los objetivos mínimos.",
+                    "6-8": "El alumno ha alcanzado los objetivos mínimos requeridos, aunque con margen de mejora en algunos aspectos. Puede mejorar sus resultados si refuerza los contenidos que le resultan más difíciles.",
+                    "8-10": "El alumno demuestra un buen dominio de los contenidos y habilidades evaluadas, con capacidad de aplicación en diferentes contextos. Los resultados reflejan un buen nivel de aprendizaje."
+                };
+        const byId = id => document.getElementById(id);
+        const formatNumber = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
+        const formatBound = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 4 });
+        const activityTypes = {
+            examen: { label: 'Examen', color: '#dceaff', match: /\bexamen(?:es)?(?=\b|\d)/ },
+            tareas: { label: 'Tareas', color: '#d9f1e4', match: /\btareas?(?=\b|\d)/ },
+            comportamiento: { label: 'Comportamiento', color: '#e9dfff', match: /\b(?:comportamiento|conducta|actitud)(?=\b|\d)/ },
+            libreta: { label: 'Libreta', color: '#fce1ee', match: /\b(?:libretas?|cuadernos?)(?=\b|\d)/ },
+            pizarra: { label: 'Pizarra', color: '#d6f2f2', match: /\bpizarra(?=\b|\d)/ },
+            ordenador: { label: 'Ordenador', color: '#ffe5d2', match: /\b(?:ordenador(?:es)?|informatica)(?=\b|\d)/ },
+            otra: { label: 'Otros', color: '#f9efcf' }
+        };
+        const manualColors = ['#f9c9c9', '#f9e3a8', '#c8e8cf', '#cddff7', '#e5d2f6', '#f5cde7'];
+        const defaultBounds = [0, 3, 6, 8, 10];
+        const maxRanges = 1000; // A scale of 0–10 has 1,000 intervals of one hundredth.
+        const averageDefaults = Object.values(defaultTemplates);
+        const behaviorDefaults = [
+            'Necesita mejorar su actitud y seguir las normas de aula con más regularidad.',
+            'Puede mejorar su actitud y participar de forma más constante.',
+            'Mantiene una actitud adecuada en clase.',
+            'Muestra una actitud respetuosa y participa de forma constructiva.'
+        ];
+        const femaleNames = new Set(('María Carmen Ana Isabel Laura Patricia Elena Cristina Marta Andrea Claudia Diana Elisa Eva Irene Julia Lucía Natalia Paula Raquel Sandra Sonia Teresa Verónica Alba Clara Inés Lidia Miriam Noelia Olga Pilar Rosa Silvia Victoria Yolanda').split(' ').map(normalize));
+
+        let fileBytes;
+        let sourceBook;
+        let sourceName;
+        let groups = [];
+        let sharedActivities = [];
+        let sharedWeights = new Map();
+        let individualWeights = [];
+        let draftWeights = [];
+        let useSharedWeights = true;
+        const sharedRanges = createRanges();
+        const sharedTemplates = [];
+        const sharedBehavior = { templates: [], choices: [] };
+        let pendingConfiguration;
+        let nextBehaviorId = 0;
+        let statusTimer;
+
+        function element(tag, text = '', className = '') {
+            const node = document.createElement(tag);
+            node.textContent = text;
+            node.className = className;
+            return node;
+        }
+
+        function field(text, input, className = '') {
+            const label = element('label', '', className);
+            label.append(input, document.createTextNode(' ' + text));
+            return label;
+        }
+
+        function checkbox(text, checked, onChange) {
+            const input = element('input');
+            input.type = 'checkbox';
+            input.checked = checked;
+            input.addEventListener('change', () => onChange(input.checked));
+            return field(text, input);
+        }
+
+        function panel(title, ...children) {
+            const fieldset = element('fieldset');
+            fieldset.append(element('legend', title), ...children);
+            return fieldset;
+        }
+
+        function normalize(value) {
+            return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+        }
+
+        function getActivityType(label) {
+            const heading = normalize(label).replaceAll('_', ' ');
+            return Object.keys(activityTypes).find(type => activityTypes[type].match?.test(heading)) || 'otra';
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('main > .section').forEach(section => {
+                section.classList.toggle('hidden', section.id !== id);
+            });
+            const heading = byId(id).querySelector('h2');
+            heading.tabIndex = -1;
+            heading.focus();
+            window.scrollTo(0, 0);
+        }
+
+        function showStatus(text, isError = false) {
+            const status = byId('status-message');
+            status.textContent = text;
+            status.className = 'status-message' + (isError ? ' error' : '');
+            clearTimeout(statusTimer);
+            statusTimer = setTimeout(() => status.classList.add('hidden'), 5000);
+        }
+
+        async function processFile() {
+            const file = byId('file-input').files[0];
+            if (!file) return;
+            byId('process-btn').disabled = true;
+            try {
+                if (typeof XLSX === 'undefined') throw new Error('Recarga la página con conexión a internet para habilitar la lectura de Excel.');
+                const bytes = await file.arrayBuffer();
+                const book = XLSX.read(bytes, { type: 'array', cellStyles: true, cellNF: true });
+                if (!book.SheetNames.length) throw new Error('El libro no contiene pestañas.');
+                fileBytes = bytes;
+                sourceBook = book;
+                sourceName = file.name.replace(/\.[^.]+$/, '');
+                byId('sheet-list').replaceChildren(...book.SheetNames.map(name => {
+                    const label = checkbox(name, true, updateSheetSelection);
+                    label.firstChild.value = name;
+                    return label;
+                }));
+                updateSheetSelection();
+                byId('sheet-dialog').showModal();
+            } catch (error) {
+                showStatus(error.message || 'No se ha podido leer el archivo Excel.', true);
+            } finally {
+                byId('process-btn').disabled = !byId('file-input').files.length;
+            }
+        }
+
+        function updateSheetSelection() {
+            byId('sheet-error').textContent = '';
+            byId('load-sheets').disabled = !byId('sheet-list').querySelector(':checked');
+        }
+
+        function setSheetSelection(checked) {
+            byId('sheet-list').querySelectorAll('input').forEach(input => { input.checked = checked; });
+            updateSheetSelection();
+        }
+
+        function parseGrade(value) {
+            if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+            const text = String(value ?? '').trim();
+            if (!/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(text)) return null;
+            return Number(text.replace(',', '.'));
+        }
+
+        function readGroup(name) {
+            const sheet = sourceBook.Sheets[name];
+            if (!sheet?.['!ref']) return null;
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, range, blankrows: true, raw: true });
+            const detectedHeader = rows.findIndex(row =>
+                row.some(value => /^nombres?$/.test(normalize(value))) &&
+                row.some(value => /^apellidos?$/.test(normalize(value)))
+            );
+            const headerIndex = Math.max(detectedHeader, 0);
+            const headerRow = range.s.r + headerIndex;
+            const headers = rows[headerIndex] || [];
+            const nameColumn = detectedHeader === -1 ? 0 : headers.findIndex(value => /^nombres?$/.test(normalize(value)));
+            const surnameColumn = detectedHeader === -1 ? 1 : headers.findIndex(value => /^apellidos?$/.test(normalize(value)));
+            if (!String(headers[nameColumn] ?? '').trim() || !String(headers[surnameColumn] ?? '').trim()) return null;
+            const firstActivity = Math.max(nameColumn, surnameColumn) + 1;
+            const occurrences = new Map();
+            const activities = [];
+            headers.slice(firstActivity).forEach((header, index) => {
+                const label = String(header ?? '').trim();
+                const normalized = normalize(label);
+                if (!normalized || normalized === 'comentario') return;
+                const occurrence = (occurrences.get(normalized) || 0) + 1;
+                occurrences.set(normalized, occurrence);
+                activities.push({ label, column: index + firstActivity, key: JSON.stringify([normalized, occurrence]), type: getActivityType(label) });
+            });
+            const students = [];
+            rows.slice(headerIndex + 1).forEach((row, index) => {
+                const name = String(row[nameColumn] ?? '').trim();
+                const surname = String(row[surnameColumn] ?? '').trim();
+                if (!name && !surname) return;
+                const grades = new Map(activities.map(activity => [activity.key, parseGrade(row[activity.column])]));
+                students.push({ name, surname, row: headerRow + index + 1, grades, selected: true, edited: false });
+            });
+            if (!students.length || !activities.length) return null;
+            return {
+                name, headerRow, activities, students,
+                ranges: createRanges(),
+                templates: [],
+                visibleActivities: new Set(activities.map(activity => activity.key)),
+                showAverage: true,
+                includeAverage: true,
+                includeTrend: true,
+                behavior: { enabled: false, mode: 'average', activity: '', templates: [], choices: [] },
+                daily: { enabled: false, text: '', activities: new Set() }
+            };
+        }
+
+        function loadSheets() {
+            try {
+                const names = [...byId('sheet-list').querySelectorAll(':checked')].map(input => input.value);
+                const loaded = names.map(readGroup);
+                const invalid = names.filter((_, index) => !loaded[index]);
+                if (invalid.length) {
+                    byId('sheet-error').textContent = 'Revisa o desmarca estas pestañas, que requieren encabezados y filas de alumnado con actividades: ' + invalid.join(', ');
+                    return;
+                }
+                groups = loaded;
+                sharedActivities = [...new Map(groups.flatMap(group => group.activities.map(activity => [activity.key, activity]))).values()];
+                sharedWeights = new Map(sharedActivities.map(activity => [activity.key, 0]));
+                individualWeights = [];
+                useSharedWeights = true;
+                if (pendingConfiguration) applyConfiguration(pendingConfiguration);
+                renderConfiguration();
+                fillGroupSelect(byId('review-filter'), true);
+                fillGroupSelect(byId('result-filter'), true);
+                fillGroupSelect(byId('weight-class'));
+                byId('sheet-dialog').close();
+                showScreen('config-section');
+                const loadedMessage = `${groups.length} clases cargadas · ${groups.flatMap(group => group.students).length} estudiantes`;
+                showStatus(pendingConfiguration ? loadedMessage + ' · Configuración aplicada.' : loadedMessage);
+                pendingConfiguration = undefined;
+            } catch (error) {
+                byId('sheet-error').textContent = error.message || 'No se han podido cargar las pestañas.';
+            }
+        }
+
+        function renderConfiguration() {
+            byId('weight-mode').hidden = groups.length < 2;
+            byId('range-mode').hidden = groups.length < 2;
+            byId('behavior-sharing').hidden = groups.length < 2;
+            initializePalette();
+            renderActivityGrouping();
+            renderWeights();
+            renderRangesAndTemplates();
+            renderClassSettings();
+        }
+
+        function fillGroupSelect(select, includeAll = false) {
+            const options = groups.map((group, index) => new Option(group.name, String(index)));
+            if (includeAll) options.unshift(new Option('Todas las clases', 'all'));
+            select.replaceChildren(...options);
+        }
+
+        function initializePalette() {
+            byId('palette').replaceChildren(...Object.entries(activityTypes).map(([type, settings]) => {
+                const input = colorInput(settings.color, 'Color de ' + settings.label);
+                const label = field(settings.label, input, 'color-setting');
+                label.dataset.activityType = type;
+                input.addEventListener('input', () => {
+                    settings.color = input.value;
+                    updatePalette();
+                });
+                return label;
+            }));
+            updatePalette();
+        }
+
+        function colorInput(color, label) {
+            const input = element('input', '', 'color-circle');
+            input.type = 'color';
+            input.value = color;
+            input.setAttribute('aria-label', label);
+            return input;
+        }
+
+        function textColor(color) {
+            const channels = color.slice(1).match(/../g).map(channel => {
+                const value = parseInt(channel, 16) / 255;
+                return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+            });
+            const luminance = channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+            return luminance > .179 ? '#000000' : '#ffffff';
+        }
+
+        function updatePalette() {
+            for (const [type, settings] of Object.entries(activityTypes)) {
+                document.querySelectorAll(`[data-activity-type="${type}"]`).forEach(node => {
+                    node.style.setProperty('--activity-color', settings.color);
+                    node.style.setProperty('--activity-ink', textColor(settings.color));
+                });
+            }
+        }
+
+        function renderActivityGrouping() {
+            byId('activity-groups').replaceChildren(...sharedActivities.map(activity => {
+                const select = element('select');
+                select.append(...Object.entries(activityTypes).map(([type, settings]) => new Option(settings.label, type)));
+                select.value = activity.type;
+                select.addEventListener('change', () => {
+                    groups.forEach(group => {
+                        group.activities.filter(column => column.key === activity.key).forEach(column => {
+                            column.type = select.value;
+                        });
+                    });
+                    renderWeights();
+                });
+                const label = element('label', activity.label, 'activity-category');
+                label.append(select);
+                return label;
+            }));
+        }
+
+        function renderWeightFields(target, activities, weights, onChange) {
+            const grid = element('div', '', 'grid');
+            activities.forEach(activity => {
+                const input = element('input');
+                input.type = 'number';
+                input.min = 0;
+                input.max = 100;
+                input.step = 'any';
+                input.value = weights.get(activity.key) ?? '';
+                input.addEventListener('input', () => {
+                    weights.set(activity.key, input.validity.badInput ? NaN : Number(input.value || 0));
+                    onChange();
+                });
+                const label = element('label', '', 'weight-field');
+                label.dataset.activityType = activity.type;
+                label.append(element('span', activity.label + ' (%)'), input);
+                grid.append(label);
+            });
+            target.replaceChildren(grid);
+            updatePalette();
+        }
+
+        function groupWeightTotal(group, weights) {
+            const values = group.activities.map(activity => weights.get(activity.key) ?? 0);
+            const total = values.reduce((sum, value) => sum + value, 0);
+            const valid = values.every(value => Number.isFinite(value) && value >= 0 && value <= 100)
+                && Math.abs(total - 100) < 1e-8;
+            return { total, valid };
+        }
+
+        function renderWeightSummary(target, weightForGroup) {
+            const totals = groups.map((group, index) => groupWeightTotal(group, weightForGroup(index)));
+            target.replaceChildren(...totals.map(({ total, valid }, index) => {
+                const text = Number.isFinite(total) ? formatNumber.format(total) + ' %' : 'valor inválido';
+                return element('span', `${groups[index].name}: ${text}`, valid ? 'total ok' : 'total');
+            }));
+            return totals.every(result => result.valid);
+        }
+
+        function activeWeights(index) {
+            return useSharedWeights ? sharedWeights : individualWeights[index];
+        }
+
+        function updateWeightSummary() {
+            byId('generate-btn').disabled = !renderWeightSummary(byId('weight-summary'), activeWeights);
+        }
+
+        function renderWeights() {
+            byId('same-weights').checked = useSharedWeights;
+            byId('different-weights').checked = !useSharedWeights;
+            byId('weight-fields').hidden = !useSharedWeights;
+            byId('edit-weights').hidden = useSharedWeights;
+            if (useSharedWeights) renderWeightFields(byId('weight-fields'), sharedActivities, sharedWeights, updateWeightSummary);
+            updateWeightSummary();
+        }
+
+        function openWeightDialog() {
+            draftWeights = groups.map((group, index) => new Map(individualWeights[index] ||
+                group.activities.map(activity => [activity.key, sharedWeights.get(activity.key)])));
+            byId('weight-class').selectedIndex = 0;
+            renderIndividualWeights();
+            byId('weight-dialog').showModal();
+        }
+
+        function renderIndividualWeights() {
+            const index = Number(byId('weight-class').value);
+            const update = () => renderWeightSummary(byId('individual-summary'), groupIndex => draftWeights[groupIndex]);
+            renderWeightFields(byId('individual-fields'), groups[index].activities, draftWeights[index], update);
+            update();
+        }
+
+        function applyIndividualWeights() {
+            individualWeights = draftWeights;
+            useSharedWeights = false;
+            byId('weight-dialog').close();
+            renderWeights();
+        }
+
+        function createRanges() {
+            return defaultBounds.slice(1).map((max, index) => ({ min: defaultBounds[index], max }));
+        }
+
+        function currentRanges(group) {
+            return byId('same-ranges').checked ? sharedRanges : group.ranges;
+        }
+
+        function currentTemplates(group) {
+            return byId('same-templates').checked ? sharedTemplates : group.templates;
+        }
+
+        function resizeRanges(ranges, count) {
+            if (count === ranges.length) return;
+            if (count < ranges.length) {
+                ranges[count - 1].max = ranges.at(-1).max;
+                ranges.length = count;
+                return;
+            }
+            const last = ranges.pop();
+            const newRanges = count - ranges.length;
+            const step = (last.max - last.min) / newRanges;
+            for (let index = 0; index < newRanges; index++) {
+                const min = index === 0 ? last.min : Number((last.min + index * step).toFixed(4));
+                const max = index === newRanges - 1 ? last.max : Number((last.min + (index + 1) * step).toFixed(4));
+                ranges.push({ min, max });
+            }
+        }
+
+        function rangeNumber(value) {
+            const input = element('input');
+            input.type = 'number';
+            input.min = 0;
+            input.max = 10;
+            input.step = 'any';
+            input.value = Number.isFinite(value) ? value : '';
+            return input;
+        }
+
+        function rangePanel(group, ranges) {
+            const count = rangeNumber(ranges.length);
+            count.min = 1;
+            count.max = maxRanges;
+            count.step = 1;
+            count.addEventListener('change', () => {
+                const value = count.valueAsNumber;
+                if (!Number.isInteger(value) || value < 1 || value > maxRanges) {
+                    showStatus(`Indica un número entero de rangos entre 1 y ${maxRanges}.`, true);
+                    count.value = ranges.length;
+                    return;
+                }
+                resizeRanges(ranges, value);
+                renderRangesAndTemplates();
+                renderClassSettings();
+                byId('range-fields').querySelectorAll('[data-range-count]')[group ? groups.indexOf(group) : 0].focus();
+            });
+            count.dataset.rangeCount = '';
+            const rows = ranges.map((range, index) => {
+                const row = element('div', '', 'range-row');
+                row.append(element('span', 'Rango ' + (index + 1), 'range-number'));
+                for (const [bound, label] of [['min', 'Desde'], ['max', 'Hasta']]) {
+                    const input = rangeNumber(range[bound]);
+                    input.setAttribute('aria-label', `${label} · rango ${index + 1}`);
+                    input.addEventListener('input', () => {
+                        range[bound] = input.valueAsNumber;
+                        updateRangeLabels();
+                    });
+                    row.append(field(label, input));
+                }
+                return row;
+            });
+            return panel(group ? 'Rangos · ' + group.name : 'Límites de los rangos', field('Número de rangos', count), ...rows);
+        }
+
+        function templateDefault(defaults, index, count) {
+            const level = count === 1 ? 2 : Math.round(index * (defaults.length - 1) / (count - 1));
+            return defaults[level];
+        }
+
+        function rangeTextFields(title, ranges, templates, defaults, count = ranges?.length) {
+            const details = element('details');
+            details.append(element('summary', title));
+            for (let index = 0; index < count; index++) {
+                const input = element('textarea');
+                input.value = templates[index] ?? templateDefault(defaults, index, count);
+                input.addEventListener('input', () => { templates[index] = input.value; });
+                const label = element('label', '', 'template-field');
+                const text = element('span');
+                text.dataset.rangeIndex = index;
+                text.dataset.rangeGroup = ranges ? String(ranges === sharedRanges ? -1 : groups.findIndex(group => group.ranges === ranges)) : '';
+                label.append(text, input);
+                details.append(label);
+            }
+            return details;
+        }
+
+        function renderRangesAndTemplates() {
+            const rangeGroups = byId('same-ranges').checked ? [null] : groups;
+            byId('range-fields').replaceChildren(...rangeGroups.map(group => rangePanel(group, group?.ranges ?? sharedRanges)));
+            const templateGroups = byId('same-templates').checked ? [null] : groups;
+            byId('template-fields').replaceChildren(...templateGroups.map(group => {
+                const title = group ? 'Editar textos de promedio · ' + group.name : 'Editar textos de promedio';
+                const ranges = group ? currentRanges(group) : byId('same-ranges').checked ? sharedRanges : null;
+                const count = ranges?.length ?? Math.max(...groups.map(item => currentRanges(item).length));
+                return rangeTextFields(title, ranges, group?.templates ?? sharedTemplates, averageDefaults, count);
+            }));
+            updateRangeLabels();
+        }
+
+        function updateRangeLabels() {
+            document.querySelectorAll('[data-range-index]').forEach(label => {
+                const index = Number(label.dataset.rangeIndex);
+                const groupIndex = label.dataset.rangeGroup;
+                const ranges = groupIndex === '-1' ? sharedRanges : groups[Number(groupIndex)]?.ranges;
+                const range = groupIndex === '' ? null : ranges?.[index];
+                const name = 'Rango ' + (index + 1);
+                const display = value => Number.isFinite(value) ? formatBound.format(value) : '…';
+                label.textContent = range ? `${name} · ${display(range.min)} a ${display(range.max)}` : name;
+            });
+        }
+
+        function currentBehaviorTexts(group) {
+            return byId('same-behavior').checked ? sharedBehavior : group.behavior;
+        }
+
+        function sharedBehaviorRangeCount() {
+            return Math.max(...groups.map(group => currentRanges(group).length));
+        }
+
+        function renderClassSettings() {
+            const shared = byId('shared-behavior-settings');
+            shared.replaceChildren();
+            if (byId('same-behavior').checked) {
+                const ranges = byId('same-ranges').checked ? sharedRanges : null;
+                const manual = element('details');
+                manual.append(element('summary', 'Editar frases de comportamiento para asignar por colores'),
+                    manualBehaviorEditor(sharedBehavior));
+                shared.append(panel('Comentarios de comportamiento comunes',
+                    rangeTextFields('Editar comentarios de comportamiento por rango', ranges, sharedBehavior.templates,
+                        behaviorDefaults, sharedBehaviorRangeCount()), manual));
+            }
+            byId('class-settings').replaceChildren(...groups.map(group => {
+                const options = element('div', '', 'toolbar');
+                options.append(
+                    checkbox('Mostrar la nota del promedio', group.showAverage, checked => { group.showAverage = checked; }),
+                    checkbox('Comentario de promedio', group.includeAverage, checked => { group.includeAverage = checked; }),
+                    checkbox('Evolución de los exámenes seleccionados', group.includeTrend, checked => { group.includeTrend = checked; })
+                );
+                return panel(group.name, options,
+                    panel('Notas que aparecerán en el comentario', activityChecklist(group, group.visibleActivities)),
+                    behaviorSettings(group), dailySettings(group));
+            }));
+            updateRangeLabels();
+        }
+
+        function behaviorSettings(group) {
+            const config = group.behavior;
+            const settings = element('div');
+            settings.hidden = !config.enabled;
+            const mode = element('select');
+            mode.append(new Option('Según el promedio y los rangos', 'average'), new Option('Asignar con círculos de color', 'manual'));
+            mode.value = config.mode;
+            const activity = element('select');
+            activity.append(new Option('Sin asociar · usar el promedio ponderado', ''),
+                ...group.activities.map(column => new Option(column.label, column.key)));
+            activity.value = config.activity;
+            activity.addEventListener('change', () => { config.activity = activity.value; });
+            const automatic = element('div');
+            automatic.append(field('Actividad asociada', activity, 'stacked-field'));
+            const usesShared = byId('same-behavior').checked;
+            if (!usesShared) {
+                automatic.append(rangeTextFields('Editar comentarios de comportamiento por rango',
+                    currentRanges(group), config.templates, behaviorDefaults));
+            }
+            const manual = usesShared ? element('p', 'Esta clase usa las frases y los colores comunes.') : manualBehaviorEditor(config);
+            const updateMode = () => {
+                automatic.hidden = config.mode !== 'average';
+                manual.hidden = config.mode !== 'manual';
+            };
+            mode.addEventListener('change', () => {
+                config.mode = mode.value;
+                updateMode();
+            });
+            updateMode();
+            settings.append(field('Cómo asignar el comentario', mode, 'stacked-field'), automatic, manual);
+            return panel('Comportamiento',
+                checkbox('Incluir comportamiento', config.enabled, checked => {
+                    config.enabled = checked;
+                    settings.hidden = !checked;
+                }),
+                settings);
+        }
+
+        function manualBehaviorEditor(config) {
+            const manual = element('div');
+            const choiceList = element('div');
+            const add = element('button', 'Añadir comentario de comportamiento');
+            add.addEventListener('click', () => {
+                const choice = {
+                    id: ++nextBehaviorId,
+                    text: '',
+                    color: manualColors[config.choices.length % manualColors.length]
+                };
+                config.choices.push(choice);
+                const row = behaviorChoiceEditor(config, choice);
+                choiceList.append(row);
+                row.querySelector('input[type="text"]').focus();
+            });
+            choiceList.append(...config.choices.map(choice => behaviorChoiceEditor(config, choice)));
+            manual.append(element('p', 'Escribe los comentarios y elige su color. En la revisión podrás asignar uno a cada alumno.'), choiceList, add);
+            return manual;
+        }
+
+        function behaviorChoiceEditor(config, choice) {
+            const row = element('div', '', 'behavior-option');
+            const color = colorInput(choice.color, 'Color del comentario de comportamiento');
+            color.addEventListener('input', () => { choice.color = color.value; });
+            const input = element('input');
+            input.type = 'text';
+            input.value = choice.text;
+            input.addEventListener('input', () => { choice.text = input.value; });
+            const remove = element('button', 'Quitar', 'back-btn');
+            remove.addEventListener('click', () => {
+                config.choices = config.choices.filter(item => item !== choice);
+                const nextButton = row.parentElement.nextElementSibling;
+                row.remove();
+                nextButton.focus();
+            });
+            row.append(color, field('Texto del comentario', input, 'stacked-field'), remove);
+            return row;
+        }
+
+        function dailySettings(group) {
+            const config = group.daily;
+            const settings = element('div');
+            settings.hidden = !config.enabled;
+            const input = element('input');
+            input.type = 'text';
+            input.value = config.text;
+            input.addEventListener('input', () => { config.text = input.value; });
+            settings.append(field('Texto opcional para la clase', input),
+                panel('Actividades asociadas (opcional)', activityChecklist(group, config.activities)));
+            return panel('Trabajo diario',
+                checkbox('Incluir trabajo diario', config.enabled, checked => {
+                    config.enabled = checked;
+                    settings.hidden = !checked;
+                }), settings);
+        }
+
+        function activityChecklist(group, selection) {
+            const list = element('div', '', 'grid');
+            list.append(...group.activities.map(activity => checkbox(activity.label, selection.has(activity.key), checked => {
+                if (checked) selection.add(activity.key);
+                else selection.delete(activity.key);
+            })));
+            return list;
+        }
+
+        function weightedAverage(student, weights) {
+            let sum = 0;
+            let total = 0;
+            for (const [key, grade] of student.grades) {
+                const weight = weights.get(key) || 0;
+                if (grade === null || !weight) continue;
+                sum += grade * weight;
+                total += weight;
+            }
+            return total ? sum / total : null;
+        }
+
+        function describeGrades(activities, student) {
+            return activities.filter(activity => student.grades.get(activity.key) !== null)
+                .map(activity => `${activity.label}: ${formatNumber.format(student.grades.get(activity.key))}`)
+                .join(', ');
+        }
+
+        function examTrend(activities, student) {
+            const exams = activities.filter(activity => activity.type === 'examen' && student.grades.get(activity.key) !== null)
+                .sort((a, b) => Number(a.label.match(/\d+/)?.[0] || 0) - Number(b.label.match(/\d+/)?.[0] || 0));
+            if (exams.length < 2) return '';
+            const change = student.grades.get(exams.at(-1).key) - student.grades.get(exams[0].key);
+            if (change > 1) return 'La nota de examen ha mejorado significativamente desde el primer examen seleccionado.';
+            if (change > .2) return 'La nota de examen ha mejorado ligeramente desde el primer examen seleccionado.';
+            if (change < -1) return 'La nota de examen ha bajado significativamente desde el primer examen seleccionado.';
+            if (change < -.2) return 'La nota de examen ha bajado ligeramente desde el primer examen seleccionado.';
+            return 'La nota de examen se mantiene estable desde el primer examen seleccionado.';
+        }
+
+        function rangedText(group, value, templates, defaults, defaultCount = currentRanges(group).length) {
+            if (value === null) return '';
+            const ranges = currentRanges(group);
+            const index = ranges.findLastIndex(range => value >= range.min && value <= range.max);
+            if (index === -1) return '';
+            return (templates[index] ?? templateDefault(defaults, index, defaultCount)).trim();
+        }
+
+        function averageComment(group, student) {
+            let template = rangedText(group, student.average, currentTemplates(group), averageDefaults);
+            if (femaleNames.has(normalize(student.name.split(/\s+/)[0]))) {
+                template = template.replace(/\bEl alumno\b/g, 'La alumna').replace(/\bel alumno\b/g, 'la alumna');
+            }
+            return template;
+        }
+
+        function automaticBehavior(group, student) {
+            const config = group.behavior;
+            if (!config.enabled || config.mode !== 'average') return '';
+            const grade = config.activity ? student.grades.get(config.activity) : student.average;
+            const count = byId('same-behavior').checked ? sharedBehaviorRangeCount() : currentRanges(group).length;
+            const text = rangedText(group, grade, currentBehaviorTexts(group).templates, behaviorDefaults, count);
+            return text ? 'Comportamiento: ' + text : '';
+        }
+
+        function manualBehaviorChoices(group) {
+            const config = group.behavior;
+            return config.enabled && config.mode === 'manual' ? currentBehaviorTexts(group).choices.filter(choice => choice.text.trim()) : [];
+        }
+
+        function assignedBehavior(group, student) {
+            const choice = manualBehaviorChoices(group).find(item => item.id === student.behaviorId);
+            return choice ? 'Comportamiento: ' + choice.text.trim() : '';
+        }
+
+        function completeComment(group, student) {
+            return [student.comment, assignedBehavior(group, student)].filter(Boolean).join('\n');
+        }
+
+        function dailyComment(group, student) {
+            const config = group.daily;
+            if (!config.enabled) return '';
+            const grades = describeGrades(group.activities.filter(activity => config.activities.has(activity.key)), student);
+            const text = config.text.trim();
+            const paragraphs = [];
+            if (text) paragraphs.push('Trabajo diario: ' + text);
+            if (grades) paragraphs.push('Actividades asociadas a trabajo diario: ' + grades + '.');
+            if (!paragraphs.length) {
+                paragraphs.push(config.activities.size ? 'Trabajo diario: sin calificaciones en las actividades asociadas.' :
+                    'Trabajo diario: es importante llevar las actividades al día y revisar las correcciones.');
+            }
+            return paragraphs.join('\n');
+        }
+
+        function buildComment(group, student) {
+            const paragraphs = [];
+            const visible = group.activities.filter(activity => group.visibleActivities.has(activity.key));
+            const gradeText = describeGrades(visible, student);
+            if (gradeText) paragraphs.push(`Las notas de las actividades evaluadas hasta el momento de ${student.name || student.surname} son: ${gradeText}.`);
+            if (group.includeTrend) paragraphs.push(examTrend(visible, student));
+            paragraphs.push(automaticBehavior(group, student), dailyComment(group, student));
+            if (group.showAverage) {
+                paragraphs.push(student.average === null ? 'Promedio ponderado pendiente de calificaciones.' :
+                    'Promedio ponderado: ' + formatNumber.format(student.average) + '.');
+            }
+            if (group.includeAverage) paragraphs.push(averageComment(group, student));
+            return paragraphs.filter(Boolean).join('\n');
+        }
+
+        function generateComments() {
+            const invalid = groups.find(group => {
+                if (!group.includeAverage && !(group.behavior.enabled && group.behavior.mode === 'average')) return false;
+                const ranges = currentRanges(group);
+                return ranges.some(({ min, max }, index) =>
+                    !(min >= 0 && max <= 10 && max > min && (index === 0 || min >= ranges[index - 1].max)));
+            });
+            if (invalid) {
+                showStatus(`Revisa los rangos de ${invalid.name}. Deben estar entre 0 y 10, ordenados y sin solaparse.`, true);
+                return;
+            }
+            const emptyChoices = groups.find(group => group.behavior.enabled && group.behavior.mode === 'manual' &&
+                !manualBehaviorChoices(group).length);
+            if (emptyChoices) {
+                showStatus(`Añade al menos un texto de comportamiento para ${emptyChoices.name}.`, true);
+                return;
+            }
+            groups.forEach((group, index) => {
+                group.students.forEach(student => {
+                    const average = weightedAverage(student, activeWeights(index));
+                    student.average = average === null ? null : Math.round((average + Number.EPSILON) * 100) / 100;
+                    student.automaticComment = buildComment(group, student);
+                    if (!student.edited) student.comment = student.automaticComment;
+                });
+            });
+            renderCommentList(false);
+            showScreen('review-section');
+        }
+
+        function visibleGroups(selectId) {
+            const selection = byId(selectId).value;
+            return selection === 'all' ? groups : [groups[Number(selection)]];
+        }
+
+        function renderCommentList(validated) {
+            const target = byId(validated ? 'result-list' : 'review-list');
+            const visible = visibleGroups(validated ? 'result-filter' : 'review-filter');
+            target.replaceChildren(...visible.map(group => {
+                const list = element('section');
+                list.append(element('h3', group.name), behaviorLegend(group),
+                    ...group.students.map(student => commentCard(group, student, validated)));
+                return list;
+            }));
+            updateStudentSelection();
+        }
+
+        function paintBehaviorDot(node, choice) {
+            node.style.setProperty('--dot-color', choice.color);
+            node.style.setProperty('--dot-ink', textColor(choice.color));
+        }
+
+        function behaviorLegend(group) {
+            const choices = manualBehaviorChoices(group);
+            if (!choices.length) return '';
+            const legend = element('details');
+            legend.open = true;
+            legend.append(element('summary', 'Comentarios de comportamiento disponibles'));
+            choices.forEach((choice, index) => {
+                const row = element('div', '', 'behavior-option');
+                const dot = element('span', String(index + 1), 'behavior-dot behavior-key');
+                paintBehaviorDot(dot, choice);
+                row.append(dot, element('span', choice.text.trim()));
+                legend.append(row);
+            });
+            return legend;
+        }
+
+        function behaviorPicker(group, student, onChange) {
+            const choices = manualBehaviorChoices(group);
+            if (!choices.length) return '';
+            const row = element('div', '', 'toolbar');
+            row.setAttribute('role', 'group');
+            row.setAttribute('aria-label', 'Asignar comportamiento');
+            row.append(element('span', 'Comportamiento'));
+            const selection = element('p', '', 'behavior-status');
+            selection.setAttribute('aria-live', 'polite');
+            const buttons = choices.map((choice, index) => {
+                const dot = element('button', String(index + 1), 'behavior-dot');
+                paintBehaviorDot(dot, choice);
+                dot.setAttribute('aria-label', `${index + 1}. ${choice.text.trim()}`);
+                dot.title = choice.text.trim();
+                dot.addEventListener('click', () => {
+                    student.behaviorId = student.behaviorId === choice.id ? undefined : choice.id;
+                    update();
+                    onChange();
+                });
+                return dot;
+            });
+            const update = () => {
+                buttons.forEach((dot, index) => {
+                    dot.setAttribute('aria-pressed', String(student.behaviorId === choices[index].id));
+                });
+                selection.textContent = choices.find(choice => choice.id === student.behaviorId)?.text.trim() ?? 'Sin comentario asignado';
+            };
+            row.append(...buttons, selection);
+            update();
+            return row;
+        }
+
+        function commentCard(group, student, validated) {
+            const card = element('article', '', 'student-comment');
+            const name = [student.name, student.surname].filter(Boolean).join(' ');
+            const heading = element('div', '', 'student-name');
+            if (validated) {
+                const label = checkbox(name, student.selected, checked => {
+                    student.selected = checked;
+                    updateStudentSelection();
+                });
+                label.firstChild.dataset.studentSelection = '';
+                heading.append(label);
+            } else {
+                const average = student.average === null ? 'Sin promedio' : `Promedio: ${formatNumber.format(student.average)}`;
+                heading.append(document.createTextNode(name + ' '), element('span', `(${average})`, 'review-average'));
+            }
+            const preview = element('p', '', 'comment-text');
+            const toolbar = element('div', '', 'toolbar');
+            const edit = element('button', 'Editar');
+            const copy = element('button', 'Copiar al portapapeles', 'copy-btn');
+            const reset = element('button', 'Restaurar comentario automático', 'back-btn');
+            toolbar.append(edit, copy, reset);
+            const editor = element('div');
+            const input = element('textarea');
+            input.setAttribute('aria-label', 'Comentario de ' + name);
+            const controls = element('div', '', 'toolbar');
+            const save = element('button', 'Guardar');
+            const cancel = element('button', 'Cancelar', 'back-btn');
+            controls.append(save, cancel);
+            const assignedLine = element('p', '', 'behavior-status');
+            editor.append(input, assignedLine, controls);
+            const picker = behaviorPicker(group, student, () => refresh(!editor.hidden));
+            card.append(heading, picker, preview, toolbar, editor);
+
+            const refresh = editing => {
+                const complete = completeComment(group, student);
+                preview.textContent = complete || 'Comentario vacío. Pulsa Editar para añadir texto.';
+                assignedLine.textContent = assignedBehavior(group, student);
+                assignedLine.hidden = !assignedLine.textContent;
+                reset.hidden = !student.edited;
+                copy.disabled = !complete.trim();
+                preview.hidden = toolbar.hidden = editing;
+                editor.hidden = !editing;
+            };
+            refresh(false);
+            edit.addEventListener('click', () => {
+                input.value = student.comment;
+                refresh(true);
+                input.focus();
+            });
+            save.addEventListener('click', () => {
+                const value = input.value.trim();
+                if (!value && !assignedBehavior(group, student)) {
+                    showStatus('Escribe un comentario antes de guardarlo.', true);
+                    return;
+                }
+                student.comment = value;
+                student.edited = value !== student.automaticComment;
+                refresh(false);
+                edit.focus();
+            });
+            cancel.addEventListener('click', () => {
+                refresh(false);
+                edit.focus();
+            });
+            copy.addEventListener('click', async () => {
+                try {
+                    await copyToClipboard(completeComment(group, student));
+                    showStatus('Comentario copiado al portapapeles.');
+                } catch {
+                    showStatus('El navegador no ha podido copiar el comentario. Puedes seleccionar el texto y copiarlo manualmente.', true);
+                }
+            });
+            reset.addEventListener('click', () => {
+                if (!student.automaticComment.trim() && !assignedBehavior(group, student) && validated) {
+                    showStatus('La configuración actual genera un comentario vacío para este alumno.', true);
+                    return;
+                }
+                student.comment = student.automaticComment;
+                student.edited = false;
+                refresh(false);
+                edit.focus();
+            });
+            return card;
+        }
+
+        async function copyToClipboard(text) {
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return;
+                } catch {
+                    // Some browsers expose the clipboard API but require a different permission.
+                }
+            }
+            const previousFocus = document.activeElement;
+            const input = element('textarea');
+            input.value = text;
+            input.readOnly = true;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.append(input);
+            input.select();
+            try {
+                if (!document.execCommand('copy')) throw new Error('No se pudo copiar.');
+            } finally {
+                input.remove();
+                previousFocus?.focus();
+            }
+        }
+
+        function validateComments() {
+            const missing = groups.flatMap(group => group.students.filter(student => !completeComment(group, student).trim()));
+            if (missing.length) {
+                showStatus(`Hay ${missing.length} comentarios vacíos. Revisa las actividades y los apartados de la configuración o añade texto con Editar.`, true);
+                return;
+            }
+            byId('result-filter').value = byId('review-filter').value;
+            renderCommentList(true);
+            showScreen('results-section');
+        }
+
+        function selectVisibleStudents(selected) {
+            visibleGroups('result-filter').forEach(group => {
+                group.students.forEach(student => { student.selected = selected; });
+            });
+            byId('result-list').querySelectorAll('[data-student-selection]').forEach(input => { input.checked = selected; });
+            updateStudentSelection();
+        }
+
+        function updateStudentSelection() {
+            const students = groups.flatMap(group => group.students);
+            const selected = students.filter(student => student.selected).length;
+            byId('selection-count').textContent = `${selected} de ${students.length} estudiantes seleccionados en total`;
+            byId('export-pdf').disabled = byId('export-excel').disabled = selected === 0;
+        }
+
+        function exportExcel() {
+            try {
+                const workbook = XLSX.read(fileBytes, { type: 'array', cellStyles: true, cellNF: true, cellFormula: true });
+                groups.forEach(group => {
+                    const sheet = workbook.Sheets[group.name];
+                    const range = XLSX.utils.decode_range(sheet['!ref']);
+                    const column = range.e.c + 1;
+                    if (column > 16383) throw new Error('La pestaña ' + group.name + ' ya ocupa todas las columnas del Excel.');
+                    XLSX.utils.sheet_add_aoa(sheet, [['Comentario']], { origin: { r: group.headerRow, c: column } });
+                    (sheet['!cols'] ??= [])[column] = { wch: 70 };
+                    group.students.filter(student => student.selected).forEach(student => {
+                        XLSX.utils.sheet_add_aoa(sheet, [[completeComment(group, student)]], { origin: { r: student.row, c: column } });
+                    });
+                });
+                XLSX.writeFile(workbook, sourceName + '_comentarios.xlsx');
+            } catch (error) {
+                showStatus(error.message || 'No se ha podido exportar el Excel.', true);
+            }
+        }
+
+        function exportPdf() {
+            const output = byId('print-output');
+            output.replaceChildren(element('h1', 'Comentarios de evaluación'));
+            groups.forEach(group => {
+                const selected = group.students.filter(student => student.selected);
+                if (!selected.length) return;
+                output.append(element('h2', group.name));
+                selected.forEach(student => {
+                    const block = element('article', '', 'student-comment');
+                    block.append(element('div', [student.name, student.surname].filter(Boolean).join(' '), 'student-name'),
+                        element('p', completeComment(group, student), 'comment-text'));
+                    output.append(block);
+                });
+            });
+            const previousTitle = document.title;
+            document.title = sourceName + '_comentarios';
+            output.hidden = false;
+            document.body.classList.add('printing');
+            window.addEventListener('afterprint', () => {
+                document.title = previousTitle;
+                document.body.classList.remove('printing');
+                output.hidden = true;
+                output.replaceChildren();
+            }, { once: true });
+            window.print();
+        }
+
+        function configurationSnapshot() {
+            const behaviorTexts = ({ templates, choices }) => ({
+                templates,
+                choices: choices.map(({ text, color }) => ({ text, color }))
+            });
+            return {
+                format: 'prenotas',
+                version: 1,
+                shared: {
+                    useSharedWeights,
+                    weights: [...sharedWeights],
+                    sameRanges: byId('same-ranges').checked,
+                    ranges: sharedRanges,
+                    sameTemplates: byId('same-templates').checked,
+                    templates: sharedTemplates,
+                    sameBehavior: byId('same-behavior').checked,
+                    behavior: behaviorTexts(sharedBehavior)
+                },
+                colors: Object.fromEntries(Object.entries(activityTypes).map(([type, { color }]) => [type, color])),
+                categories: sharedActivities.map(({ key, type }) => [key, type]),
+                classes: groups.map((group, index) => ({
+                    name: group.name,
+                    activityKeys: group.activities.map(({ key }) => key),
+                    weights: [...(individualWeights[index] ?? [])],
+                    ranges: group.ranges,
+                    templates: group.templates,
+                    visibleActivities: [...group.visibleActivities],
+                    showAverage: group.showAverage,
+                    includeAverage: group.includeAverage,
+                    includeTrend: group.includeTrend,
+                    behavior: {
+                        enabled: group.behavior.enabled,
+                        mode: group.behavior.mode,
+                        activity: group.behavior.activity,
+                        ...behaviorTexts(group.behavior)
+                    },
+                    daily: { ...group.daily, activities: [...group.daily.activities] }
+                }))
+            };
+        }
+
+        function saveConfiguration() {
+            const snapshot = JSON.stringify(configurationSnapshot(), null, 2);
+            const url = URL.createObjectURL(new Blob([snapshot], { type: 'application/json' }));
+            const link = element('a');
+            link.href = url;
+            link.download = 'Prenotas_configuracion.json';
+            document.body.append(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showStatus('Configuración descargada.');
+        }
+
+        function storedList(value) {
+            return Array.isArray(value) ? value : [];
+        }
+
+        function storedMap(value) {
+            return new Map(storedList(value).filter(entry => Array.isArray(entry) && typeof entry[0] === 'string'));
+        }
+
+        function storedWeights(entries) {
+            return new Map([...storedMap(entries)].map(([key, weight]) => [
+                key, typeof weight === 'number' ? weight : NaN
+            ]));
+        }
+
+        function storedRanges(value) {
+            const ranges = storedList(value);
+            if (!ranges.length || ranges.length > maxRanges) return createRanges();
+            return ranges.map(range => ({
+                min: typeof range?.min === 'number' ? range.min : NaN,
+                max: typeof range?.max === 'number' ? range.max : NaN
+            }));
+        }
+
+        function storedTemplates(value) {
+            return storedList(value).slice(0, maxRanges).map(text => typeof text === 'string' ? text : undefined);
+        }
+
+        function validColor(value) {
+            return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
+        }
+
+        function storedBehaviorTexts(value) {
+            return {
+                templates: storedTemplates(value?.templates),
+                choices: storedList(value?.choices).filter(choice => typeof choice?.text === 'string').map((choice, index) => ({
+                    id: ++nextBehaviorId,
+                    text: choice.text,
+                    color: validColor(choice.color) ? choice.color : manualColors[index % manualColors.length]
+                }))
+            };
+        }
+
+        function applyConfiguration(config) {
+            const shared = config.shared;
+            useSharedWeights = shared.useSharedWeights !== false;
+            byId('same-ranges').checked = shared.sameRanges !== false;
+            byId('same-templates').checked = shared.sameTemplates !== false;
+            byId('same-behavior').checked = shared.sameBehavior === true;
+            sharedRanges.splice(0, sharedRanges.length, ...storedRanges(shared.ranges));
+            sharedTemplates.splice(0, sharedTemplates.length, ...storedTemplates(shared.templates));
+            Object.assign(sharedBehavior, storedBehaviorTexts(shared.behavior));
+            for (const [type, settings] of Object.entries(activityTypes)) {
+                const color = config.colors?.[type];
+                if (validColor(color)) settings.color = color;
+            }
+
+            const categories = storedMap(config.categories);
+            const savedWeights = storedWeights(shared.weights);
+            sharedWeights = new Map(sharedActivities.map(({ key }) => [key, savedWeights.get(key) ?? 0]));
+            const classes = new Map(config.classes.filter(group => typeof group?.name === 'string').map(group => [group.name, group]));
+            individualWeights = groups.map(group => {
+                group.activities.forEach(activity => {
+                    const type = categories.get(activity.key);
+                    activity.type = Object.hasOwn(activityTypes, type) ? type : getActivityType(activity.label);
+                });
+                const saved = classes.get(group.name);
+                group.students.forEach(student => { student.behaviorId = undefined; });
+                if (saved) restoreClassConfiguration(group, saved);
+
+                const weights = storedWeights(saved?.weights);
+                if (!weights.size && useSharedWeights) return undefined;
+                return new Map(group.activities.map(({ key }) => [key, weights.get(key) ?? sharedWeights.get(key)]));
+            });
+        }
+
+        function restoreClassConfiguration(group, saved) {
+            const known = new Set(storedList(saved.activityKeys));
+            const visible = new Set(storedList(saved.visibleActivities));
+            group.visibleActivities = new Set(group.activities.map(({ key }) => key).filter(key => !known.has(key) || visible.has(key)));
+            group.ranges = storedRanges(saved.ranges);
+            group.templates = storedTemplates(saved.templates);
+            group.showAverage = saved.showAverage !== false;
+            group.includeAverage = saved.includeAverage !== false;
+            group.includeTrend = saved.includeTrend !== false;
+            const behavior = saved.behavior;
+            const activity = typeof behavior?.activity === 'string' ? behavior.activity : '';
+            const hasActivity = !activity || group.activities.some(column => column.key === activity);
+            group.behavior = {
+                enabled: behavior?.enabled === true && (behavior.mode === 'manual' || hasActivity),
+                mode: behavior?.mode === 'manual' ? 'manual' : 'average',
+                activity: hasActivity ? activity : '',
+                ...storedBehaviorTexts(behavior)
+            };
+            const daily = saved.daily;
+            const dailyActivities = new Set(storedList(daily?.activities));
+            group.daily = {
+                enabled: daily?.enabled === true,
+                text: typeof daily?.text === 'string' ? daily.text : '',
+                activities: new Set(group.activities.map(({ key }) => key).filter(key => dailyActivities.has(key)))
+            };
+        }
+
+        async function loadConfiguration(event) {
+            const input = event.target;
+            const file = input.files[0];
+            if (!file) return;
+            input.value = '';
+            try {
+                const config = JSON.parse(await file.text());
+                if (config?.format !== 'prenotas' || config.version !== 1 || !config.shared || !Array.isArray(config.classes)) {
+                    throw new Error('Formato de configuración incorrecto');
+                }
+                if (groups.length) {
+                    applyConfiguration(config);
+                    renderConfiguration();
+                    showStatus('Configuración aplicada.');
+                    return;
+                }
+                pendingConfiguration = config;
+                const message = byId('pending-configuration');
+                message.textContent = `Configuración preparada: ${file.name}. Se aplicará cuando cargues las pestañas del Excel.`;
+                message.hidden = false;
+            } catch {
+                showStatus('No se ha podido cargar la configuración. Elige un archivo JSON guardado con Prenotas.', true);
+            }
+        }
+
+        byId('save-configuration').addEventListener('click', saveConfiguration);
+        byId('configuration-file').addEventListener('change', loadConfiguration);
+        document.querySelectorAll('.load-configuration').forEach(button => {
+            button.addEventListener('click', () => byId('configuration-file').click());
+        });
+        byId('file-input').addEventListener('change', () => { byId('process-btn').disabled = !byId('file-input').files.length; });
+        byId('process-btn').addEventListener('click', processFile);
+        byId('all-sheets').addEventListener('click', () => setSheetSelection(true));
+        byId('no-sheets').addEventListener('click', () => setSheetSelection(false));
+        byId('load-sheets').addEventListener('click', loadSheets);
+        byId('cancel-sheets').addEventListener('click', () => byId('sheet-dialog').close());
+        byId('same-weights').addEventListener('change', () => {
+            useSharedWeights = true;
+            renderWeights();
+        });
+        byId('different-weights').addEventListener('change', openWeightDialog);
+        byId('edit-weights').addEventListener('click', openWeightDialog);
+        byId('weight-class').addEventListener('change', renderIndividualWeights);
+        byId('save-weights').addEventListener('click', applyIndividualWeights);
+        byId('cancel-weights').addEventListener('click', () => byId('weight-dialog').close());
+        byId('weight-dialog').addEventListener('close', () => {
+            byId('same-weights').checked = useSharedWeights;
+            byId('different-weights').checked = !useSharedWeights;
+        });
+        byId('same-ranges').addEventListener('change', () => {
+            renderRangesAndTemplates();
+            renderClassSettings();
+        });
+        byId('same-templates').addEventListener('change', renderRangesAndTemplates);
+        byId('same-behavior').addEventListener('change', renderClassSettings);
+        byId('generate-btn').addEventListener('click', generateComments);
+        byId('review-filter').addEventListener('change', () => renderCommentList(false));
+        byId('validate-btn').addEventListener('click', validateComments);
+        byId('result-filter').addEventListener('change', () => renderCommentList(true));
+        byId('select-visible').addEventListener('click', () => selectVisibleStudents(true));
+        byId('clear-visible').addEventListener('click', () => selectVisibleStudents(false));
+        byId('export-excel').addEventListener('click', exportExcel);
+        byId('export-pdf').addEventListener('click', exportPdf);
+        document.querySelectorAll('.back-to-config').forEach(button => {
+            button.addEventListener('click', () => showScreen('config-section'));
+        });
+    </script>
+</body>
+</html>
